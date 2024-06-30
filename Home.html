@@ -25,357 +25,367 @@
 
   }
 
- 
+
   body {
     font-family: 'Montserrat';
-font-size: 20px;
+    font-size: 20px;
   }
 
   .pulsa {
-  animation: pulsa 1.4s infinite;
-  min-width: 120px;
-  width: fit-content;
-  border-radius: 9999px;
-  /* overflow: hidden; */
-}
-
-.cta {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  background-color: none;
-  border-radius: 9999px;
-  padding: 8px 16px;
-  color: white;
-  font-size: 15px;
-  background: linear-gradient(109.6deg, #090979 11.2%, #9006A1 53.7%, #090979 100.2%);
-  letter-spacing: 0.08em;
-  font-weight: 800;
-  position: relative;
-}
-
-.cta:active {
-  animation: pulsa-active .4s infinite;
-}
-
-.star {
-  width: 2px;
-  height: 2px;
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  animation: pulsa-stella 1.8s infinite;
-  transition: all .8s ease-in-out;
-}
-
-.star.a {
-  top: 8px;
-  left: 6px;
-}
-
-.star.b {
-  top: 2px;
-  left: 16px;
-}
-
-.star.c {
-  top: 18px;
-  left: 8px;
-}
-
-.star.d {
-  top: 14px;
-  left: 20px;
-}
-
-.star.e {
-  top: 30px;
-  left: 8px;
-}
-
-.star.f {
-  top: 24px;
-  left: 24px;
-}
-
-.star.g {
-  top: 10px;
-  left: 32px;
-}
-
-.pulsa:hover .star.a {
-  transform: translate3d(0px, 8px, 0);
-}
-
-.pulsa:hover .star.b {
-  transform: translate3d(-4px, 6px, 0);
-}
-
-.pulsa:hover .star.c {
-  transform: translate3d(14px, -8px, 0);
-}
-
-.pulsa:hover .star.d {
-  transform: translate3d(16px, -2px, 0);
-}
-
-.pulsa:hover .star.e {
-  transform: translate3d(58px, -20px, 0);
-}
-
-.pulsa:hover .star.f {
-  transform: translate3d(34px, 2px, 0);
-}
-
-.pulsa:hover .star.g {
-  transform: translate3d(10px, 16px, 0);
-}
-
-.rocket {
-  position: absolute;
-  top: 8px;
-  right: 16px;
-  z-index: -1;
-  transform: rotate(180deg);
-  transition: all .3s ease-in-out;
-}
-
-.pulsa:hover .rocket {
-  z-index: auto;
-  animation: muovi-razzo 1.8s linear;
-  transform: rotate(0deg);
-}
-
-@keyframes pulsa {
-  0% {
-    box-shadow: 0 0 0 0 #9006A1;
+    animation: pulsa 1.4s infinite;
+    min-width: 120px;
+    width: fit-content;
+    border-radius: 9999px;
+    /* overflow: hidden; */
   }
 
-  100% {
-    box-shadow: 0 0 0 8px #fbb32f01;
+  .cta {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background-color: none;
+    border-radius: 9999px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 15px;
+    background: linear-gradient(109.6deg, #090979 11.2%, #9006A1 53.7%, #090979 100.2%);
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    position: relative;
   }
-}
 
-@keyframes pulsa-stella {
-  0% {
-    box-shadow: 0 0 0 0 #ffffff;
+  .cta:active {
+    animation: pulsa-active .4s infinite;
   }
 
-  100% {
-    box-shadow: 0 0 0 4px #fbb32f01;
+  .star {
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    animation: pulsa-stella 1.8s infinite;
+    transition: all .8s ease-in-out;
   }
-}
 
-@keyframes muovi-razzo {
-  from {
+  .star.a {
+    top: 8px;
+    left: 6px;
+  }
+
+  .star.b {
+    top: 2px;
+    left: 16px;
+  }
+
+  .star.c {
+    top: 18px;
+    left: 8px;
+  }
+
+  .star.d {
+    top: 14px;
+    left: 20px;
+  }
+
+  .star.e {
+    top: 30px;
+    left: 8px;
+  }
+
+  .star.f {
+    top: 24px;
+    left: 24px;
+  }
+
+  .star.g {
+    top: 10px;
+    left: 32px;
+  }
+
+  .pulsa:hover .star.a {
+    transform: translate3d(0px, 8px, 0);
+  }
+
+  .pulsa:hover .star.b {
+    transform: translate3d(-4px, 6px, 0);
+  }
+
+  .pulsa:hover .star.c {
+    transform: translate3d(14px, -8px, 0);
+  }
+
+  .pulsa:hover .star.d {
+    transform: translate3d(16px, -2px, 0);
+  }
+
+  .pulsa:hover .star.e {
+    transform: translate3d(58px, -20px, 0);
+  }
+
+  .pulsa:hover .star.f {
+    transform: translate3d(34px, 2px, 0);
+  }
+
+  .pulsa:hover .star.g {
+    transform: translate3d(10px, 16px, 0);
+  }
+
+  .rocket {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    z-index: -1;
     transform: rotate(180deg);
+    transition: all .3s ease-in-out;
   }
 
-  25% {
-    transform: translate3d(40px, 32px, 0);
-  }
-
-  50% {
-    transform: translate3d(32px, -60px, 0);
-  }
-
-  75% {
-    transform: translate3d(0px, -60px, 0) rotate(0);
-  }
-
-  to {
+  .pulsa:hover .rocket {
+    z-index: auto;
+    animation: muovi-razzo 1.8s linear;
     transform: rotate(0deg);
   }
-}
 
-@keyframes pulsa-active {
-  0% {
-    box-shadow: 0 0 0 0 #9006A1;
+  @keyframes pulsa {
+    0% {
+      box-shadow: 0 0 0 0 #9006A1;
+    }
+
+    100% {
+      box-shadow: 0 0 0 8px #fbb32f01;
+    }
   }
 
-  100% {
-    box-shadow: 0 0 0 16px #fbb32f01;
+  @keyframes pulsa-stella {
+    0% {
+      box-shadow: 0 0 0 0 #ffffff;
+    }
+
+    100% {
+      box-shadow: 0 0 0 4px #fbb32f01;
+    }
   }
-}
 
-.card {
-  width: 300px;
-  height: 280px;
-  background-color: #FF3CAC;
-  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
-  color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-  perspective: 1000px;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
-  cursor: pointer;
-}
+  @keyframes muovi-razzo {
+    from {
+      transform: rotate(180deg);
+    }
 
-.card-content {
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-}
+    25% {
+      transform: translate3d(40px, 32px, 0);
+    }
 
-.card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
+    50% {
+      transform: translate3d(32px, -60px, 0);
+    }
 
-.card:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 60%;
-  background-color: rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
-  z-index: 1;
-}
+    75% {
+      transform: translate3d(0px, -60px, 0) rotate(0);
+    }
 
-.card:hover:before {
-  opacity: 1;
-}
+    to {
+      transform: rotate(0deg);
+    }
+  }
 
-.card .card-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  text-transform: capitalize;
-}
+  @keyframes pulsa-active {
+    0% {
+      box-shadow: 0 0 0 0 #9006A1;
+    }
 
-.card .card-para {
-  font-size: 16px;
-  opacity: 0.8;
-}
+    100% {
+      box-shadow: 0 0 0 16px #fbb32f01;
+    }
+  }
 
-.card-content {
-  transform: translateY(50%);
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
-}
+  .card {
+    width: 300px;
+    height: 280px;
+    background-color: #FF3CAC;
+    background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+    color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    perspective: 1000px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+    cursor: pointer;
+  }
 
-.card:hover .card-content {
-  transform: translateY(0%);
-}
+  .card-content {
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
 
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
 
-/* this is a recreation of twitter search in css */
-.form {
-  --input-text-color: #fff;
-  --input-bg-color: #283542;
-  --focus-input-bg-color: transparent;
-  --text-color: #949faa;
-  --active-color: #1b9bee;
-  --width-of-input: 200px;
-  --inline-padding-of-input: 1.2em;
-  --gap: 0.9rem;
-}
-/* form style */
-.form {
-  font-size: 0.9rem;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: var(--width-of-input);
-  position: relative;
-  isolation: isolate;
-}
-/* a fancy bg for showing background and border when focus. */
-.fancy-bg {
-  position: absolute;
-  width: 100%;
-  inset: 0;
-  background: var(--input-bg-color);
-  border-radius: 30px;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-}
-/* label styling */
-label {
-  width: 100%;
-  padding: 0.8em;
-  height: 40px;
-  padding-inline: var(--inline-padding-of-input);
-  display: flex;
-  align-items: center;
-}
+  .card:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    background-color: rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+    z-index: 1;
+  }
 
-.search,.close-btn {
-  position: absolute;
-}
-/* styling search-icon */
-.search {
-  fill: var(--text-color);
-  left: var(--inline-padding-of-input);
-}
-/* svg -- size */
-svg {
-  width: 17px;
-  display: block;
-}
-/* styling of close button */
-.close-btn {
-  border: none;
-  right: var(--inline-padding-of-input);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  padding: 0.1em;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--active-color);
-  opacity: 0;
-  visibility: hidden;
-}
-/* styling of input */
-.input {
-  color: var(--input-text-color);
-  width: 100%;
-  margin-inline: min(2em,calc(var(--inline-padding-of-input) + var(--gap)));
-  background: none;
-  border: none;
-}
+  .card:hover:before {
+    opacity: 1;
+  }
 
-.input:focus {
-  outline: none;
-}
+  .card .card-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: capitalize;
+  }
 
-.input::placeholder {
-  color: var(--text-color)
-}
-/* input background change in focus */
-.input:focus ~ .fancy-bg {
-  border: 1px solid var(--active-color);
-  background: var(--focus-input-bg-color);
-}
-/* search icon color change in focus */
-.input:focus ~ .search {
-  fill: var(--active-color);
-}
-/* showing close button when typing */
-.input:valid ~ .close-btn {
-  opacity: 1;
-  visibility: visible;
-}
-/* this is for the default background in input,when selecting autofill options -- you can remove this code if you do not want to override the browser style.  */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
-  -webkit-transition-delay: 9999s;
-}
+  .card .card-para {
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  .card-content {
+    transform: translateY(50%);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
+  }
+
+  .card:hover .card-content {
+    transform: translateY(0%);
+  }
 
 
+  /* this is a recreation of twitter search in css */
+  .form {
+    --input-text-color: #fff;
+    --input-bg-color: #283542;
+    --focus-input-bg-color: transparent;
+    --text-color: #949faa;
+    --active-color: #1b9bee;
+    --width-of-input: 200px;
+    --inline-padding-of-input: 1.2em;
+    --gap: 0.9rem;
+  }
+
+  /* form style */
+  .form {
+    font-size: 0.9rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    width: var(--width-of-input);
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* a fancy bg for showing background and border when focus. */
+  .fancy-bg {
+    position: absolute;
+    width: 100%;
+    inset: 0;
+    background: var(--input-bg-color);
+    border-radius: 30px;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  }
+
+  /* label styling */
+  label {
+    width: 100%;
+    padding: 0.8em;
+    height: 40px;
+    padding-inline: var(--inline-padding-of-input);
+    display: flex;
+    align-items: center;
+  }
+
+  .search,
+  .close-btn {
+    position: absolute;
+  }
+
+  /* styling search-icon */
+  .search {
+    fill: var(--text-color);
+    left: var(--inline-padding-of-input);
+  }
+
+  /* svg -- size */
+  svg {
+    width: 17px;
+    display: block;
+  }
+
+  /* styling of close button */
+  .close-btn {
+    border: none;
+    right: var(--inline-padding-of-input);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 0.1em;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--active-color);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* styling of input */
+  .input {
+    color: var(--input-text-color);
+    width: 100%;
+    margin-inline: min(2em, calc(var(--inline-padding-of-input) + var(--gap)));
+    background: none;
+    border: none;
+  }
+
+  .input:focus {
+    outline: none;
+  }
+
+  .input::placeholder {
+    color: var(--text-color)
+  }
+
+  /* input background change in focus */
+  .input:focus~.fancy-bg {
+    border: 1px solid var(--active-color);
+    background: var(--focus-input-bg-color);
+  }
+
+  /* search icon color change in focus */
+  .input:focus~.search {
+    fill: var(--active-color);
+  }
+
+  /* showing close button when typing */
+  .input:valid~.close-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* this is for the default background in input,when selecting autofill options -- you can remove this code if you do not want to override the browser style.  */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
+    -webkit-transition-delay: 9999s;
+  }
 </style>
 
 <body>
@@ -413,15 +423,31 @@ input:-webkit-autofill:active {
             <div id="pulsa" class="pulsa me-lg-5">
               <button id="cta" class="cta">
                 Login <div class="star a"></div>
-              <div class="star b"></div>
-              <div class="star c"></div>
-              <div class="star d"></div>
-              <div class="star e"></div>
-              <div class="star f"></div>
-              <div class="star g"></div>
-              <svg version="1.1" viewBox="0 0 1024 1024" width="24px" class="rocket"><path fill="#3A7EB9" d="M662.72 462.784l136.448 169.408v173.248l-136.448-48.32zM342.72 457.344L206.272 626.816v173.248l136.448-48.384z"></path><path fill="#D48171" d="M570.688 418.688l-142.848 1.152a266.496 266.496 0 0 1-20.288-0.576l3.712 448.64c0.256 28.928 94.272 130.048 94.272 130.048s93.888-102.656 93.632-131.584l-3.712-448.96a344.64 344.64 0 0 1-24.768 1.28z"></path><path fill="#E9DF92" d="M531.456 599.296l-63.04 0.576c-3.008 0-5.952-0.064-8.96-0.384l2.176 257.792c0.128 16.64 41.728 74.816 41.728 74.816s41.344-58.944 41.28-75.52l-2.176-257.92c-3.648 0.384-7.296 0.64-11.008 0.64z"></path><path fill="#B5D5EB" d="M554.304 93.568a324.352 324.352 0 0 0-110.592 1.728L342.72 240.768v584.512c13.824-0.96 27.968-1.536 42.368-1.536h245.248c11.84 0 23.36 0.384 34.816 1.024V253.312L554.304 93.568z"></path><path fill="#3A7EB9" d="M541.44 94.144L500.416 35.008l-45.696 59.136v29.504h89.024v-29.504zM459.456 288.64h88.96v88.896h-88.96zM459.456 467.456h88.96v88.96h-88.96zM459.456 634.176h88.96v88.896h-88.96zM364.928 788.736h277.76v44.352h-277.76z"></path></svg>
+                <div class="star b"></div>
+                <div class="star c"></div>
+                <div class="star d"></div>
+                <div class="star e"></div>
+                <div class="star f"></div>
+                <div class="star g"></div>
+                <svg version="1.1" viewBox="0 0 1024 1024" width="24px" class="rocket">
+                  <path fill="#3A7EB9"
+                    d="M662.72 462.784l136.448 169.408v173.248l-136.448-48.32zM342.72 457.344L206.272 626.816v173.248l136.448-48.384z">
+                  </path>
+                  <path fill="#D48171"
+                    d="M570.688 418.688l-142.848 1.152a266.496 266.496 0 0 1-20.288-0.576l3.712 448.64c0.256 28.928 94.272 130.048 94.272 130.048s93.888-102.656 93.632-131.584l-3.712-448.96a344.64 344.64 0 0 1-24.768 1.28z">
+                  </path>
+                  <path fill="#E9DF92"
+                    d="M531.456 599.296l-63.04 0.576c-3.008 0-5.952-0.064-8.96-0.384l2.176 257.792c0.128 16.64 41.728 74.816 41.728 74.816s41.344-58.944 41.28-75.52l-2.176-257.92c-3.648 0.384-7.296 0.64-11.008 0.64z">
+                  </path>
+                  <path fill="#B5D5EB"
+                    d="M554.304 93.568a324.352 324.352 0 0 0-110.592 1.728L342.72 240.768v584.512c13.824-0.96 27.968-1.536 42.368-1.536h245.248c11.84 0 23.36 0.384 34.816 1.024V253.312L554.304 93.568z">
+                  </path>
+                  <path fill="#3A7EB9"
+                    d="M541.44 94.144L500.416 35.008l-45.696 59.136v29.504h89.024v-29.504zM459.456 288.64h88.96v88.896h-88.96zM459.456 467.456h88.96v88.96h-88.96zM459.456 634.176h88.96v88.896h-88.96zM364.928 788.736h277.76v44.352h-277.76z">
+                  </path>
+                </svg>
               </button>
-              
+
             </div>
           </form>
         </div>
@@ -433,31 +459,34 @@ input:-webkit-autofill:active {
 
         <div class="col-md-6 ">
 
-          <img style="border-radius: 15px;" class="img-fluid ms-5 mt-5 " src="https://via.placeholder.com/510x280" alt="Sample Image">
-  
+          <img style="border-radius: 15px;" class="img-fluid ms-5 mt-5 " src="https://via.placeholder.com/510x280"
+            alt="Sample Image">
+
         </div>
-  
+
         <div class="col-md-6">
-  
+
           <div class="row">
 
             <div class="card mt-5">
               <div class="card-content">
                 <p class="card-title">hover effect
-                </p><p class="card-para">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </p>
+                <p class="card-para">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
               </div>
             </div>
-  
+
             <div class="card mt-5 ms-4">
               <div class="card-content">
                 <p class="card-title">hover effect
-                </p><p class="card-para">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </p>
+                <p class="card-para">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
               </div>
             </div>
 
           </div>
-          
-  
+
+
         </div>
 
       </div>
@@ -466,27 +495,32 @@ input:-webkit-autofill:active {
 
         <div class="col-md-6">
 
-          
+
 
 
           <form class="form ms-5 mt-5">
             <label for="search">
-                <input class="input" type="text" required="" placeholder="Search twitter" id="search">
-                <div class="fancy-bg"></div>
-                <div class="search">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" class="r-14j79pv r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-4wgw6l r-f727ji r-bnwqim r-1plcrui r-lrvibr">
-                        <g>
-                            <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
-                        </g>
-                    </svg>
-                </div>
-                <button class="close-btn" type="reset">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
+              <input class="input" type="text" required="" placeholder="Search twitter" id="search">
+              <div class="fancy-bg"></div>
+              <div class="search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"
+                  class="r-14j79pv r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-4wgw6l r-f727ji r-bnwqim r-1plcrui r-lrvibr">
+                  <g>
+                    <path
+                      d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z">
+                    </path>
+                  </g>
+                </svg>
+              </div>
+              <button class="close-btn" type="reset">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"></path>
+                </svg>
+              </button>
             </label>
-        </form>
+          </form>
 
         </div>
 
@@ -497,7 +531,7 @@ input:-webkit-autofill:active {
 
       </div>
 
-      
+
 
     </article>
   </div>
