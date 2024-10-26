@@ -1,0 +1,102 @@
+import React, { useEffect, useState } from "react";
+import { Select, MenuItem } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import DashboardCard from "../../../components/shared/DashboardCard";
+import Chart from "react-apexcharts";
+import axios from "axios";
+
+const SalesOverview = () => {
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]); // Dữ liệu doanh thu theo tháng
+  const [year, setYear] = useState(2024); // Năm mặc định
+
+  const theme = useTheme();
+  const primary = theme.palette.primary.main;
+
+  // Gọi API để lấy doanh thu cho năm được chọn
+  useEffect(() => {
+    fetchMonthlyRevenue(year);
+  }, [year]);
+
+  const fetchMonthlyRevenue = async (selectedYear) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/getDoanhThuChart?year=${selectedYear}`
+      );
+      setMonthlyRevenue(response.data || []); // Giả sử API trả về mảng doanh thu theo tháng
+    } catch (error) {
+      console.error("Lỗi khi lấy doanh thu: ", error);
+      setMonthlyRevenue([]);
+    }
+  };
+
+  const handleYearChange = (event) => {
+    const selectedYear = event.target.value;
+    console.log("Năm được chọn:", selectedYear);
+    setYear(selectedYear);
+  };
+
+  // Thay đổi dữ liệu cho chart theo doanh thu đã lấy
+  const seriescolumnchart = [
+    { name: "Doanh thu", data: monthlyRevenue },
+  ];
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <DashboardCard
+      title= {`Doanh thu trong năm ${currentYear}`}
+      action={
+        <Select
+          id="year-dd"
+          value={year}
+          size="small"
+          onChange={handleYearChange}
+        >
+          {[2022, 2023, 2024, 2025].map((yearOption) => (
+            <MenuItem key={yearOption} value={yearOption}>
+              Năm {yearOption}
+            </MenuItem>
+          ))}
+        </Select>
+      }
+    >
+      <Chart
+        options={{
+          chart: {
+            type: "bar",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            foreColor: "#adb0bb",
+            toolbar: { show: true },
+            height: 370,
+          },
+          colors: [primary],
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: "42%",
+              borderRadius: 6,
+            },
+          },
+          stroke: { show: true, width: 5, colors: ["transparent"] },
+          dataLabels: { enabled: false },
+          grid: { borderColor: "rgba(0,0,0,0.1)", strokeDashArray: 3 },
+          yaxis: { tickAmount: 4 },
+          xaxis: {
+            categories: [
+              "January", "February", "March", "April",
+              "May", "June", "July", "August",
+              "September", "October", "November", "December",
+            ],
+          },
+          tooltip: {
+            theme: theme.palette.mode === "dark" ? "dark" : "light",
+          },
+        }}
+        series={seriescolumnchart}
+        type="bar"
+        height="370px"
+      />
+    </DashboardCard>
+  );
+};
+
+export default SalesOverview;
