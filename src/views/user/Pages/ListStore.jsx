@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 const ListStore = ({ Products }) => {
 
   const listProduct = useSelector(state => state.product.ListProductSearch);
-
+  const TextSearch = useSelector(state => state.textSearch.Text);
 
   return (
     <div style={{
@@ -58,12 +58,7 @@ const ListStore = ({ Products }) => {
 
       })}
 
-      {listProduct.length > 0 ? null
-
-
-
-
-        : Products.map((product) => {
+      {TextSearch == "" && listProduct.length == 0   ? Products.map((product) => {
           const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
           const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
           return <div className="card mx-5 mt-3" key={product.san_phamId} style={{ width: '250px', minHeight: '310px', borderRadius: '20px', position: 'relative', overflow: 'hidden' }}>
@@ -100,7 +95,9 @@ const ListStore = ({ Products }) => {
 
 
 
-        })}
+        }) : <h3>ko co san pham</h3>}
+
+      
 
 
 

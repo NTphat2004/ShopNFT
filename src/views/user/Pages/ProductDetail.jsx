@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios';
 import SimilarProduct from './SimilarProduct';
-import { AddItem } from '../Reducer/cartReducer';
+import { AddItem, addItemToCart } from '../Reducer/cartReducer';
 import { useDispatch } from 'react-redux';
 import DanhGia from './DanhGia';
 
@@ -114,13 +114,15 @@ const ProductDetail = () => {
 
                     <div className='d-flex mt-5'>
 
-                        <button className='btn btn-outline-dark text-danger '><i class="bi bi-heart-fill fs-3"></i></button>
+                        <button className='btn btn-outline-dark text-danger ' onClick={()=>{
+                            alert(`id sản phẩm ${params.id} và `)
+                        }}><i class="bi bi-heart-fill fs-3"></i></button>
 
                         <button className='btn btn-outline-dark text-danger ms-3'><i class="fa fa-cart-plus fs-3"></i></button>
 
                         <button onClick={() => {
 
-                            const addCart = AddItem({
+                            const addCart = addItemToCart({
                                 ProductDetail: ProductDetail,
                                 QuantityProduct: QuantityProduct,
                             });

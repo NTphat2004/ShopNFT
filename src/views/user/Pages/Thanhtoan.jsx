@@ -39,16 +39,17 @@ const labelRender = (props) => {
 };
 function Thanhtoan() {
     const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan2) || [];
-    console.log(ListSPChecked);
+ 
     const totalAmount = Array.isArray(ListSPChecked)
         ? ListSPChecked.reduce((total, Spthanhtoan) => {
-            console.log(`Quantity: ${Spthanhtoan.QuantityProduct}, Giá: ${Spthanhtoan.gia_goc}`);
-            return total + (Spthanhtoan.QuantityProduct * Spthanhtoan.gia_goc);
+           
+            const price = Spthanhtoan.sanpham.gia_km > 0 ? Spthanhtoan.sanpham.gia_km : Spthanhtoan.sanpham.gia_goc;
+            return total + (Spthanhtoan.so_luong * price);
         }, 0)
         : 0;
     const [showPopup, setShowPopup] = useState(false);
 
-    // Xử lý khi click bên ngoài để đóng popup
+   
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest('.search-container') || !event.target.closest('.popup')) {
@@ -78,14 +79,14 @@ function Thanhtoan() {
             <header className="bg-white border-bottom">
                 <div className="container-fluid py-1">
                     <div className="row align-items-center">
-                        {/* Logo và Dropdown */}
+                       
                         <div className="col-3 col-md-3 d-flex align-items-center mt-2 ps-3">
                             <NavLink to="/">
                                 <img src="/images/logo-removebg-preview.png" className="me-3 img-fluid" width={80} alt="" />
                             </NavLink>
                         </div>
 
-                        {/* Tìm kiếm */}
+                      
                         <div className="col-6 col-md-6 mt-2 mt-md-0 d-flex justify-content-center mt-2 px-2">
                             <input type="text" className="form-control me-2" style={{ width: '500px' }} placeholder="Tìm kiếm" onClick={handleInputClick} />
                             <button className="btn btn-outline-secondary" type="submit">
@@ -93,7 +94,7 @@ function Thanhtoan() {
                             </button>
                         </div>
 
-                        {/* Icon giỏ hàng và thông báo */}
+                       
                         <div className="col-3 col-md-3 d-flex justify-content-end align-items-center mt-2">
                             <NavLink className="me-4 d-flex align-items-center" to="#">
                                 <i className="bi bi-person-circle text-dark fs-4"></i>
@@ -151,8 +152,8 @@ function Thanhtoan() {
                         return <div className="col-12 cardgiohang d-flex align-items-start" key={index}>
                             <div>
                                 <div className="d-flex">
-                                    <img width={150} height={150} src={`/images/${sp.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
-                                    <p style={{ width: '300px' }}>{sp.ten_san_pham}</p>
+                                    <img width={150} height={150} src={`/images/${sp.sanpham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
+                                    <p style={{ width: '300px' }}>{sp.sanpham.ten_san_pham}</p>
                                 </div>
                                 <div className="d-flex ps-4 align-items-center">
                                     <EditOutlined />
@@ -161,8 +162,8 @@ function Thanhtoan() {
                             </div>
 
                             <div className="chitietgiatien d-flex flex-column align-items-center justify-content-center">
-                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {sp.gia_km >0 ? sp.QuantityProduct * sp.gia_km : sp.QuantityProduct * sp.gia_goc} </p>
-                                <p style={{ color: '#777e90', margin: '0' }}>Số lượng: {sp.QuantityProduct}</p>
+                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {sp.sanpham.gia_km >0 ? sp.so_luong * sp.sanpham.gia_km : sp.so_luong * sp.sanpham.gia_goc} </p>
+                                <p style={{ color: '#777e90', margin: '0' }}>Số lượng: {sp.so_luong}</p>
                             </div>
                         </div>
                     })}
@@ -213,7 +214,7 @@ function Thanhtoan() {
                                 <p style={{ margin: '0', fontWeight: 'bolder' }}>Thành tiền</p>
                             </div>
                             <div className="fw-bolder" style={{ color: 'red' }}>
-                                100.000 ₫
+                            {totalAmount.toLocaleString()} ₫
                             </div>
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >
