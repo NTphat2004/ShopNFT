@@ -1,6 +1,7 @@
 import { Tabs, Select, Table } from "antd"; // Thêm Table từ antd
 import "../../styles/Quanlykho.css";
-import { ExportOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExportOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 
 const onChange = (key) => {
   console.log(key);
@@ -18,169 +19,219 @@ const getCurrentDate = () => {
   return `${year}-${month}-${day}`;
 };
 
-// Dữ liệu cho bảng
-const dataSource = [
-  {
-    key: "1",
-    productCode: "SP001",
-    productName: "Sản phẩm 1",
-    quantity: 50,
-    status: "Hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-  {
-    key: "2",
-    productCode: "SP002",
-    productName: "Sản phẩm 2",
-    quantity: 30,
-    status: "Ngừng hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-  {
-    key: "3",
-    productCode: "SP003",
-    productName: "Sản phẩm 3",
-    quantity: 20,
-    status: "Hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-];
-
 // Cấu hình cột cho bảng
 const columns = [
   {
     title: "Mã sản phẩm",
-    dataIndex: "productCode",
-    key: "productCode",
+    dataIndex: "san_phamId",
+    key: "san_phamId",
   },
   {
     title: "Tên sản phẩm",
-    dataIndex: "productName",
-    key: "productName",
+    dataIndex: "ten_san_pham",
+    key: "ten_san_pham",
   },
   {
-    title: "Số lượng",
-    dataIndex: "quantity",
-    key: "quantity",
+    title: "Giá bán ra",
+    dataIndex: "gia_goc",
+    key: "gia_goc",
   },
   {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
+    title: "Giá khuyến mãi",
+    dataIndex: "gia_km",
+    key: "gia_km",
+  },
+  {
+    title: "Mô tả",
+    dataIndex: "mo_ta",
+    key: "mo_ta",
+  },
+  {
+    title: "Lượt mua",
+    dataIndex: "luot_mua",
+    key: "luot_mua",
+  },
+  {
+    title: "Phần trăm giảm giá",
+    dataIndex: "phantram_GG",
+    key: "phantram_GG",
+  },
+  {
+    title: "Hạn giảm giá",
+    dataIndex: "han_gg",
+    key: "han_gg",
+  },
+  {
+    title: "Hoạt động",
+    dataIndex: "hoat_dong",
+    key: "hoat_dong",
   },
   {
     title: "Hành động",
-    dataIndex: "action",
-    key: "action",
+    dataIndex: "hang_dong",
+    key: "hanh_dong",
+    render: (text, record) => (
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <EditOutlined />
+        <DeleteOutlined />
+      </div>
+    ),
   },
 ];
 
-const Sanpham = () => (
-  <Tabs
-    className="mx-auto"
-    style={{ width: "700px", margin: "auto" }}
-    onChange={onChange}
-    type="card"
-    items={[
-      {
-        label: `Thông tin chung`,
-        key: "1",
-        children: (
-          <div className="tab-content">
-            <h1>Thông tin chung</h1>
-            <div className="input-container">
-              <div className="form-group">
-                <label htmlFor="productCode">Mã sản phẩm</label>
-                <input type="text" id="productCode" className="form-control" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="productName">Tên sản phẩm</label>
-                <input type="text" id="productName" className="form-control" />
-              </div>
-            </div>
+const Sanpham = () => {
+  const [sanphamData, setSanphamData] = useState([]);
 
-            <div className="input-container">
-              <div className="form-group">
-                <label htmlFor="createDate">Ngày tạo</label>
-                <input
-                  type="date"
-                  id="createDate"
-                  className="form-control"
-                  value={getCurrentDate()}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="productQuantity">Số lượng</label>
-                <input
-                  type="number"
-                  id="productQuantity"
-                  className="form-control"
-                />
-              </div>
-            </div>
+  useEffect(() => {
+    const fetchsanphamData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/listSanPham");
+        const data = await response.json();
+        console.log("Dữ liệu là: ", data);
+        const formattedData = data.map((item) => ({
+          key: item.san_phamId,
+          san_phamId: item.san_phamId,
+          ten_san_pham: item.ten_san_pham,
+          gia_goc: item.gia_goc,
+          gia_km: item.gia_km,
+          mo_ta: item.mo_ta,
+          luot_mua: item.luot_mua,
+          phantram_GG: item.phantram_GG,
+          han_gg: item.han_gg,
+          hoat_dong: item.hoat_dong ? "Hoạt động" : "Ngừng hoạt động",
+        }));
+        setSanphamData(formattedData);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu voucher:", error);
+      }
+    };
+    fetchsanphamData();
+  }, []);
 
-            <div className="input-container">
-              <div className="form-group">
-                <label htmlFor="warehouseStatus">Trạng thái kho</label>
-                <Select
-                  defaultValue="active"
-                  style={{ width: "100%", borderRadius: "8px" }}
-                  onChange={handleChange}
-                  options={[
-                    { value: "active", label: "Hoạt động" },
-                    { value: "inactive", label: "Ngừng hoạt động" },
-                  ]}
-                />
+  return (
+    <Tabs
+      className="mx-auto"
+      style={{ width: "1100px", margin: "auto" }}
+      onChange={onChange}
+      type="card"
+      items={[
+        {
+          label: `Thông tin chung`,
+          key: "1",
+          children: (
+            <div className="tab-content">
+              <h1>Thông tin chung</h1>
+              <div className="input-container">
+                <div className="form-group">
+                  <label htmlFor="productCode">Mã sản phẩm</label>
+                  <input
+                    type="text"
+                    id="san_phamId"
+                    className="form-control"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productName">Tên sản phẩm</label>
+                  <input
+                    type="text"
+                    id="ten_san_pham"
+                    className="form-control"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="createDate">Giá bán ra</label>
+                  <input
+                    type="number"
+                    id="gia_goc"
+                    className="form-control"
+                  />
+                </div>
               </div>
+
+              <div className="input-container">
+                <div className="form-group">
+                  <label htmlFor="productQuantity">Giá khuyến mãi</label>
+                  <input
+                    type="number"
+                    id="gia_km"
+                    className="form-control"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productQuantity">Mô tả</label>
+                  <input
+                    type="number"
+                    id="mo_ta"
+                    className="form-control"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productQuantity">Phần trăm giảm giá</label>
+                  <input
+                    type="number"
+                    id="phantram_GG"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+
+              <div className="input-container">
               <div className="form-group">
-                <button className="button">Cập nhật</button>
+                  <label htmlFor="productQuantity">Hạn giảm giá</label>
+                  <input
+                    type="number"
+                    id="han_gg"
+                    className="form-control"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="warehouseStatus">Hoạt động</label>
+                  <Select
+                    defaultValue="active"
+                    style={{ width: "100%", borderRadius: "8px", height: "40px" }}
+                    onChange={handleChange}
+                    options={[
+                      { value: "active", label: "Hoạt động" },
+                      { value: "inactive", label: "Ngừng hoạt động" },
+                    ]}
+                  />
+                </div>
+                <div className="form-group">
+                  <button className="button">Cập nhật</button>
+                </div>
               </div>
             </div>
-          </div>
-        ),
-      },
-      {
-        label: `Danh sách sản phẩm`,
-        key: "2",
-        children: (
-          <div className="tab-content">
-            <h1>Danh sách kho</h1>
-            <button
-              style={{
-                marginBottom: "20px",
-                float: "right",
-                display: "flex",
-                alignItems: "center",
-              }}
-              className="buttonexcel"
-            >
-              <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file excel
-            </button>
-            <Table
-              dataSource={dataSource}
-              columns={columns}
-              pagination={false}
-            />
-          </div>
-        ),
-      },
-    ]}
-  />
-);
+          ),
+        },
+        {
+          label: `Danh sách sản phẩm`,
+          key: "2",
+          children: (
+            <div className="tab-content">
+              <h1>Danh sách sản phẩm</h1>
+              <button
+                style={{
+                  marginBottom: "20px",
+                  float: "right",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                className="buttonexcel"
+              >
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
+                excel
+              </button>
+              <Table
+                dataSource={sanphamData}
+                columns={columns}
+                pagination={false}
+              />
+            </div>
+          ),
+        },
+      ]}
+    />
+  );
+};
 
 export default Sanpham;

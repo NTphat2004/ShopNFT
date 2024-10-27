@@ -4,6 +4,8 @@ import Loadable from "../layouts/full/shared/loadable/Loadable";
 import Newlogin1 from "../views/quanly/Newlogin1";
 import Thongtincanhan from "../views/quanly/Thongtincanhan";
 import Voucher from "../views/quanly/QuanlyVoucher";
+import Sanpham from "../views/quanly/QuanlySP";
+import Kho from "../views/quanly/Quanlykho";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -36,6 +38,8 @@ const Router = [
       { path: "dashboard", element: <Thongtincanhan /> },
       { path: "thongke", element: <Dashboard /> },
       { path: "voucher", element: <Voucher /> },
+      { path: "kho", element: <Kho /> },
+      { path: "sanpham", element: <Sanpham /> },
       { path: "sample-page", element: <SamplePage /> },
       { path: "icons", element: <Icons /> },
       { path: "ui/typography", element: <TypographyPage /> },

@@ -1,6 +1,7 @@
 import { Tabs, Select, Table } from "antd"; // Thêm Table từ antd
 import "../../styles/Quanlykho.css";
-import { ExportOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExportOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 
 const onChange = (key) => {
   console.log(key);
@@ -17,83 +18,129 @@ const getCurrentDate = () => {
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
-
-// Dữ liệu cho bảng
-const dataSource = [
-  {
-    key: "1",
-    productCode: "SP001",
-    productName: "Sản phẩm 1",
-    quantity: 50,
-    status: "Hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-  {
-    key: "2",
-    productCode: "SP002",
-    productName: "Sản phẩm 2",
-    quantity: 30,
-    status: "Ngừng hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-  {
-    key: "3",
-    productCode: "SP003",
-    productName: "Sản phẩm 3",
-    quantity: 20,
-    status: "Hoạt động",
-    action: (
-      <div>
-        <button className="buttonedit">Edit</button>
-        <button className="buttondelete">Delete</button>
-      </div>
-    ),
-  },
-];
-
 // Cấu hình cột cho bảng
 const columns = [
   {
     title: "Mã sản phẩm",
-    dataIndex: "productCode",
-    key: "productCode",
+    dataIndex: "san_phamId",
+    key: "san_phamId",
   },
   {
     title: "Tên sản phẩm",
-    dataIndex: "productName",
-    key: "productName",
+    dataIndex: "ten_san_pham",
+    key: "ten_san_pham",
+  },
+  {
+    title: "Ngày tạo",
+    dataIndex: "ngay_tao",
+    key: "ngay_tao",
   },
   {
     title: "Số lượng",
-    dataIndex: "quantity",
-    key: "quantity",
+    dataIndex: "so_luong",
+    key: "so_luong",
   },
   {
-    title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
+    title: "Giá bán ra",
+    dataIndex: "gia_goc",
+    key: "gia_goc",
+  },
+  {
+    title: "Trạng thái kho",
+    dataIndex: "trang_thai_kho",
+    key: "trang_thai_kho",
+  },
+  {
+    title: "Phê duyệt",
+    dataIndex: "phe_duyet",
+    key: "phe_duyet",
+  },
+  {
+    title: "Trạng thái xóa",
+    dataIndex: "trang_thai_xoa",
+    key: "trang_thai_xoa",
+  },
+  {
+    title: "Nhập hàng",
+    dataIndex: "nhap_hang",
+    key: "nhap_hang",
+  },
+  {
+    title: "Tiền nhập hàng",
+    dataIndex: "tien_nhap_hang",
+    key: "tien_nhap_hang",
+  },
+  {
+    title: "Chiều cao",
+    dataIndex: "chieu_cao",
+    key: "chieu_cao",
+  },
+  {
+    title: "Chiều dài",
+    dataIndex: "chieu_dai",
+    key: "chieu_dai",
+  },
+  {
+    title: "Chiều rộng",
+    dataIndex: "chieu_rong",
+    key: "chieu_rong",
+  },
+  {
+    title: "Khối lượng",
+    dataIndex: "khoi_luong",
+    key: "khoi_luong",
   },
   {
     title: "Hành động",
-    dataIndex: "action",
-    key: "action",
+    dataIndex: "hanh_dong",
+    key: "hanh_dong",
+    render: (_, record) => (
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <EditOutlined />
+        <DeleteOutlined />
+      </div>
+    ),
   },
 ];
 
-const Kho = () => (
-  <Tabs
+const Kho = () => {
+  const [khoData, setKhoData] = useState([]);
+
+  useEffect(() => {
+    const fetchKhoData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/listSanPham");
+        const data = await response.json();
+        console.log("Dữ liệu là: ", data);
+        const formattedData = data.map((item) => ({
+          key: item.san_phamId,
+          san_phamId: item.san_phamId,
+          ten_san_pham: item.ten_san_pham,
+          ngay_tao: item.ngay_tao,
+          so_luong: item.so_luong,
+          gia_goc: item.gia_goc,
+          trang_thai_kho: item.trang_thai_kho,
+          phe_duyet: item.phe_duyet ? "Đã phê duyệt" : "Chưa phê duyệt",
+          trang_thai_xoa: item.trang_thai_xoa ? "Đã xoá" : "Chưa xoá",
+          nhap_hang: item.nhap_hang ? "Đã nhập hàng" : "Chưa nhập hàng",
+          tien_nhap_hang: item.tien_nhap_hang,
+          chieu_cao: item.chieu_cao,
+          chieu_dai: item.chieu_dai,
+          chieu_rong: item.chieu_rong,
+          khoi_luong: item.khoi_luong,
+        }));
+        setKhoData(formattedData);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu voucher:", error);
+      }
+    };
+    fetchKhoData();
+  }, []);
+
+  return(
+    <Tabs
     className="mx-auto"
-    style={{ width: "700px", margin: "auto" }}
+    style={{ width: "1170px", margin: "auto" }}
     onChange={onChange}
     type="card"
     items={[
@@ -106,7 +153,7 @@ const Kho = () => (
             <div className="input-container">
               <div className="form-group">
                 <label htmlFor="productCode">Mã sản phẩm</label>
-                <input type="text" id="productCode" className="form-control" />
+                <input type="text" id="san_phamId" className="form-control" />
               </div>
               <div className="form-group">
                 <label htmlFor="productName">Tên sản phẩm</label>
@@ -173,7 +220,7 @@ const Kho = () => (
               Xuất file excel
             </button>
             <Table
-              dataSource={dataSource}
+              dataSource={khoData}
               columns={columns}
               pagination={false}
             />
@@ -182,6 +229,7 @@ const Kho = () => (
       },
     ]}
   />
-);
+  )
+  };
 
 export default Kho;

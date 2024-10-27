@@ -49,6 +49,13 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
+    title: "Quản lý sản phẩm",
+    icon: IconTypography,
+    href: "/sanpham",
+    roles: ["Nhân viên kho"],
+  },
+  {
+    id: uniqueId(),
     title: "Quản lý Voucher",
     icon: IconTypography,
     href: "/voucher",
