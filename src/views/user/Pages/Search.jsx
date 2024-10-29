@@ -90,7 +90,7 @@ const Search = () => {
 
                 }
 
-              }} key={d.danh_mucId} data-value={`${d.danh_mucId}`} >{d.ten_loaiDM} </li>
+              }} key={d.danh_mucId} data-value={`${d.danh_mucId}`}   >{d.ten_loaiDM} </li>
             })}
 
           </ul>
