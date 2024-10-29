@@ -10,6 +10,9 @@ const NewHeader = () => {
     const userId = localStorage.getItem('account_id');
     const [showPopup, setShowPopup] = useState(false);
     const [historySearch,SethistorySearch] = useState([]);
+    const danhmuc = useSelector(state => state.textSearch.Danhmuc);
+    const TextSearch = useSelector(state => state.textSearch.Text);
+    const sosao = useSelector(state => state.textSearch.sosao);
     
 
     const [Text,SetText] = useState("");
@@ -58,6 +61,14 @@ const NewHeader = () => {
         const api = ListProductSearch(res.data);
         console.log('data',res.data)
         dispatch(api);
+
+        if(danhmuc != "")
+        {
+            const res = await axios({url:`http://localhost:8080/Product/FindbyNameandDanhmuc?id=${danhmuc}&name=${value}`,method:'GET'})
+            const api = ListProductSearch(res.data);
+            console.log('data',res.data)
+            dispatch(api);
+        }
         
 
         if(value !=='')

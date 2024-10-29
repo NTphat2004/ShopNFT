@@ -53,6 +53,19 @@ background-color: rgb(244, 245, 246);
   top: 0;
   right: 0
 }
+.borderRadiousRight1 {
+  width: 40px; /* Hoặc điều chỉnh theo kích thước bạn muốn */
+  height: 40px; /* Hoặc điều chỉnh theo kích thước bạn muốn */
+  background-color: rgb(57, 219, 74);
+  border-bottom-left-radius: 20px; /* Điều chỉnh góc nếu cần */
+  position: absolute;
+  top: 10px; /* Điều chỉnh theo ý muốn */
+  right: 10px; /* Điều chỉnh theo ý muốn */
+  display: flex; /* Để sử dụng flexbox */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  cursor: pointer; /* Hiện con trỏ tay khi hover */
+}
 
 .bg-green{
   background-color: rgb(57, 219, 74);
@@ -564,3 +577,7 @@ header {
 }
 
 /*Kết thúc giỏ hàng*/
+.nav1-link {
+  text-decoration: none; /* Loại bỏ gạch chân */
+  color: inherit; /* Sử dụng màu văn bản của phần tử cha */
+}

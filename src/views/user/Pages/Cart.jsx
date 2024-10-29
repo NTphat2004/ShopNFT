@@ -5,11 +5,13 @@ import { Checkbox, Button, Modal, Input } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from "react-redux";
 import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem } from "../Reducer/cartReducer";
+import axios from "axios";
 
 
 function Cart() {
     const userId = localStorage.getItem('account_id');
-    const [change,setchange] = useState(0)
+    const addressCurent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
+    const [change, setchange] = useState(0)
     const [showPopup, setShowPopup] = useState(false);
     const [checkedAll, setCheckedAll] = useState(false);
     const [checkedItems, setCheckedItems] = React.useState([false, false]);
@@ -20,12 +22,15 @@ function Cart() {
     const [isChecked, setIsChecked] = useState(Array(6).fill(false)); // Tạo mảng trạng thái
     const [sum, Setsum] = useState(0);
     const [spchecked, setspchecked] = useState([]);
+    const [AddressCurrent, SetaddressCurrent] = useState({});
+    const [addressList, SetaddressList] = useState([]);
     const handleToggle = (index) => {
         const newChecked = [...isChecked];
         newChecked[index] = !newChecked[index]; // Đảo trạng thái chỉ phần tử được nhấn
         setIsChecked(newChecked); // Cập nhật lại state
 
     };
+
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -65,15 +70,43 @@ function Cart() {
         if (e.target.checked) {
             const api = AddSpthanhtoan(cart);
             dispatch(api)
-        
+
         }
         else {
             const api = DeleteSpthanhtoan(cart);
             dispatch(api)
-           
+
 
         }
     };
+
+    const handleSubmitADDFORM = async (e) =>{
+        e.preventDefault()
+        const name = document.querySelector('input[name="name"]').value;
+        const phone = document.querySelector('input[name="phone"]').value;
+        const address = document.querySelector('input[name="address"]').value;
+        
+       
+
+        const queryParams = new URLSearchParams({
+            name: name,
+            phone: phone,
+            address: address,
+            iduser : userId
+          });
+        
+          try {
+            const res = await axios.post(`http://localhost:8080/DiaChi/Add?${queryParams.toString()}`);
+            const resList = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
+     
+        SetaddressList(resList.data)
+            
+          } catch (error) {
+            
+          }finally {
+            setIsModalAddOpen(false);
+        }
+    }
 
 
 
@@ -82,7 +115,7 @@ function Cart() {
 
     const totalAmount = Array.isArray(ListSPChecked)
         ? ListSPChecked.reduce((total, Spthanhtoan) => {
-            // Nếu `gia_km` lớn hơn 0, dùng `gia_km`, nếu không dùng `gia_goc`
+          
             const price = Spthanhtoan.sanpham.gia_km > 0 ? Spthanhtoan.sanpham.gia_km : Spthanhtoan.sanpham.gia_goc;
             return total + (Spthanhtoan.so_luong * price);
         }, 0)
@@ -116,12 +149,31 @@ function Cart() {
         }
 
     };
-   
+
+    const InformationUser = async () => {
+
+        const res = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
+     
+        SetaddressList(res.data)
+        if(addressCurent != null)
+        {
+            SetaddressCurrent(addressCurent);
+        }
+        else{
+            SetaddressCurrent(res.data[0]);
+        }
+       
+
+       
+        
+    }
+
+    
 
 
- 
     useEffect(() => {
         console.log('cart run')
+        InformationUser()
         setCheckedItems(Array(ListCart.length).fill(false));
         dispatch(CallAPI_Cart(userId))
         const handleClickOutside = (event) => {
@@ -140,13 +192,13 @@ function Cart() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('scroll', handleScroll);
-           
+
 
             dispatch(Clear())
 
         };
     }, []);
-   
+
     const handleInputClick = () => {
         setShowPopup(true);
     };
@@ -160,54 +212,82 @@ function Cart() {
                     <div className="hangdautien">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/user-male-circle.png" alt="user" className="icon" />
                         <p className="tieude" >Thông tin người nhận:</p>
-                        <p className="noidung" style={{ paddingLeft: '200px' }}>Thành | 0984762140</p>
+                        <p className="noidung" style={{ paddingLeft: '200px' }}>{AddressCurrent?.users?.hovaten } | {AddressCurrent?.users?.so_dien_thoai ? AddressCurrent?.users?.so_dien_thoai : <span className="text-danger fw-bold">Chưa nhập số điện thoại</span>}</p>
                         <button className="thaydoidiachi" onClick={showModal}>Thay đổi địa chỉ</button>
                         <Modal width={1000}
                             title="Địa chỉ giao hàng của tôi" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                             <Button onClick={showModalAdd}>Thêm địa chỉ giao hàng
                                 <PlusOutlined />
                             </Button>
-                            <div className="mt-2 py-2 ps-2" style={{ border: '1px solid #d4d7de' }}>
-                                <div className="d-flex align-items-center" style={{ height: '40px' }}>
-                                    <img width={32} height={32} src="https://img.icons8.com/windows/32/user-male-circle.png" alt="user" className="icon" />
-                                    <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '50px' }}>Thông tin người nhận:</p>
-                                    <p style={{ margin: '0' }} >Thành | 0984762140</p>
-                                </div>
-                                <div className="d-flex align-items-center" style={{ height: '40px' }}>
-                                    <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
-                                    <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '80px' }}>Địa chỉ giao hàng:</p>
-                                    <p style={{ margin: '0' }}>đường số 10, Campuchia, tỉnh Đắc Lắk, làng Nủ</p>
-                                </div>
-                                <div className="d-flex align-items-center" style={{ height: '40px' }}>
-                                    <img width={32} height={32} src="https://img.icons8.com/fluency-systems-regular/50/online-store.png" alt="store" className="icon" />
-                                    <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '130px' }}>Cửa hàng:</p>
-                                    <p style={{ margin: '0' }}>Quận 7</p>
-                                </div>
+                            <div >
+                                {addressList.map((address,index) => {
+                                    return <div className="mt-2 py-2 ps-2" key={address.dia_chiID} style={{ border: '1px solid #d4d7de' }}>
+
+                                        <div className="d-flex align-items-center" style={{ height: '40px' }}>
+                                            <img width={32} height={32} src="https://img.icons8.com/windows/32/user-male-circle.png" alt="user" className="icon" />
+                                            <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '50px' }}>Thông tin người nhận:</p>
+                                            <p style={{ margin: '0' }} >{address.users.hovaten} | {address.users.so_dien_thoai}</p>
+                                        </div>
+                                        <div className="d-flex align-items-center" style={{ height: '40px' }}>
+                                            <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
+                                            <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '80px' }}>Địa chỉ giao hàng:</p>
+                                            <p style={{ margin: '0' }}>{address.dia_chi}</p>
+                                        </div>
+                                       
+                                       {AddressCurrent?.dia_chiID !== address.dia_chiID ?  <div className="d-flex align-items-center" style={{ height: '60px' }}>
+                                           <button onClick={()=>{
+                                             const dataJSON = JSON.stringify(address);
+        
+                                             
+                                             localStorage.setItem('addressCurent', dataJSON);
+                                             SetaddressCurrent(JSON.parse(localStorage.getItem('addressCurent')))
+                                           }} className="btn btn-primary m-3">Dùng địa chỉ này</button>
+                                        </div>  : <> 
+                                        </> }
+                                       
+                                    </div>
+                                })}
+
                             </div>
                         </Modal>
                         <Modal width={1000}
                             title="Thêm địa chỉ mới" open={isModalAddOpen} onOk={handleOkAdd} onCancel={handleCancelAdd}>
-                            <div>
-                                <div className="mb-3">
+                            
+                                {AddressCurrent != null ?<form onSubmit={handleSubmitADDFORM}> <div className="mb-3">
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" placeholder="Nhập tên người nhận" prefix={<UserOutlined />} />
+                                    <Input size="large" name="name" placeholder="Nhập tên người nhận" value={AddressCurrent?.users?.hovaten} prefix={<UserOutlined />} />
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" placeholder="Nhập số điện thoại" prefix={<PhoneOutlined />} />
+                                    <Input size="large" name="phone" placeholder="Nhập số điện thoại" value={AddressCurrent?.users?.so_dien_thoai} prefix={<PhoneOutlined />} />
+                                </div>
+                                <div>
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span></label>
+                                    <Input size="large" name="address" required placeholder="Nhập địa chỉ giao hàng" prefix={<HomeOutlined />} />
+                                </div>  <button type="submit" onClick={()=>{
+                                             
+                                           }} className="btn btn-primary m-3">Thêm địa chỉ</button>  </form>:
+                                
+                                <form> <div className="mb-3">
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
+                                    <Input size="large" placeholder="Nhập tên người nhận" value={''} prefix={<UserOutlined />} />
+                                </div>
+                                <div className="mb-3">
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
+                                    <Input size="large" placeholder="Nhập số điện thoại" value={''} prefix={<PhoneOutlined />} />
                                 </div>
                                 <div>
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span></label>
                                     <Input size="large" placeholder="Nhập địa chỉ giao hàng" prefix={<HomeOutlined />} />
-                                </div>
-                            </div>
+                                </div>  </form>}
+                          
                         </Modal>
                     </div>
 
                     <div className="hangthuhai">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
                         <p className="tieude">Địa chỉ giao hàng:</p>
-                        <p className="noidung" style={{ paddingLeft: '233px' }}>đường số 10, Campuchia, tỉnh Đắc Lắk, làng Nủ</p>
+                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi : <span className="text-danger fw-bold">Chưa nhập địa chỉ</span> }</p>
                     </div>
 
                     <div className="hangthuba">
@@ -265,22 +345,23 @@ function Cart() {
                                             })
                                             dispatch(increasesp)
                                         }
-                                        const increase = decreaseItem({                                          
+                                        const increase = decreaseItem({
                                             quantity: cart.so_luong,
-                                            userId:userId,
+                                            userId: userId,
                                             productId: cart.sanpham.san_phamId,
-                                            idcart:cart.id
+                                            idcart: cart.id
                                         })
                                         dispatch(increase)
-                                       
-                                       
+
+
                                     }} type="default" size="small">-</Button>
                                     <span style={{ margin: '0 10px' }}>{cart.so_luong}</span>
                                     <Button onClick={() => {
                                         const increase = increaseItem({
-                                            idcart:cart.id,
-                                            userId:userId})
-                                        
+                                            idcart: cart.id,
+                                            userId: userId
+                                        })
+
                                         dispatch(increase)
 
                                         if (ListSPChecked.length > 0) {
@@ -290,11 +371,11 @@ function Cart() {
                                             })
                                             dispatch(increasesp)
                                         }
-                                        
-                                        
 
-                                      
-                                        
+
+
+
+
                                     }} type="default" size="small">+</Button>
 
                                 </div>
