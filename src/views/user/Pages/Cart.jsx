@@ -4,7 +4,7 @@ import { json, NavLink } from "react-router-dom";
 import { Checkbox, Button, Modal, Input } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from "react-redux";
-import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem } from "../Reducer/cartReducer";
+import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem, clearItem } from "../Reducer/cartReducer";
 import axios from "axios";
 
 
@@ -312,8 +312,8 @@ function Cart() {
                         <div className="navsotiennd">
                             Số tiền
                             <DeleteOutlined onClick={() => {
-                                const clear = ClearCart();
-                                dispatch(clear)
+                                
+                                dispatch(clearItem(userId))
                             }} style={{ paddingLeft: '115px' }} />
                         </div>
                     </div>

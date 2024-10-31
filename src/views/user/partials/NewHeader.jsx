@@ -146,35 +146,26 @@ const NewHeader = () => {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink className="nav-link" to="/uu-dai-hot" activeClassName="active">
-                                    Ưu Đãi Hot
+                                <NavLink className="nav-link" to="/voucher" activeClassName="active">
+                                    Voucher
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink className="nav-link" to="/khuyen-mai" activeClassName="active">
-                                    Khuyến Mãi
+                                <NavLink className="nav-link" to="/bai-dang" activeClassName="active">
+                                   Bài đăng
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink className="nav-link" to="/ban-chay" activeClassName="active">
+                                <NavLink className="nav-link" to="/allproduct/FindProductTopSell" activeClassName="active">
                                     Bán Chạy
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink className="nav-link" to="/hang-moi" activeClassName="active">
+                                <NavLink className="nav-link" to="/allproduct/FindProductThisWeek" activeClassName="active">
                                     Hàng Mới
                                 </NavLink>
                             </li>
-                            <li className="nav-item">
-                                <NavLink className="nav-link" to="/su-kien-noi-bat" activeClassName="active">
-                                    Sự Kiện Nổi Bật
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink className="nav-link" to="/dat-hang-nhanh" activeClassName="active">
-                                    Đặt Hàng Nhanh
-                                </NavLink>
-                            </li>
+                           
                         </ul>
                     </div>
                 </div>
