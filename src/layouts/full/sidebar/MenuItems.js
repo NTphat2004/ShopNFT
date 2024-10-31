@@ -30,6 +30,20 @@ const Menuitems = [
     roles: ["Admin"],
   },
   {
+    id: uniqueId(),
+    title: "Quản lý người dùng",
+    icon: IconLayoutDashboard,
+    href: "/nguoidung",
+    roles: ["Admin"],
+  },
+  {
+    id: uniqueId(),
+    title: "Quản lý thương hiệu",
+    icon: IconLayoutDashboard,
+    href: "/thuonghieu",
+    roles: ["Admin"],
+  },
+  {
     navlabel: true,
     subheader: "Utilities",
   },
@@ -59,7 +73,7 @@ const Menuitems = [
     title: "Quản lý Voucher",
     icon: IconTypography,
     href: "/voucher",
-    roles: ["Nhân viên kinh doanh"],
+    roles: ["Nhân viên kinh doanh", "Nhân viên kho", "Admin"],
   },
   {
     id: uniqueId(),

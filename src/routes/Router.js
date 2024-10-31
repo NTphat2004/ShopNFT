@@ -6,6 +6,8 @@ import Thongtincanhan from "../views/quanly/Thongtincanhan";
 import Voucher from "../views/quanly/QuanlyVoucher";
 import Sanpham from "../views/quanly/QuanlySP";
 import Kho from "../views/quanly/Quanlykho";
+import UserForm from "../views/quanly/Usermanagement";
+import Thuonghieu from "../views/quanly/ThuongHieu";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -40,6 +42,8 @@ const Router = [
       { path: "voucher", element: <Voucher /> },
       { path: "kho", element: <Kho /> },
       { path: "sanpham", element: <Sanpham /> },
+      { path: "nguoidung", element: <UserForm /> },
+      { path: "thuonghieu", element: <Thuonghieu /> },
       { path: "sample-page", element: <SamplePage /> },
       { path: "icons", element: <Icons /> },
       { path: "ui/typography", element: <TypographyPage /> },

@@ -157,7 +157,7 @@ const Kho = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="productName">Tên sản phẩm</label>
-                <input type="text" id="productName" className="form-control" />
+                <input type="text" id="ten_san_pham" className="form-control" />
               </div>
             </div>
 
@@ -166,7 +166,7 @@ const Kho = () => {
                 <label htmlFor="createDate">Ngày tạo</label>
                 <input
                   type="date"
-                  id="createDate"
+                  id="ngay_tao"
                   className="form-control"
                   value={getCurrentDate()}
                 />
@@ -175,7 +175,7 @@ const Kho = () => {
                 <label htmlFor="productQuantity">Số lượng</label>
                 <input
                   type="number"
-                  id="productQuantity"
+                  id="so_luong"
                   className="form-control"
                 />
               </div>
