@@ -12,6 +12,7 @@ import { Call_API_Products } from '../Reducer/productReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import ListProduct from './ListProduct'
 import { setLoading } from '../Reducer/LoadingReducer'
+import ListDanhHieu from './ListDanhHieu'
 const Index = () => {
    console.log('run')
    const dispatch = useDispatch();
@@ -140,8 +141,33 @@ const Index = () => {
           <NavLink to={'allproduct/FindProductDiscount'} className='gradient-button-2' >Xem tất cả sản phẩm</NavLink>
       </div>
 
-     
+      <div className='row mt-4'>
 
+        <div className='col-md-12 '>
+
+          <h6 className='ms-3 text-danger mt-2'>ĐẶC BIỆT</h6>
+
+        </div>
+
+        <div className='col-md-6'>
+
+          <h3 className='ms-3 text-dark mt-1 fw-bold'>Sản Phẩm Có Thương Hiệu
+            {/* <br />
+            From Our Menu */}
+          </h3>
+
+        </div>
+        <div className='col-md-6 d-flex flex-column justify-content-center '>
+
+
+
+        </div>
+
+      </div>
+      <ListDanhHieu></ListDanhHieu>
+      
+
+      <ListProduct products={ListProductDiscount} ></ListProduct>
      {/* // post */}
     <Post></Post>
 

@@ -36,6 +36,8 @@ import YeuThichSanPham from './views/user/Pages/YeuThichSanPham';
 import PagePost from './views/user/Pages/PagePost'
 import PostDetail from './views/user/Pages/PostDetail';
 import Voucher from './views/user/Pages/Voucher';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
@@ -107,6 +109,7 @@ root.render(
 
 
       </Routes>
+      <ToastContainer pauseOnHover={false} />
       <Popup></Popup>
     </BrowserRouter>
     <Loading></Loading>

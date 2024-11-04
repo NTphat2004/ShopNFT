@@ -1,16 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
-
+import { toast } from 'react-toastify';
 
 export const addItemToCart = createAsyncThunk(
     'cart/addItemToCart',
     async ({ ProductDetail, QuantityProduct }, { getState }) => {
         const userId = localStorage.getItem('account_id');
         
-        if (!userId) {
-            throw new Error('userId không được tìm thấy');
-        }
+        
 
         const state = getState();
         const index = state.cart.Cart.findIndex(p => p.san_phamId === ProductDetail.san_phamId);
@@ -29,7 +27,7 @@ export const addItemToCart = createAsyncThunk(
             return { item: { ...ProductDetail, QuantityProduct }, isNew: true, data: res.data  };
         } else {
             // Cập nhật số lượng sản phẩm
-            await axios.post(`http://localhost:8080/AddCart1/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`, null, {
+            await axios.post(`http://localhost:8080/AddCart/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`, null, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -41,13 +39,13 @@ export const addItemToCart = createAsyncThunk(
 
 export const removeItem = createAsyncThunk(
     'cart/removeItem',
-    async ({ idcart, userId }, thunkAPI) => {
+    async ({ idcart, userId,idsanpham }, thunkAPI) => {
         if (window.confirm("bạn có muốn xóa vật phẩm này không")) {
             await axios.delete(`http://localhost:8080/delete/${idcart}`);
             const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {}, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            return { action: 'remove', data: res.data };
+            return { action: 'remove', data: res.data,id:idsanpham};
         }
         return thunkAPI.rejectWithValue("User canceled the removal");
 
@@ -184,7 +182,7 @@ const cartReducer = createSlice({
                     try {
 
                         const res = await axios({
-                            url: `http://localhost:8080/AddCart1/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`,
+                            url: `http://localhost:8080/AddCart/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`,
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -295,12 +293,15 @@ const cartReducer = createSlice({
             })
             .addCase(increaseItem.fulfilled, (state, action) => {
                 state.CartDatabase = action.payload; // Cập nhật CartDatabase từ phản hồi API
+                
             })
             .addCase(removeItem.fulfilled, (state, action) => {
-                const { action: removeAction, data } = action.payload; // Lấy action và dữ liệu từ payload
+                const { action: removeAction, data,id } = action.payload; // Lấy action và dữ liệu từ payload
                 if (removeAction === 'remove') {
                     state.CartDatabase = data; // Cập nhật CartDatabase với dữ liệu mới từ server
                     // Xóa sản phẩm khỏi danh sách thanh toán
+                    const index = state.Cart.findIndex(p => p.san_phamId == id)
+                    state.Cart.splice(index,1)
                     state.ListSpthanhtoan = state.ListSpthanhtoan.filter(item => item.id !== action.meta.arg.idcart); 
                 }
             })
@@ -312,11 +313,14 @@ const cartReducer = createSlice({
     
                 if (isNew) {
                     state.CartDatabase = data;
+                    toast.success('Thêm sản phẩm vào giỏ hàng thành công!');
                     state.Cart.push(item);
                 } else {
                     const index = state.Cart.findIndex(p => p.san_phamId === item.san_phamId);
                     if (index !== -1) {
                         state.Cart[index].QuantityProduct += item.QuantityProduct;
+                        toast.success('Thêm sản phẩm vào giỏ hàng thành công!');
+                        
                     }
                 }
     
@@ -324,6 +328,7 @@ const cartReducer = createSlice({
             })
             .addCase(addItemToCart.rejected, (state, action) => {
                 console.error(action.error.message);
+                toast.error('Lỗi khi thêm sản phẩm vào giỏ hàng');
             }).addCase(clearItem.fulfilled, (state,action)=>{
                 const { action: clearAction, data } = action.payload; // Lấy action và dữ liệu từ payload
                 if (clearAction === 'clear') {

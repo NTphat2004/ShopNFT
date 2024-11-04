@@ -3,7 +3,9 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
     Text:"",
     Danhmuc:"",
-    sosao:""
+    sosao:"",
+    price:"",
+    
 }
 
 const searchReducer = createSlice({
@@ -20,11 +22,14 @@ const searchReducer = createSlice({
     },
     SetSoSao:(state,action)=>{
       state.sosao = action.payload
+    },
+    SetPrice:(state,action)=>{
+      state.price = action.payload
     }
 
   }
 });
 
-export const {SetTEXT,SetDanhMuc,SetSoSao} = searchReducer.actions
+export const {SetTEXT,SetDanhMuc,SetSoSao,SetPrice} = searchReducer.actions
 
 export default searchReducer.reducer

@@ -8,6 +8,7 @@ import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clea
 import axios from "axios";
 
 
+
 function Cart() {
     const userId = localStorage.getItem('account_id');
     const addressCurent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
@@ -80,30 +81,30 @@ function Cart() {
         }
     };
 
-    const handleSubmitADDFORM = async (e) =>{
+    const handleSubmitADDFORM = async (e) => {
         e.preventDefault()
         const name = document.querySelector('input[name="name"]').value;
         const phone = document.querySelector('input[name="phone"]').value;
         const address = document.querySelector('input[name="address"]').value;
-        
-       
+
+
 
         const queryParams = new URLSearchParams({
             name: name,
             phone: phone,
             address: address,
-            iduser : userId
-          });
-        
-          try {
+            iduser: userId
+        });
+
+        try {
             const res = await axios.post(`http://localhost:8080/DiaChi/Add?${queryParams.toString()}`);
             const resList = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
-     
-        SetaddressList(resList.data)
-            
-          } catch (error) {
-            
-          }finally {
+
+            SetaddressList(resList.data)
+
+        } catch (error) {
+
+        } finally {
             setIsModalAddOpen(false);
         }
     }
@@ -115,7 +116,7 @@ function Cart() {
 
     const totalAmount = Array.isArray(ListSPChecked)
         ? ListSPChecked.reduce((total, Spthanhtoan) => {
-          
+
             const price = Spthanhtoan.sanpham.gia_km > 0 ? Spthanhtoan.sanpham.gia_km : Spthanhtoan.sanpham.gia_goc;
             return total + (Spthanhtoan.so_luong * price);
         }, 0)
@@ -128,47 +129,67 @@ function Cart() {
 
     const handleCheckAllChange = (e) => {
         const isChecked = e.target.checked;
-        setCheckedAll(isChecked);
-        setCheckedItems(Array(ListCart.length).fill(isChecked));
+        const newCheckedItems = ListCart.map((cart, index) => {
 
-        if (isChecked) {
-            // Nếu tất cả được chọn, dispatch action cho tất cả sản phẩm
-            ListCart.forEach(cart => {
-                const api = AddSpthanhtoan(cart);
-                dispatch(api);
+            return cart.sanpham.so_luong > 0 ? isChecked : checkedItems[index];
+        });
+        setCheckedItems(newCheckedItems);
 
-            });
+        setCheckedAll(newCheckedItems.every((item, index) => ListCart[index].sanpham.so_luong > 0 ? item : true));
 
-        } else {
-            // Nếu không có sản phẩm nào được chọn, dispatch action xóa cho tất cả
-            ListCart.forEach(cart => {
-                const api = DeleteSpthanhtoan(cart);
-                dispatch(api);
 
-            });
-        }
+        newCheckedItems.forEach((checked, index) => {
+            if (checked && ListCart[index].sanpham.so_luong > 0) {
+                dispatch(AddSpthanhtoan(ListCart[index]));
+            } else if (!checked && ListCart[index].sanpham.so_luong > 0) {
+                dispatch(DeleteSpthanhtoan(ListCart[index]));
+            }
+        });
+
+
+        // const isChecked = e.target.checked;
+        // setCheckedAll(isChecked);
+        // setCheckedItems(Array(ListCart.length).fill(isChecked));
+
+        // if (isChecked) {
+        //     // Nếu tất cả được chọn, dispatch action cho tất cả sản phẩm
+        //     ListCart.forEach(cart => {
+        //         const api = AddSpthanhtoan(cart);
+        //         dispatch(api);
+
+        //     });
+
+        // } else {
+        //     // Nếu không có sản phẩm nào được chọn, dispatch action xóa cho tất cả
+        //     ListCart.forEach(cart => {
+        //         const api = DeleteSpthanhtoan(cart);
+        //         dispatch(api);
+
+        //     });
+        // }
+
+
 
     };
 
     const InformationUser = async () => {
 
         const res = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
-     
+
         SetaddressList(res.data)
-        if(addressCurent != null)
-        {
+        if (addressCurent != null) {
             SetaddressCurrent(addressCurent);
         }
-        else{
+        else {
             SetaddressCurrent(res.data[0]);
         }
-       
 
-       
-        
+
+
+
     }
 
-    
+
 
 
     useEffect(() => {
@@ -212,7 +233,7 @@ function Cart() {
                     <div className="hangdautien">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/user-male-circle.png" alt="user" className="icon" />
                         <p className="tieude" >Thông tin người nhận:</p>
-                        <p className="noidung" style={{ paddingLeft: '200px' }}>{AddressCurrent?.users?.hovaten } | {AddressCurrent?.users?.so_dien_thoai ? AddressCurrent?.users?.so_dien_thoai : <span className="text-danger fw-bold">Chưa nhập số điện thoại</span>}</p>
+                        <p className="noidung" style={{ paddingLeft: '200px' }}>{AddressCurrent?.users?.hovaten} | {AddressCurrent?.users?.so_dien_thoai ? AddressCurrent?.users?.so_dien_thoai : <span className="text-danger fw-bold">Chưa nhập số điện thoại</span>}</p>
                         <button className="thaydoidiachi" onClick={showModal}>Thay đổi địa chỉ</button>
                         <Modal width={1000}
                             title="Địa chỉ giao hàng của tôi" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
@@ -220,7 +241,7 @@ function Cart() {
                                 <PlusOutlined />
                             </Button>
                             <div >
-                                {addressList.map((address,index) => {
+                                {addressList.map((address, index) => {
                                     return <div className="mt-2 py-2 ps-2" key={address.dia_chiID} style={{ border: '1px solid #d4d7de' }}>
 
                                         <div className="d-flex align-items-center" style={{ height: '40px' }}>
@@ -233,18 +254,18 @@ function Cart() {
                                             <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '80px' }}>Địa chỉ giao hàng:</p>
                                             <p style={{ margin: '0' }}>{address.dia_chi}</p>
                                         </div>
-                                       
-                                       {AddressCurrent?.dia_chiID !== address.dia_chiID ?  <div className="d-flex align-items-center" style={{ height: '60px' }}>
-                                           <button onClick={()=>{
-                                             const dataJSON = JSON.stringify(address);
-        
-                                             
-                                             localStorage.setItem('addressCurent', dataJSON);
-                                             SetaddressCurrent(JSON.parse(localStorage.getItem('addressCurent')))
-                                           }} className="btn btn-primary m-3">Dùng địa chỉ này</button>
-                                        </div>  : <> 
-                                        </> }
-                                       
+
+                                        {AddressCurrent?.dia_chiID !== address.dia_chiID ? <div className="d-flex align-items-center" style={{ height: '60px' }}>
+                                            <button onClick={() => {
+                                                const dataJSON = JSON.stringify(address);
+
+
+                                                localStorage.setItem('addressCurent', dataJSON);
+                                                SetaddressCurrent(JSON.parse(localStorage.getItem('addressCurent')))
+                                            }} className="btn btn-primary m-3">Dùng địa chỉ này</button>
+                                        </div> : <>
+                                        </>}
+
                                     </div>
                                 })}
 
@@ -252,11 +273,11 @@ function Cart() {
                         </Modal>
                         <Modal width={1000}
                             title="Thêm địa chỉ mới" open={isModalAddOpen} onOk={handleOkAdd} onCancel={handleCancelAdd}>
-                            
-                                {AddressCurrent != null ?<form onSubmit={handleSubmitADDFORM}> <div className="mb-3">
-                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" name="name" placeholder="Nhập tên người nhận" value={AddressCurrent?.users?.hovaten} prefix={<UserOutlined />} />
-                                </div>
+
+                            {AddressCurrent != null ? <form onSubmit={handleSubmitADDFORM}> <div className="mb-3">
+                                <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
+                                <Input size="large" name="name" placeholder="Nhập tên người nhận" value={AddressCurrent?.users?.hovaten} prefix={<UserOutlined />} />
+                            </div>
                                 <div className="mb-3">
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
                                     <Input size="large" name="phone" placeholder="Nhập số điện thoại" value={AddressCurrent?.users?.so_dien_thoai} prefix={<PhoneOutlined />} />
@@ -264,30 +285,30 @@ function Cart() {
                                 <div>
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span></label>
                                     <Input size="large" name="address" required placeholder="Nhập địa chỉ giao hàng" prefix={<HomeOutlined />} />
-                                </div>  <button type="submit" onClick={()=>{
-                                             
-                                           }} className="btn btn-primary m-3">Thêm địa chỉ</button>  </form>:
-                                
+                                </div>  <button type="submit" onClick={() => {
+
+                                }} className="btn btn-primary m-3">Thêm địa chỉ</button>  </form> :
+
                                 <form> <div className="mb-3">
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
                                     <Input size="large" placeholder="Nhập tên người nhận" value={''} prefix={<UserOutlined />} />
                                 </div>
-                                <div className="mb-3">
-                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" placeholder="Nhập số điện thoại" value={''} prefix={<PhoneOutlined />} />
-                                </div>
-                                <div>
-                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" placeholder="Nhập địa chỉ giao hàng" prefix={<HomeOutlined />} />
-                                </div>  </form>}
-                          
+                                    <div className="mb-3">
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
+                                        <Input size="large" placeholder="Nhập số điện thoại" value={''} prefix={<PhoneOutlined />} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontWeight: 'bold' }} htmlFor="">Địa chỉ giao hàng <span style={{ color: 'red' }}>*</span></label>
+                                        <Input size="large" placeholder="Nhập địa chỉ giao hàng" prefix={<HomeOutlined />} />
+                                    </div>  </form>}
+
                         </Modal>
                     </div>
 
                     <div className="hangthuhai">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
                         <p className="tieude">Địa chỉ giao hàng:</p>
-                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi : <span className="text-danger fw-bold">Chưa nhập địa chỉ</span> }</p>
+                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi : <span className="text-danger fw-bold">Chưa nhập địa chỉ</span>}</p>
                     </div>
 
                     <div className="hangthuba">
@@ -312,14 +333,14 @@ function Cart() {
                         <div className="navsotiennd">
                             Số tiền
                             <DeleteOutlined onClick={() => {
-                                
+
                                 dispatch(clearItem(userId))
                             }} style={{ paddingLeft: '115px' }} />
                         </div>
                     </div>
 
                     {ListCart.map((cart, index) => {
-                        return <div className="col-12 cardgiohang d-flex align-items-start" key={index}>
+                        return <div className={`col-12 cardgiohang d-flex align-items-start ${cart.sanpham.so_luong == 0 ? 'disabled-div' : ''}  `} key={index}>
                             <Checkbox
                                 checked={checkedItems[index]}
                                 onChange={handleCheckItemChange(index, cart)}
@@ -327,8 +348,47 @@ function Cart() {
                                 style={{ paddingLeft: '10px', paddingBottom: '140px' }}
                             />
                             <div>
-                                <div className="d-flex">
-                                    <img width={150} height={150} src={`/images/${cart.sanpham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
+                                <div className="d-flex position-relative">
+                                {cart.sanpham.so_luong === 0 && (
+        <div
+            style={{
+                position: 'absolute',
+                top: '0',
+                left: '40px',
+                width: '100%',
+                height: '100%',
+                color: 'red',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                zIndex: '1',
+            }}
+        >
+            Hết hàng
+            <button
+                className="btn btn-danger btn-interactive"
+                style={{
+                    position: 'absolute',
+                    top: '80%',
+                    left: '180px', 
+                    zIndex: '2', 
+                    transform: 'translateY(-50%)', 
+                    minWidth:'180px'
+                }}
+                onClick={() => {
+                    const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanpham.san_phamId });
+                    dispatch(remove);
+                }}
+            >
+                Xóa
+            </button>
+        </div>
+    )}
+
+                                    <NavLink to={`/product/detail/${cart.sanpham.san_phamId}`}><img width={150} height={150} src={`/images/${cart.sanpham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" /></NavLink>
+
                                     <p className="text-center" style={{ width: '300px' }}>{cart.sanpham.ten_san_pham}</p>
                                 </div>
 
@@ -338,6 +398,7 @@ function Cart() {
                                 <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {(cart.sanpham.gia_km > 0 ? cart.so_luong * cart.sanpham.gia_km : cart.so_luong * cart.sanpham.gia_goc).toLocaleString()}     </p>
                                 <div className="d-flex align-items-center">
                                     <Button onClick={() => {
+
                                         if (ListSPChecked.length > 0) {
                                             const increasesp = DecreaseSpthanhtoan({
                                                 productId: cart,
@@ -357,6 +418,10 @@ function Cart() {
                                     }} type="default" size="small">-</Button>
                                     <span style={{ margin: '0 10px' }}>{cart.so_luong}</span>
                                     <Button onClick={() => {
+                                        if (cart.so_luong == cart.sanpham.so_luong) {
+                                            alert(`Trong shop còn ${cart.sanpham.so_luong} sản phẩm thêm ăn cc à`);
+                                            return;
+                                        }
                                         const increase = increaseItem({
                                             idcart: cart.id,
                                             userId: userId
@@ -379,10 +444,10 @@ function Cart() {
                                     }} type="default" size="small">+</Button>
 
                                 </div>
-                                <p style={{ color: '#777e90', margin: '0' }}>Tối đa 127 sản phẩm </p>
+                                <p style={{ color: '#777e90', margin: '0' }}>Tối đa {cart.sanpham.so_luong} sản phẩm </p>
                             </div>
                             <DeleteOutlined onClick={() => {
-                                const remove = removeItem({ idcart: cart.id, userId });
+                                const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanpham.san_phamId });
                                 dispatch(remove);
 
                             }} style={{ paddingTop: '70px', paddingLeft: '65px' }} />

@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react'
 
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios';
 import SimilarProduct from './SimilarProduct';
 import { AddItem, addItemToCart } from '../Reducer/cartReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import DanhGia from './DanhGia';
 import { addFavotite } from '../Reducer/YeuthichReducer';
+import { toast } from 'react-toastify';
 
 const ProductDetail = () => {
     const userId = localStorage.getItem('account_id');
     const params = useParams();
-    
+    const navigate = useNavigate();
     const [averageRating, setAverageRating] = useState(0);
     const [ProductDetail, SetProductDetail] = useState({});
     const [Danhgia, SetDanhGia] = useState([]);
@@ -26,9 +27,34 @@ const ProductDetail = () => {
 
     const handleChange = (e) => {
         const value = Number(e.target.value);
-
+        
+        if(QuantityProduct == 0 )
+        {
+           if(value == 0)
+           {
+            const value1 = e.target.value.replace(/^0+/, Number(0));
+            SetQuantityProduct(value1)
+            return;
+           
+           
+           }
+           else
+           {
+            const value1 = e.target.value.replace(/^0+/, '');
+            
+  
+            SetQuantityProduct(value1 === ''  ? 0 : value1 );
+           }
+           
+        
+           return;
+        }
         if (value >= 1) {
             SetQuantityProduct(value);
+        }
+        else{
+            console.log('cc')
+            SetQuantityProduct(0);
         }
     };
     const Change_Img = (event) => {
@@ -49,7 +75,7 @@ const ProductDetail = () => {
             const avgStars = resdanhgia.data.length > 0 ? (totalStars / resdanhgia.data.length).toFixed(1) : 0;
             setAverageRating(avgStars);
         } catch (error) {
-
+            navigate("/")
         }
     }
 
@@ -78,7 +104,7 @@ const ProductDetail = () => {
     }
 
     useEffect(() => {
-
+            
         API_Product_Detail()
         Yeuthich()
         
@@ -122,7 +148,7 @@ const ProductDetail = () => {
 
                     {ProductDetail.phantram_GG > 0 ? <h2 className="fw-bold mt-3">{ProductDetail.gia_km} đ</h2> : <h2 className="fw-bold mt-3">{ProductDetail.gia_goc} đ</h2>}
 
-                    <h6 className="fw-bold mt-2">{ProductDetail.mo_ta}</h6>
+                    <h6 className="fw-bold mt-2">{ProductDetail.mo_ta}  {QuantityProduct}</h6>
 
                     {/* <ul className='mt-3'>
                         <li style={{ marginBottom: '10px' }}> <b>Dưa Hấu Giống Mỹ</b> có vỏ màu xanh và sọc dưa đậm, ruột đỏ, hột đen. Quả có vỏ cứng, dày, ăn rất ngon, độ đường cao, hương vị thơm ngon, hấp dẫn.</li>
@@ -134,12 +160,29 @@ const ProductDetail = () => {
                     <hr />
                     <h6 className="fw-bold mt-4">Số lượng</h6>
                     <div className="btn-group mt-2" role="group" aria-label="Basic example">
-                        <button onClick={() => {
-                            if (QuantityProduct == 1) { return }
+                        <button disabled={QuantityProduct == 1 || QuantityProduct == 0} onClick={() => {
+                            if (QuantityProduct == 0) { return }
                             SetQuantityProduct(QuantityProduct - 1)
                         }} type="button" className="btn btn-outline-primary btn-sm p-2 fw-bold">-</button>
-                        <input onChange={handleChange} className="form-control form-control-sm w-50" max={300} type="number" value={QuantityProduct} />
-                        <button onClick={() => { SetQuantityProduct(QuantityProduct + 1) }} type="button" className="btn btn-outline-primary btn-sm p-2 fw-bold">+</button>
+                        <input onChange={handleChange} className="form-control form-control-sm w-50 custom-input"
+                        
+                        onKeyDown={(e) => {
+                            const currentValue = e.target.value;
+                            const isNumberKey = e.key >= "0" && e.key <= "9";
+                            const isAllowedKey = ["Backspace", "ArrowLeft", "ArrowRight", "Delete"].includes(e.key);
+            
+                           
+                            if (isNumberKey && parseInt(currentValue + e.key) > ProductDetail.so_luong) {
+                              e.preventDefault();
+                            }
+                          
+                            else if (!isNumberKey && !isAllowedKey) {
+                              e.preventDefault();
+                            }
+                          }}  
+                        
+                        type="number" value={QuantityProduct} />
+                        <button onClick={() => { SetQuantityProduct(QuantityProduct + 1) }} disabled={QuantityProduct == ProductDetail.so_luong }   type="button" className="btn btn-outline-primary btn-sm p-2 fw-bold">+</button>
 
 
                     </div>
@@ -148,14 +191,14 @@ const ProductDetail = () => {
 
                         {Yeuthich1?.yeu_thichID >= 0 ? 
                         <button className='btn btn-outline-dark text-danger ' onClick={async () => {
-                            alert(`id sản phẩm ${params.id} và ${userId}`)
+                          
                             await axios({ url: `http://localhost:8080/DELETE/Yeuthich?idyt=${Yeuthich1?.yeu_thichID}&iduser=${userId}`, method: 'GET' })
                             dispatch(addFavotite(""))
 
                         }}><i class="bi bi-heart-fill fs-3"></i>
                         </button> : 
                         <button className='btn btn-outline-dark text-danger ' onClick={async () => {
-                            alert(`id sản phẩm ${params.id} và ${userId}`)
+                          
                             const res=  await axios({ url: `http://localhost:8080/ADD/Yeuthich?idsp=${params.id}&iduser=${userId}`, method: 'POST' })
                             dispatch(addFavotite(res.data))
                             console.log('data',res.data)
@@ -164,14 +207,15 @@ const ProductDetail = () => {
 
                         <button className='btn btn-outline-dark text-danger ms-3'><i class="fa fa-cart-plus fs-3"></i></button>
 
-                        <button onClick={() => {
+                        <button disabled={QuantityProduct ==0} onClick={() => {
 
                             const addCart = addItemToCart({
                                 ProductDetail: ProductDetail,
                                 QuantityProduct: QuantityProduct,
                             });
                             dispatch(addCart)
-                        }} className="gradient-button ms-4 fw-bold">
+                          
+                        }} className={`${QuantityProduct == 0 ? 'gradient2-button' : 'gradient-button'}   ms-4 fw-bold`}>
                             Thêm vào giỏ hàng
                         </button>
                     </div>

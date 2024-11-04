@@ -20,13 +20,14 @@ const SearchByDanhmuc = () => {
     }
 
     useEffect(()=>{
+      window.scrollTo(0, 0);
         API()
     },[params.id])
 
   return (
     <div className='container-fluid'>
     <Banner></Banner>
-    <CategoryNew></CategoryNew>
+    <CategoryNew ids={params.id}></CategoryNew>
     <div className="row mt-3">
 
     
