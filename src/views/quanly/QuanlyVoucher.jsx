@@ -10,6 +10,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { data, get } from "jquery";
 import * as XLSX from "xlsx";
+import axios from "axios";
 //import "../../assets/images"
 
 const getBase64 = (file) =>
@@ -24,6 +25,7 @@ const Voucher = () => {
   const [voucherData, setVoucherData] = useState([]);
   const [hoatDong, setHoatDong] = useState("Hoạt động");
   const [selectedVoucher, setSelectedVoucher] = useState({
+    voucherID: "",
     hoat_dong: "Hoạt động",
     hanh_dong: "Thêm", // Giá trị mặc định
     ngay_tao: "",
@@ -38,6 +40,8 @@ const Voucher = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [userData, setUserData] = useState(null);
   const [isAddDisabled, setIsAddDisabled] = useState(false);
+  const [isDeleteDisabled, setIsDeleteDisabled] = useState(false);
+  const [newVoucherID, setNewVoucherID] = useState("");
 
   // Kiểm tra quyền admin
   const isAdmin = userData && userData.roles.includes("Admin");
@@ -48,6 +52,22 @@ const Voucher = () => {
     const month = String(today.getMonth() + 1).padStart(2, "0");
     const day = String(today.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  };
+
+  const getNewVoucherID = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/voucher/getNewVoucherID"
+      );
+      setNewVoucherID(response.data);
+      console.log("VoucherID:", response.data);
+      setSelectedVoucher((prev) => ({
+        ...prev,
+        voucherID: response.data,
+      }));
+    } catch (error) {
+      console.error("Lỗi khi lấy voucherID:", error);
+    }
   };
 
   const handleDateChange = (e) => {
@@ -134,12 +154,13 @@ const Voucher = () => {
 
     setFileList(initialFileList);
     if (voucher.hoat_dong === "Hoạt động") {
-      setIsDisabled(true);
-      setIsAddDisabled(true);
-    }
-    else {
       setIsDisabled(false);
       setIsAddDisabled(true);
+      setIsDeleteDisabled(true);
+    } else {
+      setIsDisabled(true);
+      setIsAddDisabled(true);
+      setIsDeleteDisabled(false);
     }
     console.log(voucher);
   };
@@ -160,23 +181,25 @@ const Voucher = () => {
       const formattedData = data.map((item) => ({
         key: item[0], // voucherID
         voucherID: item[0],
-        dieu_kien: item[1],
-        don_hang_toi_thieu: item[2],
-        han_su_dung: item[3],
-        hinh_anh: item[4],
-        hoat_dong: item[5],
-        so_luong: item[6],
-        so_luot_SD: item[7],
-        so_tien_giam: item[8],
-        trang_thai_xoa: item[9],
-        hanh_dong: item[10],
-        ngay_tao: item[11],
-        accountID: item[12],
+        ma_voucher: item[1],
+        dieu_kien: item[2],
+        don_hang_toi_thieu: item[3],
+        han_su_dung: item[4],
+        hinh_anh: item[5],
+        hoat_dong: item[6],
+        so_luong: item[7],
+        so_luot_SD: item[8],
+        so_tien_giam: item[9],
+        trang_thai_xoa: item[10],
+        hanh_dong: item[11],
+        ngay_tao: item[12],
+        accountID: item[13],
       }));
       setVoucherData(formattedData);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu voucher:", error);
     }
+    getNewVoucherID();
   };
 
   useEffect(() => {
@@ -188,7 +211,7 @@ const Voucher = () => {
 
     const data = JSON.parse(localStorage.getItem("data"));
     setUserData(data);
-    
+
     // Nếu người dùng không phải admin, tự động chuyển sang tab 1
     if (data && !data.roles.includes("Admin")) {
       setActiveKey("1");
@@ -199,6 +222,7 @@ const Voucher = () => {
   const voucherChung = () => {
     voucher = {
       voucherID: document.getElementById("voucherID").value,
+      ma_voucher: document.getElementById("ma_voucher").value,
       dieu_kien: document.getElementById("dieu_kien").value,
       don_hang_toi_thieu:
         parseInt(document.getElementById("don_hang_toi_thieu").value) || 0,
@@ -206,7 +230,7 @@ const Voucher = () => {
       han_su_dung: document.getElementById("han_su_dung").value,
       hoat_dong: selectedVoucher.hoat_dong,
       so_luong: parseInt(document.getElementById("so_luong").value) || 0,
-     // so_luot_SD: parseInt(document.getElementById("so_luot_SD").value) || 0,
+      // so_luot_SD: parseInt(document.getElementById("so_luot_SD").value) || 0,
       so_tien_giam:
         parseInt(document.getElementById("so_tien_giam").value) || 0,
     };
@@ -341,7 +365,7 @@ const Voucher = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            hanh_dong: "Xóa",
+            hanh_dong: "Xóa hoàn toàn",
           }),
         }
       );
@@ -413,7 +437,8 @@ const Voucher = () => {
   };
 
   const clear = () => {
-    document.getElementById("voucherID").value = "";
+    getNewVoucherID();
+    document.getElementById("ma_voucher").value = "";
     document.getElementById("dieu_kien").value = "";
     document.getElementById("don_hang_toi_thieu").value = "";
     document.getElementById("ngay_tao").value = getCurrentDate();
@@ -496,7 +521,7 @@ const Voucher = () => {
           method: "DELETE",
         }
       );
-      
+
       if (response.ok) {
         alert("Voucher đã được xóa thành công!");
         fetchVoucherData();
@@ -514,6 +539,11 @@ const Voucher = () => {
       title: "Mã voucher",
       dataIndex: "voucherID",
       key: "voucherID",
+    },
+    {
+      title: "Mã voucher",
+      dataIndex: "ma_voucher",
+      key: "ma_voucher",
     },
     {
       title: "Điều kiện",
@@ -593,14 +623,19 @@ const Voucher = () => {
     },
   ];
   if (isAdmin) {
-    columns = columns.filter(col => col.key !== "hanhdong"); // Lọc cột "hanhdong" nếu là admin
+    columns = columns.filter((col) => col.key !== "hanhdong"); // Lọc cột "hanhdong" nếu là admin
   }
- 
+
   let columnsGarbage = [
     {
       title: "Mã voucher",
       dataIndex: "voucherID",
       key: "voucherID",
+    },
+    {
+      title: "Mã voucher",
+      dataIndex: "ma_voucher",
+      key: "ma_voucher",
     },
     {
       title: "Điều kiện",
@@ -673,13 +708,18 @@ const Voucher = () => {
     },
   ];
   if (isAdmin) {
-    columnsGarbage = columnsGarbage.filter(col => col.key !== "hanhdong"); // Lọc cột "hanhdong" nếu là admin
+    columnsGarbage = columnsGarbage.filter((col) => col.key !== "hanhdong"); // Lọc cột "hanhdong" nếu là admin
   }
   const columnsNhatKyHoatDong = [
     {
       title: "Mã voucher",
       dataIndex: "voucherID",
       key: "voucherID",
+    },
+    {
+      title: "Mã voucher",
+      dataIndex: "ma_voucher",
+      key: "ma_voucher",
     },
     {
       title: "Điều kiện",
@@ -755,14 +795,14 @@ const Voucher = () => {
   });
 
   const filteredVoucherDataGarbage = voucherData.filter((voucher) => {
-    return voucher.trang_thai_xoa !== null && voucher.hanh_dong !== 'Xóa';
+    return voucher.trang_thai_xoa !== null && voucher.hanh_dong !== "Xóa hoàn toàn";
   });
-  console.log("Thùng rác", filteredVoucherDataGarbage);
+  //console.log("Thùng rác", filteredVoucherDataGarbage);
 
   const filteredVoucherDataNhatKy = voucherData.filter((voucher) => {
     return voucher.hanh_dong !== null;
   });
-  console.log("Nhật ký", filteredVoucherDataNhatKy);
+  //console.log("Nhật ký", filteredVoucherDataNhatKy);
 
   // Xuất file Excel
   const exportToExcel = () => {
@@ -787,7 +827,7 @@ const Voucher = () => {
       activeKey={activeKey} // Điều khiển tab hiện tại
       onChange={(key) => setActiveKey(key)}
       type="card"
-      items={[   
+      items={[
         {
           label: `Thông tin chung`,
           key: "1",
@@ -796,7 +836,7 @@ const Voucher = () => {
               <h1>Thông tin chung</h1>
               <div className="input-container">
                 <div className="form-group">
-                  <label htmlFor="productCode">Mã voucher</label>
+                  <label htmlFor="productCode">ID</label>
                   <input
                     type="text"
                     id="voucherID"
@@ -807,6 +847,22 @@ const Voucher = () => {
                       setSelectedVoucher({
                         ...selectedVoucher,
                         voucherID: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="productCode">Mã voucher</label>
+                  <input
+                    type="text"
+                    id="ma_voucher"
+                    className="form-control"
+                    disabled={isDisabled}
+                    value={selectedVoucher?.ma_voucher || ""}
+                    onChange={(e) =>
+                      setSelectedVoucher({
+                        ...selectedVoucher,
+                        ma_voucher: e.target.value,
                       })
                     }
                   />
@@ -827,6 +883,9 @@ const Voucher = () => {
                     }
                   />
                 </div>
+              </div>
+
+              <div className="input-container">
                 <div className="form-group">
                   <label htmlFor="">Đơn hàng tối thiểu</label>
                   <input
@@ -843,9 +902,6 @@ const Voucher = () => {
                     }
                   />
                 </div>
-              </div>
-
-              <div className="input-container">
                 <div className="form-group">
                   <label htmlFor="createDate">Ngày tạo</label>
                   <input
@@ -879,9 +935,13 @@ const Voucher = () => {
                     // }
                     onChange={handleDateChange}
                   />
-                  {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+                  {errorMessage && (
+                    <p style={{ color: "red" }}>{errorMessage}</p>
+                  )}
                 </div>
+              </div>
 
+              <div className="input-container">
                 <div className="form-group">
                   <label htmlFor="warehouseStatus">Hoạt động</label>
                   <Select
@@ -906,9 +966,6 @@ const Voucher = () => {
                     }}
                   />
                 </div>
-              </div>
-
-              <div className="input-container">
                 <div className="form-group">
                   <label htmlFor="so_luong">Số lượng</label>
                   <input
@@ -1003,8 +1060,9 @@ const Voucher = () => {
                 <div className="form-group">
                   <button
                     className="button"
+                    id="xoavoucher"
                     onClick={handleDeleteInput}
-                    disabled={isDisabled}
+                    disabled={isDeleteDisabled}
                   >
                     Xóa
                   </button>
@@ -1016,7 +1074,8 @@ const Voucher = () => {
                 </div>
               </div>
             </div>
-          ),disabled: isAdmin,
+          ),
+          disabled: isAdmin,
         },
         {
           label: `Danh sách voucher`,
@@ -1035,7 +1094,7 @@ const Voucher = () => {
                 onClick={exportToExcel}
                 disabled={isAdmin}
               >
-                <ExportOutlined style={{ marginRight: "8px" }}  /> Xuất file
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
                 excel
               </button>
               <label htmlFor="searchStatus">Tìm kiếm theo trạng thái</label>

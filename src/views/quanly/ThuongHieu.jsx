@@ -118,7 +118,7 @@ const Thuonghieu = () => {
 
   const fetchThuongHieuData = async () => {
     try {
-      const response = await fetch("http://localhost:8080/loadAll");
+      const response = await fetch("http://localhost:8080/thuonghieu/loadAll");
       const data = await response.json();
       console.log("Dữ liệu là: ", data);
       const formattedData = data.map((item) => ({
@@ -181,7 +181,11 @@ const Thuonghieu = () => {
         console.log(selectedThuongHieu);
       } else {
         const errorData = await response.json();
-        console.error("Lỗi khi thêm thương hiệu:", response.statusText, errorData);
+        console.error(
+          "Lỗi khi thêm thương hiệu:",
+          response.statusText,
+          errorData
+        );
         alert("Thêm thương hiệu thất bại!");
       }
     } catch (error) {
@@ -241,7 +245,7 @@ const Thuonghieu = () => {
     setHoatDong("Hoạt động");
     setTrangThaiXoa("Chưa xóa");
     document.getElementById("accountID").value = "";
-  }
+  };
   const handelClear = () => {
     clear();
   };
@@ -367,13 +371,17 @@ const Thuonghieu = () => {
 
   // Lọc trạng thái
   const filteredThuongHieuData = searchStatus
-    ? thuonghieuData.filter((thuonghieu) => thuonghieu.hoat_dong === searchStatus)
+    ? thuonghieuData.filter(
+        (thuonghieu) => thuonghieu.hoat_dong === searchStatus
+      )
     : thuonghieuData; // Nếu không có trạng thái tìm kiếm, hiển thị tất cả
 
   // Xuất file Excel
   const exportToExcel = () => {
     const filteredData = searchStatus
-      ? thuonghieuData.filter((thuonghieu) => thuonghieu.hoat_dong === searchStatus)
+      ? thuonghieuData.filter(
+          (thuonghieu) => thuonghieu.hoat_dong === searchStatus
+        )
       : thuonghieuData;
 
     // Chuyển đổi dữ liệu thành bảng

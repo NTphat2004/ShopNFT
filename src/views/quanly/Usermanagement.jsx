@@ -23,7 +23,7 @@ import {
   AppBar,
 } from "@mui/material";
 import { Add, Search, Edit, Delete, Restore } from "@mui/icons-material";
-//import "../../styles/UserForm.css";
+import "../../styles/UserForm.css";
 
 const UserForm = () => {
   const [page, setPage] = useState(0);

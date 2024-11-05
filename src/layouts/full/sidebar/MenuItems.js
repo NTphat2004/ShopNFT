@@ -59,14 +59,14 @@ const Menuitems = [
     title: "Quản lý kho",
     icon: IconTypography,
     href: "/kho",
-    roles: ["Nhân viên kho"],
+    roles: ["Nhân viên kho", "Admin"],
   },
   {
     id: uniqueId(),
     title: "Quản lý sản phẩm",
     icon: IconTypography,
     href: "/sanpham",
-    roles: ["Nhân viên kho"],
+    roles: ["Nhân viên kho", "Admin"],
   },
   {
     id: uniqueId(),

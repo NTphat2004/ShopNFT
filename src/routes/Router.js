@@ -8,6 +8,7 @@ import Sanpham from "../views/quanly/QuanlySP";
 import Kho from "../views/quanly/Quanlykho";
 import UserForm from "../views/quanly/Usermanagement";
 import Thuonghieu from "../views/quanly/ThuongHieu";
+import Naptien from "../views/quanly/Naptien";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -62,6 +63,7 @@ const Router = [
     ],
   },
   { path: "/login", element: <Newlogin1 /> },
+  { path: "naptien", element: <Naptien /> },
 ];
 
 export default Router;

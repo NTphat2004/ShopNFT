@@ -14,6 +14,7 @@ import LoiNhuan from "./components/LoiNhuan";
 import TrangThaiDonHang from "./components/TrangThaiDonHang";
 import "../../styles/trangthaidonhang.css";
 import DonHang from "./components/DonHang";
+import DoanhThuDateToDate from "./components/DoanhThuDateToDate";
 
 const Dashboard = () => {
   const token = localStorage.getItem("jwtToken");
@@ -53,12 +54,16 @@ const Dashboard = () => {
           {/* Hàng riêng cho SalesOverview */}
           <Grid item xs={12} lg={12} className="hang3">
             <SalesOverview />
+          </Grid> 
+
+          <Grid item xs={12} lg={12} className="hang4">
+            <DoanhThuDateToDate />
           </Grid>
 
           {/* Hàng riêng cho TrangThaiDonHang */}
           <Grid item xs={12} lg={12} className="hang4">
             <TrangThaiDonHang />
-          </Grid>
+          </Grid> 
         </Grid>
       </Box>
     </PageContainer>

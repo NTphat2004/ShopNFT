@@ -7,7 +7,7 @@ import axios from "axios";
 
 const SalesOverview = () => {
   const [monthlyRevenue, setMonthlyRevenue] = useState([]); // Dữ liệu doanh thu theo tháng
-  const [year, setYear] = useState(2024); // Năm mặc định
+  const [year, setYear] = useState(2024); 
 
   const theme = useTheme();
   const primary = theme.palette.primary.main;

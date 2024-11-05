@@ -16,8 +16,14 @@ const LoiNhuan = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setLoiNhuan(data);
-      });
+        setLoiNhuan(data || 0);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setLoiNhuan(0);
+      })
+      ;
+    
   }, []);
 
   return (
