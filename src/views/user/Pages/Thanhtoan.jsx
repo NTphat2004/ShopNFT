@@ -39,12 +39,12 @@ const labelRender = (props) => {
 };
 function Thanhtoan() {
     const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan2) || [];
- 
+    const AddressCurrent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
     const totalAmount = Array.isArray(ListSPChecked)
         ? ListSPChecked.reduce((total, Spthanhtoan) => {
            
-            const price = Spthanhtoan.sanpham.gia_km > 0 ? Spthanhtoan.sanpham.gia_km : Spthanhtoan.sanpham.gia_goc;
-            return total + (Spthanhtoan.so_luong * price);
+            const price = Spthanhtoan.sanPham.gia_km > 0 ? Spthanhtoan.sanPham.gia_km : Spthanhtoan.sanPham.gia_goc;
+            return total + (Spthanhtoan.soLuong * price);
         }, 0)
         : 0;
     const [showPopup, setShowPopup] = useState(false);
@@ -76,33 +76,7 @@ function Thanhtoan() {
     };
     return (
         <>
-            <header className="bg-white border-bottom">
-                <div className="container-fluid py-1">
-                    <div className="row align-items-center">
-                       
-                        <div className="col-3 col-md-3 d-flex align-items-center mt-2 ps-3">
-                            <NavLink to="/">
-                                <img src="/images/logo-removebg-preview.png" className="me-3 img-fluid" width={80} alt="" />
-                            </NavLink>
-                        </div>
-
-                      
-                        <div className="col-6 col-md-6 mt-2 mt-md-0 d-flex justify-content-center mt-2 px-2">
-                            <input type="text" className="form-control me-2" style={{ width: '500px' }} placeholder="Tìm kiếm" onClick={handleInputClick} />
-                            <button className="btn btn-outline-secondary" type="submit">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
-
-                       
-                        <div className="col-3 col-md-3 d-flex justify-content-end align-items-center mt-2">
-                            <NavLink className="me-4 d-flex align-items-center" to="#">
-                                <i className="bi bi-person-circle text-dark fs-4"></i>
-                            </NavLink>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            
 
             <nav className="breaddesign col-11 mx-auto" aria-label="breadcrumb">
                 <ol className="breadcrumb">
@@ -121,13 +95,13 @@ function Thanhtoan() {
                     <div className="hangdautien">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/user-male-circle.png" alt="user" className="icon" />
                         <p className="tieude" >Thông tin người nhận:</p>
-                        <p className="noidung" style={{ paddingLeft: '200px' }}>Thành | 0984762140</p>
+                        <p className="noidung" style={{ paddingLeft: '200px' }}>{AddressCurrent?.users?.hovaten} | {AddressCurrent?.users?.so_dien_thoai}</p>
                     </div>
 
                     <div className="hangthuhai">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
                         <p className="tieude">Địa chỉ giao hàng:</p>
-                        <p className="noidung" style={{ paddingLeft: '233px' }}>đường số 10, Campuchia, tỉnh Đắc Lắk, làng Nủ</p>
+                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi : <span className="text-danger fw-bold">Chưa nhập địa chỉ</span>}</p>
                     </div>
 
                     <div className="hangthuba">
@@ -152,8 +126,8 @@ function Thanhtoan() {
                         return <div className="col-12 cardgiohang d-flex align-items-start" key={index}>
                             <div>
                                 <div className="d-flex">
-                                    <img width={150} height={150} src={`/images/${sp.sanpham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
-                                    <p style={{ width: '300px' }}>{sp.sanpham.ten_san_pham}</p>
+                                    <img width={150} height={150} src={`/images/${sp.sanPham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
+                                    <p style={{ width: '300px' }}>{sp.sanPham.ten_san_pham}</p>
                                 </div>
                                 <div className="d-flex ps-4 align-items-center">
                                     <EditOutlined />
@@ -162,8 +136,8 @@ function Thanhtoan() {
                             </div>
 
                             <div className="chitietgiatien d-flex flex-column align-items-center justify-content-center">
-                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {sp.sanpham.gia_km >0 ? sp.so_luong * sp.sanpham.gia_km : sp.so_luong * sp.sanpham.gia_goc} </p>
-                                <p style={{ color: '#777e90', margin: '0' }}>Số lượng: {sp.so_luong}</p>
+                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {sp.sanPham.gia_km >0 ? sp.soLuong * sp.sanPham.gia_km : sp.soLuong * sp.sanPham.gia_goc} </p>
+                                <p style={{ color: '#777e90', margin: '0' }}>Số lượng: {sp.soLuong}</p>
                             </div>
                         </div>
                     })}

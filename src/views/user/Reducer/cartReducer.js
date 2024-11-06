@@ -7,14 +7,9 @@ export const addItemToCart = createAsyncThunk(
     'cart/addItemToCart',
     async ({ ProductDetail, QuantityProduct }, { getState }) => {
         const userId = localStorage.getItem('account_id');
-        
-        
-
         const state = getState();
         const index = state.cart.Cart.findIndex(p => p.san_phamId === ProductDetail.san_phamId);
-
-        if (index < 0) {
-            // Thêm sản phẩm mới vào giỏ hàng
+        if (index < 0) {   
             await axios.post(`http://localhost:8080/AddCart/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`, null, {
                 headers: {
                     'Content-Type': 'application/json'
@@ -24,28 +19,31 @@ export const addItemToCart = createAsyncThunk(
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            return { item: { ...ProductDetail, QuantityProduct }, isNew: true, data: res.data  };
+            return { item: { ...ProductDetail, QuantityProduct }, isNew: true, data: res.data };
         } else {
-            // Cập nhật số lượng sản phẩm
+           
             await axios.post(`http://localhost:8080/AddCart/${userId}/${ProductDetail.san_phamId}/${QuantityProduct}`, null, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-            return { item: state.cart.Cart[index], isNew: false};
+            return { item: state.cart.Cart[index], isNew: false };
         }
     }
 );
 
 export const removeItem = createAsyncThunk(
     'cart/removeItem',
-    async ({ idcart, userId,idsanpham }, thunkAPI) => {
+    async ({ userId, idsanpham }, thunkAPI) => {
+        const state = thunkAPI.getState();
+        const index = state.cart.ListSpthanhtoan.findIndex(item => item.sanPham.san_phamId === idsanpham); 
+       
         if (window.confirm("bạn có muốn xóa vật phẩm này không")) {
-            await axios.delete(`http://localhost:8080/delete/${idcart}`);
+            await axios.delete(`http://localhost:8080/remove/${userId}/${idsanpham}`);
             const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {}, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            return { action: 'remove', data: res.data,id:idsanpham};
+            return { action: 'remove', data: res.data, id: idsanpham,index:index };
         }
         return thunkAPI.rejectWithValue("User canceled the removal");
 
@@ -71,48 +69,46 @@ export const clearItem = createAsyncThunk(
 
 export const decreaseItem = createAsyncThunk(
     'cart/decreaseItem',
-    async ({ productId, quantity, userId, idcart }, thunkAPI) => {
-        // Tìm chỉ số của sản phẩm trong CartDatabase
-        const index = thunkAPI.getState().cart.CartDatabase.findIndex(p => p.san_phamId === productId);
-
+    async ({ productId, quantity, userId, idsp }, thunkAPI) => {
+        
+       
+        const state = thunkAPI.getState();
+        const index = state.cart.ListSpthanhtoan.findIndex(item => item.sanPham.san_phamId === idsp); // Xác định index của sản phẩm
+      
         if (quantity === 1) {
-            // Trường hợp xóa sản phẩm khỏi giỏ hàng
-            if (window.confirm("bạn có muốn xóa vật phẩm này không")) {
-                await axios.delete(`http://localhost:8080/delete/${idcart}`);
-                const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {}, {
+            if (window.confirm("Bạn có muốn xóa sản phẩm này không?")) {
+                await axios.delete(`http://localhost:8080/remove/${userId}/${idsp}`);
+                const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {
                     headers: { 'Content-Type': 'application/json' }
                 });
-                return { action: 'remove', data: res.data, index }; // Trả về hành động và chỉ số sản phẩm
+                return { action: 'remove', data: res.data, index };
+            } else {
+                return undefined;
             }
-            else {
-                return undefined; // Trả về undefined nếu người dùng hủy thao tác
-            }
-        
-        } else {
-            // Trường hợp giảm số lượng sản phẩm
-            await axios.post(`http://localhost:8080/decrease/${idcart}`, {}, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {}, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-            return { action: 'decrease', data: res.data, index }; // Trả về hành động, dữ liệu và chỉ số sản phẩm
         }
+
+        await axios.post(`http://localhost:8080/decrease/${idsp}/${userId}`, {}, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const res = await axios.get(`http://localhost:8080/GETcart/${userId}`, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return { action: 'decrease', data: res.data };
     }
 );
 
 
 export const increaseItem = createAsyncThunk(
     'cart/increaseItem',
-    async ({ idcart, userId }, thunkAPI) => {
-        const id = parseInt(idcart);
+    async ({ idsp, userId }, thunkAPI) => {
 
-      
-        await axios.post(`http://localhost:8080/increase/${id}`, {}, {
+
+
+        await axios.post(`http://localhost:8080/increase/${idsp}/${userId}`, {}, {
             headers: { 'Content-Type': 'application/json' }
         });
-        
-        
+
+
         const response = await axios.get(`http://localhost:8080/GETcart/${userId}`);
         return response.data;
     }
@@ -121,7 +117,7 @@ export const increaseItem = createAsyncThunk(
 const initialState = {
     Cart: [],
     CartDatabase: [],
-   
+
     ListSpthanhtoan: [],
     ListSpthanhtoan2: []
 
@@ -141,13 +137,6 @@ const cartReducer = createSlice({
             const QuantityProduct = action.payload.QuantityProduct;
             const userId = localStorage.getItem('account_id');
 
-            if (!userId) {
-                console.error('userId không được tìm thấy');
-                return;  
-            }
-
-
-
             const index = state.Cart.findIndex(p => p.san_phamId === ProductDetail.san_phamId);
             if (index < 0) {
                 const item = { ...ProductDetail, QuantityProduct };
@@ -165,7 +154,7 @@ const cartReducer = createSlice({
                                 'Content-Type': 'application/json'
                             }
                         })
-                        
+
 
                     } catch (error) {
 
@@ -174,10 +163,10 @@ const cartReducer = createSlice({
                 add()
 
             } else {
-              
+
                 state.Cart[index].QuantityProduct += QuantityProduct;
 
-             
+
                 const add = async () => {
                     try {
 
@@ -196,9 +185,9 @@ const cartReducer = createSlice({
 
             }
 
-           
+
         },
-       
+
 
 
         ClearCart: (state, action) => {
@@ -206,21 +195,27 @@ const cartReducer = createSlice({
                 state.ListSpthanhtoan = []
                 state.Cart = [];
 
-            
+
             }
 
 
         },
 
-       
+
 
         AddSpthanhtoan: (state, action) => {
             const newProduct = action.payload;
 
 
             if (Array.isArray(state.ListSpthanhtoan)) {
+                
+                const isProductExists = state.ListSpthanhtoan.some(item => item.id === newProduct.id); // Thay newProduct.id bằng id của sản phẩm
 
-                state.ListSpthanhtoan.push(newProduct);
+                if (!isProductExists) {
+                    state.ListSpthanhtoan.push(newProduct);
+                } else {
+                    console.warn("Sản phẩm đã tồn tại trong danh sách thanh toán.");
+                }
             } else {
                 console.error("ListSpthanhtoan is not an array");
             }
@@ -228,45 +223,64 @@ const cartReducer = createSlice({
 
 
         DeleteSpthanhtoan: (state, action) => {
-            const sp = action.payload;
-            console.log("spne",sp);
+            const productToDelete = action.payload; // Đối tượng sản phẩm cần xóa
+    const idSanPham = productToDelete.id;   // Lấy id từ đối tượng sản phẩm
+            console.log('sad',idSanPham)
+    if (Array.isArray(state.ListSpthanhtoan)) {
+        // Tìm index của sản phẩm trong ListSpthanhtoan dựa trên id
+        const index = state.ListSpthanhtoan.findIndex(item => item.id === idSanPham);
 
-            // Kiểm tra xem ListSpthanhtoan có phải là một mảng trước khi tìm chỉ mục
-            if (Array.isArray(state.ListSpthanhtoan)) {
-                const index = state.ListSpthanhtoan.findIndex(s => s.sanpham.san_phamId === sp.sanpham.san_phamId);
-                console.log("index ne",index)
-                // Nếu tìm thấy (index != -1), xóa sản phẩm khỏi danh sách
-                if (index !== -1) {
-                    state.ListSpthanhtoan.splice(index, 1);
-                } else {
-                    console.error("Item not found in ListSpthanhtoan");
-                }
+        if (index !== -1) {
+            
+            state.ListSpthanhtoan.splice(index, 1);
+            console.log(`Sản phẩm với id ${idSanPham} đã được xóa.`);
+        } else {
+            console.error("Không tìm thấy sản phẩm với id:", idSanPham);
+        }
+    } else {
+        console.error("ListSpthanhtoan is not an array");
+    }
 
-            } else {
-                console.error("ListSpthanhtoan is not an array");
-            }
+           
+            
         },
         Clear: (state, action) => {
             state.ListSpthanhtoan = []
         },
         IncreaseSpthanhtoan: (state, action) => {
-            const { quantity, productId } = action.payload;
-            const index = state.ListSpthanhtoan.findIndex(p => p.sanpham.san_phamId == productId.sanpham.san_phamId);
-
-            state.ListSpthanhtoan[index].so_luong += quantity
-        },
+          
+            const { quantity, productId } = action.payload; // Sử dụng sanPham từ payload
+            console.log('sd',quantity)
+            console.log('sd',productId)
+             const index = state.ListSpthanhtoan.findIndex(p => p.sanPham.san_phamId === productId.sanPham.san_phamId);
+             
+             console.log('sd',index)
+            if (index !== -1) {
+              
+                state.ListSpthanhtoan[index].soLuong += quantity;
+            } 
+            },
+        
+        
         DecreaseSpthanhtoan: (state, action) => {
-            const { quantity, productId } = action.payload;
-            const index = state.ListSpthanhtoan.findIndex(p => p.sanpham.san_phamId == productId.sanpham.san_phamId);
-
-            if (state.ListSpthanhtoan[index].QuantityProduct === 1) {
-                return;
+            const { quantity, productId } = action.payload; 
+            
+             const index = state.ListSpthanhtoan.findIndex(p => p.sanPham.san_phamId === productId.sanPham.san_phamId);
+            
+            if (index !== -1 && state.ListSpthanhtoan[index].soLuong > 1) {
+               
+                state.ListSpthanhtoan[index].soLuong -= quantity;
             }
-            state.ListSpthanhtoan[index].so_luong -= quantity
         },
+        
         RemoveSpthanhtoan: (state, action) => {
-
-            const index = state.ListSpthanhtoan.findIndex(p => p.san_phamId == action.payload);
+            const sanPhamId = action.payload; 
+            const index = state.ListSpthanhtoan.findIndex(p => p.sanPham.san_phamId === sanPhamId);
+        
+            if (index !== -1) {
+                // Xóa sản phẩm khỏi danh sách nếu tìm thấy
+                state.ListSpthanhtoan.splice(index, 1);
+            }
         },
 
         Thanhtoan: (state, action) => {
@@ -276,41 +290,42 @@ const cartReducer = createSlice({
 
     }, extraReducers: (builder) => {
         builder
-            .addCase(decreaseItem.fulfilled, (state, action) => {
-                // Kiểm tra nếu action.payload có tồn tại
-                if (!action.payload) return;
-    
-                const { action: decreaseAction, data, index } = action.payload; // Lấy action, data và index từ payload
-                if (decreaseAction === 'remove') {
-                    state.ListSpthanhtoan.splice(index, 1);
-                    state.CartDatabase = data; // Xóa sản phẩm khỏi danh sách thanh toán
-                } else if (decreaseAction === 'decrease') {
-                    state.CartDatabase = data;
+        .addCase(decreaseItem.fulfilled, (state, action) => {
+            if (!action.payload) return;
+
+            const { action: decreaseAction, data, index } = action.payload;
+            if (decreaseAction === 'remove') {
+                if (index !== -1) {
+                    console.log('ádsadsa',index)
+                    state.ListSpthanhtoan.splice(index, 1); // Xóa sản phẩm khỏi danh sách thanh toán
                 }
-            })
-            .addCase(decreaseItem.rejected, (state, action) => {
-                console.error("Thao tác bị từ chối:", action.error); // Đã hủy xóa sản phẩm
-            })
+                state.CartDatabase = data; // Cập nhật CartDatabase sau khi xóa
+            } else if (decreaseAction === 'decrease') {
+                state.CartDatabase = data;
+            }
+        })
+        .addCase(decreaseItem.rejected, (state, action) => {
+            console.error("Thao tác bị từ chối:", action.error);
+        })
             .addCase(increaseItem.fulfilled, (state, action) => {
                 state.CartDatabase = action.payload; // Cập nhật CartDatabase từ phản hồi API
-                
+
             })
             .addCase(removeItem.fulfilled, (state, action) => {
-                const { action: removeAction, data,id } = action.payload; // Lấy action và dữ liệu từ payload
+                const { action: removeAction, data, idsp,index } = action.payload; // Lấy action và dữ liệu từ payload
                 if (removeAction === 'remove') {
+                    state.ListSpthanhtoan.splice(index,1)
                     state.CartDatabase = data; // Cập nhật CartDatabase với dữ liệu mới từ server
                     // Xóa sản phẩm khỏi danh sách thanh toán
-                    const index = state.Cart.findIndex(p => p.san_phamId == id)
-                    state.Cart.splice(index,1)
-                    state.ListSpthanhtoan = state.ListSpthanhtoan.filter(item => item.id !== action.meta.arg.idcart); 
+                  
                 }
             })
             .addCase(removeItem.rejected, (state, action) => {
-                console.error(action.payload); 
+                console.error(action.payload);
             })
             .addCase(addItemToCart.fulfilled, (state, action) => {
                 const { item, isNew, data } = action.payload;
-    
+
                 if (isNew) {
                     state.CartDatabase = data;
                     toast.success('Thêm sản phẩm vào giỏ hàng thành công!');
@@ -320,27 +335,27 @@ const cartReducer = createSlice({
                     if (index !== -1) {
                         state.Cart[index].QuantityProduct += item.QuantityProduct;
                         toast.success('Thêm sản phẩm vào giỏ hàng thành công!');
-                        
+
                     }
                 }
-    
-              
+
+
             })
             .addCase(addItemToCart.rejected, (state, action) => {
                 console.error(action.error.message);
                 toast.error('Lỗi khi thêm sản phẩm vào giỏ hàng');
-            }).addCase(clearItem.fulfilled, (state,action)=>{
+            }).addCase(clearItem.fulfilled, (state, action) => {
                 const { action: clearAction, data } = action.payload; // Lấy action và dữ liệu từ payload
                 if (clearAction === 'clear') {
-                    state.CartDatabase = data; 
-                   state.Cart = []
+                    state.CartDatabase = data;
+                    state.Cart = []
                     state.ListSpthanhtoan = []
                 }
             }).addCase(clearItem.rejected, (state, action) => {
                 console.error(action.error.message);
             })
     }
-    
+
 
 
 });
@@ -351,8 +366,13 @@ export default cartReducer.reducer
 
 export const CallAPI_Cart = (userID) => {
     return async (dispatch) => {
-        const res = await axios({ url: `http://localhost:8080/GETcart/${userID}`, method: 'GET' })
-        dispatch(ListAllCartByid(res.data));
+        try {
+            const res = await axios({ url: `http://localhost:8080/GETcart/${userID}`, method: 'GET' })
+
+            dispatch(ListAllCartByid(res.data));
+        } catch (error) {
+
+        }
     }
 }
 

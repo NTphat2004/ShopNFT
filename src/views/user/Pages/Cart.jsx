@@ -11,11 +11,12 @@ import axios from "axios";
 
 function Cart() {
     const userId = localStorage.getItem('account_id');
+    const ListCart = useSelector(state => state.cart.CartDatabase);
     const addressCurent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
     const [change, setchange] = useState(0)
     const [showPopup, setShowPopup] = useState(false);
     const [checkedAll, setCheckedAll] = useState(false);
-    const [checkedItems, setCheckedItems] = React.useState([false, false]);
+    const [checkedItems, setCheckedItems] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
@@ -60,25 +61,31 @@ function Cart() {
         setIsModalVoucherOpen(false);
     };
 
+    useEffect(() => {
+        if (checkedItems.length !== ListCart.gioHangChiTiet?.length) {
+            setCheckedItems(new Array(ListCart.gioHangChiTiet?.length).fill(false));
+            setCheckedAll(false); // Reset lại checkedAll khi số lượng sản phẩm thay đổi
+        }
+    }, [ListCart.gioHangChiTiet]);
+
 
     const handleCheckItemChange = (index, cart) => (e) => {
         const newCheckedItems = [...checkedItems];
-        newCheckedItems[index] = e.target.checked;
+        newCheckedItems[index] = e.target.checked; // Cập nhật checkbox của item
         setCheckedItems(newCheckedItems);
 
+        // Kiểm tra xem tất cả checkbox có được chọn không
+        const allChecked = newCheckedItems.every(item => item === true);
+        setCheckedAll(allChecked); 
 
-        setCheckedAll(newCheckedItems.every((item) => item));
-        if (e.target.checked) {
-            const api = AddSpthanhtoan(cart);
-            dispatch(api)
-
-        }
-        else {
-            const api = DeleteSpthanhtoan(cart);
-            dispatch(api)
-
-
-        }
+    // Dispatch action tương ứng
+    if (e.target.checked) {
+        const api = AddSpthanhtoan(cart);
+        dispatch(api);
+    } else {
+        const api = DeleteSpthanhtoan(cart);
+        dispatch(api);
+    }
     };
 
     const handleSubmitADDFORM = async (e) => {
@@ -111,14 +118,15 @@ function Cart() {
 
 
 
-    const ListCart = useSelector(state => state.cart.CartDatabase);
+    
     const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan) || [];
+
 
     const totalAmount = Array.isArray(ListSPChecked)
         ? ListSPChecked.reduce((total, Spthanhtoan) => {
 
-            const price = Spthanhtoan.sanpham.gia_km > 0 ? Spthanhtoan.sanpham.gia_km : Spthanhtoan.sanpham.gia_goc;
-            return total + (Spthanhtoan.so_luong * price);
+            const price = Spthanhtoan.sanPham.gia_km > 0 ? Spthanhtoan.sanPham.gia_km : Spthanhtoan.sanPham.gia_goc;
+            return total + (Spthanhtoan.soLuong * price);
         }, 0)
         : 0;
 
@@ -129,47 +137,29 @@ function Cart() {
 
     const handleCheckAllChange = (e) => {
         const isChecked = e.target.checked;
-        const newCheckedItems = ListCart.map((cart, index) => {
+    setCheckedAll(isChecked);
 
-            return cart.sanpham.so_luong > 0 ? isChecked : checkedItems[index];
-        });
-        setCheckedItems(newCheckedItems);
+   
+    const newCheckedItems = ListCart.gioHangChiTiet.map(cart => cart.sanPham.so_luong > 0 ? isChecked : false);
+    setCheckedItems(newCheckedItems);
 
-        setCheckedAll(newCheckedItems.every((item, index) => ListCart[index].sanpham.so_luong > 0 ? item : true));
-
-
-        newCheckedItems.forEach((checked, index) => {
-            if (checked && ListCart[index].sanpham.so_luong > 0) {
-                dispatch(AddSpthanhtoan(ListCart[index]));
-            } else if (!checked && ListCart[index].sanpham.so_luong > 0) {
-                dispatch(DeleteSpthanhtoan(ListCart[index]));
+    if (isChecked) {
+      
+        ListCart.gioHangChiTiet.forEach(cart => {
+            if (cart.sanPham.so_luong > 0) {
+                const api = AddSpthanhtoan(cart);
+                dispatch(api);
             }
         });
-
-
-        // const isChecked = e.target.checked;
-        // setCheckedAll(isChecked);
-        // setCheckedItems(Array(ListCart.length).fill(isChecked));
-
-        // if (isChecked) {
-        //     // Nếu tất cả được chọn, dispatch action cho tất cả sản phẩm
-        //     ListCart.forEach(cart => {
-        //         const api = AddSpthanhtoan(cart);
-        //         dispatch(api);
-
-        //     });
-
-        // } else {
-        //     // Nếu không có sản phẩm nào được chọn, dispatch action xóa cho tất cả
-        //     ListCart.forEach(cart => {
-        //         const api = DeleteSpthanhtoan(cart);
-        //         dispatch(api);
-
-        //     });
-        // }
-
-
-
+    } else {
+       
+        ListCart.gioHangChiTiet.forEach(cart => {
+            if (cart.sanPham.so_luong > 0) {
+                const api = DeleteSpthanhtoan(cart);
+                dispatch(api);
+            }
+        });
+    }
     };
 
     const InformationUser = async () => {
@@ -188,14 +178,14 @@ function Cart() {
 
 
     }
-
+   
 
 
 
     useEffect(() => {
         console.log('cart run')
         InformationUser()
-        setCheckedItems(Array(ListCart.length).fill(false));
+       
         dispatch(CallAPI_Cart(userId))
         const handleClickOutside = (event) => {
             if (!event.target.closest('.search-container') || !event.target.closest('.popup')) {
@@ -322,7 +312,7 @@ function Cart() {
             <div className="col-12 mx-auto sanphamvakhuyenmai d-flex justify-content-between">
                 <div className="sanpham col-7">
                     <div className="tieudesanpham col-12">
-                        <p>Tất cả sản phẩm ({ListCart.length})</p>
+                        <p>Tất cả sản phẩm ({ListCart?.gioHangChiTiet?.length})</p>
                     </div>
                     <div className="navsanpham col-12">
                         <div className="navsanphamnd">
@@ -339,8 +329,8 @@ function Cart() {
                         </div>
                     </div>
 
-                    {ListCart.map((cart, index) => {
-                        return <div className={`col-12 cardgiohang d-flex align-items-start ${cart.sanpham.so_luong == 0 ? 'disabled-div' : ''}  `} key={index}>
+                    {ListCart?.gioHangChiTiet?.map((cart, index) => {
+                        return <div className={`col-12 cardgiohang d-flex align-items-start ${cart.sanPham?.so_luong == 0 ? 'disabled-div' : ''}  `} key={index}>
                             <Checkbox
                                 checked={checkedItems[index]}
                                 onChange={handleCheckItemChange(index, cart)}
@@ -349,53 +339,53 @@ function Cart() {
                             />
                             <div>
                                 <div className="d-flex position-relative">
-                                {cart.sanpham.so_luong === 0 && (
-        <div
-            style={{
-                position: 'absolute',
-                top: '0',
-                left: '40px',
-                width: '100%',
-                height: '100%',
-                color: 'red',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                zIndex: '1',
-            }}
-        >
-            Hết hàng
-            <button
-                className="btn btn-danger btn-interactive"
-                style={{
-                    position: 'absolute',
-                    top: '80%',
-                    left: '180px', 
-                    zIndex: '2', 
-                    transform: 'translateY(-50%)', 
-                    minWidth:'180px'
-                }}
-                onClick={() => {
-                    const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanpham.san_phamId });
-                    dispatch(remove);
-                }}
-            >
-                Xóa
-            </button>
-        </div>
-    )}
+                                    {cart.sanPham.so_luong === 0 && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                top: '0',
+                                                left: '40px',
+                                                width: '100%',
+                                                height: '100%',
+                                                color: 'red',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '18px',
+                                                fontWeight: 'bold',
+                                                zIndex: '1',
+                                            }}
+                                        >
+                                            Hết hàng
+                                            <button
+                                                className="btn btn-danger btn-interactive"
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '80%',
+                                                    left: '180px',
+                                                    zIndex: '2',
+                                                    transform: 'translateY(-50%)',
+                                                    minWidth: '180px'
+                                                }}
+                                                onClick={() => {
+                                                    const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanPham.san_phamId });
+                                                    dispatch(remove);
+                                                }}
+                                            >
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    )}
 
-                                    <NavLink to={`/product/detail/${cart.sanpham.san_phamId}`}><img width={150} height={150} src={`/images/${cart.sanpham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" /></NavLink>
+                                    <NavLink to={`/product/detail/${cart.sanPham?.san_phamId}`}><img width={150} height={150} src={`/images/${cart.sanPham?.hinhanh[0]?.ten_hinh}`} alt="Sản phẩm" /></NavLink>
 
-                                    <p className="text-center" style={{ width: '300px' }}>{cart.sanpham.ten_san_pham}</p>
+                                    <p className="text-center" style={{ width: '300px' }}>{cart.sanPham?.ten_san_pham}</p>
                                 </div>
 
                             </div>
 
                             <div className="chitietgiatien d-flex flex-column align-items-center justify-content-center">
-                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {(cart.sanpham.gia_km > 0 ? cart.so_luong * cart.sanpham.gia_km : cart.so_luong * cart.sanpham.gia_goc).toLocaleString()}     </p>
+                                <p style={{ fontSize: '20px', fontWeight: 'bolder' }}> {(cart.sanPham?.gia_km > 0 ? cart.soLuong * cart.sanPham?.gia_km : cart.soLuong * cart.sanPham?.gia_goc).toLocaleString()}     </p>
                                 <div className="d-flex align-items-center">
                                     <Button onClick={() => {
 
@@ -407,23 +397,23 @@ function Cart() {
                                             dispatch(increasesp)
                                         }
                                         const increase = decreaseItem({
-                                            quantity: cart.so_luong,
+                                            quantity: cart.soLuong,
                                             userId: userId,
-                                            productId: cart.sanpham.san_phamId,
-                                            idcart: cart.id
+                                            productId: cart.sanPham.san_phamId,
+                                            idsp: cart.sanPham.san_phamId,
                                         })
                                         dispatch(increase)
 
 
                                     }} type="default" size="small">-</Button>
-                                    <span style={{ margin: '0 10px' }}>{cart.so_luong}</span>
+                                    <span style={{ margin: '0 10px' }}>{cart.soLuong}</span>
                                     <Button onClick={() => {
-                                        if (cart.so_luong == cart.sanpham.so_luong) {
-                                            alert(`Trong shop còn ${cart.sanpham.so_luong} sản phẩm thêm ăn cc à`);
+                                        if (cart.soLuong == cart.sanPham.so_luong) {
+                                            alert(`Trong shop còn ${cart.sanPham.so_luong} sản phẩm thêm ăn cc à`);
                                             return;
                                         }
                                         const increase = increaseItem({
-                                            idcart: cart.id,
+                                            idsp: cart.sanPham.san_phamId,
                                             userId: userId
                                         })
 
@@ -444,10 +434,10 @@ function Cart() {
                                     }} type="default" size="small">+</Button>
 
                                 </div>
-                                <p style={{ color: '#777e90', margin: '0' }}>Tối đa {cart.sanpham.so_luong} sản phẩm </p>
+                                <p style={{ color: '#777e90', margin: '0' }}>Tối đa {cart.sanPham?.so_luong} sản phẩm </p>
                             </div>
                             <DeleteOutlined onClick={() => {
-                                const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanpham.san_phamId });
+                                const remove = removeItem({ userId, idsanpham: cart.sanPham.san_phamId });
                                 dispatch(remove);
 
                             }} style={{ paddingTop: '70px', paddingLeft: '65px' }} />
