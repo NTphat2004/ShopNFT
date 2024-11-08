@@ -37,6 +37,8 @@ import PagePost from './views/user/Pages/PagePost'
 import PostDetail from './views/user/Pages/PostDetail';
 import Voucher from './views/user/Pages/Voucher';
 import { ToastContainer } from 'react-toastify';
+import ResultPayment from './views/user/Pages/ResultPayment';
+import Listdonhang from './views/user/Pages/listdonhang';
 import 'react-toastify/dist/ReactToastify.css';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -70,6 +72,8 @@ root.render(
           <Route path='voucher' element={<Voucher></Voucher>}></Route>
           <Route path='Thanhtoan' element={<Thanhtoan></Thanhtoan>}></Route>
           <Route path='Sanphamyeuthich' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
+          <Route path='paymentreturn' element={<ResultPayment></ResultPayment>}></Route>
+          <Route path='donhang' element={<Listdonhang></Listdonhang>}></Route>
 
         </Route>
 
