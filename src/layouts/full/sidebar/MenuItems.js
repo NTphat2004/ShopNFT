@@ -44,6 +44,13 @@ const Menuitems = [
     roles: ["Admin"],
   },
   {
+    id: uniqueId(),
+    title: "Quản lý đơn hàng",
+    icon: IconLayoutDashboard,
+    href: "/donhang",
+    roles: ["Admin"],
+  },
+  {
     navlabel: true,
     subheader: "Utilities",
   },
@@ -53,6 +60,20 @@ const Menuitems = [
     icon: IconTypography,
     href: "/ui/typography",
     roles: ["User"],
+  },
+  {
+    id: uniqueId(),
+    title: "Quản lý nhập hàng",
+    icon: IconTypography,
+    href: "/nhaphang",
+    roles: ["Nhân viên kho", "Admin"],
+  },
+  {
+    id: uniqueId(),
+    title: "Quản lý đánh giá",
+    icon: IconTypography,
+    href: "/danhgia",
+    roles: ["Nhân viên kho", "Admin"],
   },
   {
     id: uniqueId(),

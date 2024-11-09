@@ -100,7 +100,7 @@ const columns = [
   },
 ];
 
-const Kho = () => {
+const NhapHang = () => {
   const [khoData, setKhoData] = useState([]);
   const [sanPhamId, setSanPhamId] = useState("");
   const [selectedKho, setSelectedKho] = useState({
@@ -115,6 +115,11 @@ const Kho = () => {
     khoNewData = {
       san_phamId: sanPhamId,
       ten_san_pham: document.getElementById("ten_san_pham").value,
+      chieu_cao: document.getElementById("chieu_cao").value,
+      chieu_dai: document.getElementById("chieu_dai").value,
+      chieu_rong: document.getElementById("chieu_rong").value,
+      khoi_luong: document.getElementById("khoi_luong").value,
+      gia_goc: document.getElementById("gia_goc").value,
       so_luong: parseInt(document.getElementById("so_luong").value) || 0,
       ngay_tao: getCurrentDate(),
     };
@@ -141,7 +146,6 @@ const Kho = () => {
       console.error("Lỗi khi lấy mã sản phẩm mới:", error);
     }
   };
-
   useEffect(() => {
     const fetchKhoData = async () => {
       try {
@@ -179,23 +183,17 @@ const Kho = () => {
       const khoChung = KhoInput();
       console.log("Kho chung:", khoChung);
       const response = await axios.post(
-        "http://localhost:8080/api/kho/addSanPham",
+        "http://localhost:8080/api/nhaphang/addSanPham",
         khoChung,
         {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded", // Đảm bảo thiết lập đúng Content-Type
+            "Content-Type": "application/json", // Đảm bảo thiết lập đúng Content-Type
           },
         }
       );
       console.log("Sản phẩm đã được thêm:", response.data);
       setKhoData((prevKhoData) => [...prevKhoData, response.data]);
       fetchNewProductId(); // Lấy mã sản phẩm mới
-      setSelectedKho({
-        san_phamId: "",
-        ten_san_pham: "",
-        ngay_tao: getCurrentDate(),
-        so_luong: 0,
-      }); // Reset form
     } catch (error) {
       console.error(
         "Lỗi khi thêm sản phẩm:",
@@ -316,8 +314,8 @@ const Kho = () => {
                   <label htmlFor="createDate">Giá bán ra</label>
                   <input
                     type="number"
-                    id="chieu_cao"
-                    name="chieu_cao"
+                    id="gia_goc"
+                    name="gia_goc"
                     className="form-control"
                     value={selectedKho.gia_goc}
                     onChange={handleChange}
@@ -409,7 +407,7 @@ const Kho = () => {
           ),
         },
         {
-          label: `Hàng tồn kho`,
+          label: `Nhật ký hoạt động`,
           key: "3",
           children: (
             <div className="tab-content">
@@ -422,36 +420,8 @@ const Kho = () => {
             </div>
           ),
         },
-        {
-          label: `Cần nhập hàng`,
-          key: "4",
-          children: (
-            <div className="tab-content">
-              <h1>Cần nhập hàng</h1>
-              <Table
-                dataSource={khoData}
-                columns={columns}
-                pagination={false}
-              />
-            </div>
-          ),
-        },
-        {
-          label: `Sản phẩm không còn bán nữa`,
-          key: "5",
-          children: (
-            <div className="tab-content">
-              <h1>Sản phẩm không còn bán nữa</h1>
-              <Table
-                dataSource={khoData}
-                columns={columns}
-                pagination={false}
-              />
-            </div>
-          ),
-        },
       ]}
     />
   );
 };
-export default Kho;
+export default NhapHang;

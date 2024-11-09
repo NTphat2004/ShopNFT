@@ -5,10 +5,13 @@ import Newlogin1 from "../views/quanly/Newlogin1";
 import Thongtincanhan from "../views/quanly/Thongtincanhan";
 import Voucher from "../views/quanly/QuanlyVoucher";
 import Sanpham from "../views/quanly/QuanlySP";
-import Kho from "../views/quanly/Quanlykho";
 import UserForm from "../views/quanly/Usermanagement";
 import Thuonghieu from "../views/quanly/ThuongHieu";
 import Naptien from "../views/quanly/Naptien";
+import QuanLyDonHang from "../views/quanly/QuanLyDonHang";
+import NhapHang from "../views/quanly/QuanLyNhapHang";
+import Kho from "../views/quanly/QuanLyKho";
+import DanhGia from "../views/quanly/QuanLyDanhGia";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -41,8 +44,11 @@ const Router = [
       { path: "dashboard", element: <Thongtincanhan /> },
       { path: "thongke", element: <Dashboard /> },
       { path: "voucher", element: <Voucher /> },
+      { path: "nhaphang", element: <NhapHang /> },
       { path: "kho", element: <Kho /> },
+      { path: "danhgia", element: <DanhGia /> },
       { path: "sanpham", element: <Sanpham /> },
+      { path: "donhang", element: <QuanLyDonHang /> },
       { path: "nguoidung", element: <UserForm /> },
       { path: "thuonghieu", element: <Thuonghieu /> },
       { path: "sample-page", element: <SamplePage /> },

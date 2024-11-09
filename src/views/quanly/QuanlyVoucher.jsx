@@ -154,11 +154,11 @@ const Voucher = () => {
 
     setFileList(initialFileList);
     if (voucher.hoat_dong === "Hoạt động") {
-      setIsDisabled(false);
+      setIsDisabled(true);
       setIsAddDisabled(true);
       setIsDeleteDisabled(true);
     } else {
-      setIsDisabled(true);
+      setIsDisabled(false);
       setIsAddDisabled(true);
       setIsDeleteDisabled(false);
     }
