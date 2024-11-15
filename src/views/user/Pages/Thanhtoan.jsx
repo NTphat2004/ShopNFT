@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { Select } from 'antd';
 import { DeleteOutlined, EditOutlined, CreditCardOutlined, WalletOutlined } from '@ant-design/icons';
 import axios from "axios";
@@ -12,6 +12,7 @@ let shipfee = localStorage.getItem('shippingfee');
 let total = localStorage.getItem('totalamount');
 let totalafterdiscount = localStorage.getItem('total_after');
 let discount = localStorage.getItem('discount');
+
 
 
 const AddressCurrent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
@@ -49,6 +50,7 @@ const labelRender = (props) => {
         </span>);
 };
 function Thanhtoan() {
+    const [donhangid, setdonhangid] = useState('');
     const [token, settoken] = useState("");
     const [leadtime, setleadtime] = useState(0);
     const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan2) || [];
@@ -141,14 +143,14 @@ function Thanhtoan() {
 
     const apipayment = async (id) => {
         console.log('run save');
-        console.log(method);
+        console.log("method :", method);
         const res = await axios({
             url: `http://localhost:8080/createpayment?userid=${userId}&spid=${product_id_params}&quantity=${product_quantity_params}&total=${parseInt(totalAmount) + parseInt(shipfee)}&method=${method}&paypalid=${id}`, method: 'POST',
             headers: {
                 "Content-Type": "application/json"
             }, data: {
                 'don_hangid': null,
-                'trang_thai': method === "1" ? "chờ xử lí" : "chờ thanh toán",
+                'trang_thai': method == "1" ? "Nhận đơn" : "chờ thanh toán",
                 'ngay_tao': new Date(),
                 'thoi_gianXN': null,
                 'dia_chi': AddressCurrent.dia_chi,
@@ -156,7 +158,7 @@ function Thanhtoan() {
                 'ghi_chu': null,
                 'phi_ship': shipfee,
                 'tong_tien': parseInt(totalAmount) + parseInt(shipfee),
-                'thoi_gian_du_kien': leadtime,
+                'thoi_gian_du_kien': leadtime.toString(),
                 'users': {
                     'accountID': AddressCurrent.users.accountID,
                 },
@@ -164,11 +166,12 @@ function Thanhtoan() {
                     'dia_chiID': AddressCurrent.dia_chiID
                 },
                 'phuongthuctt': {
-                    'phuong_thucTTID': method === '1' ? "ptt01" : "ptt02"
+                    'phuong_thucTTID': method == '1' ? "ptt01" : "ptt02"
                 }
             }
         });
-        console.log(res.data);
+        console.log("Response tao don hang: ", res.data);
+        setdonhangid(res.data.don_hangid);
     }
 
 
@@ -269,7 +272,6 @@ function Thanhtoan() {
         apipayment(res.data.id);
         console.log('paypal', res.data.links.find(link => link.rel === "approve").href);
         if (method === "2") {
-
             console.log('run paypal');
             window.open(res.data.links.find(link => link.rel === "approve").href, "_blank");
             localStorage.setItem('paypal_order_id', res.data.id);
@@ -282,7 +284,9 @@ function Thanhtoan() {
 
 
 
+    useEffect(() => {
 
+    }, [donhangid]);
 
 
     useEffect(() => {
@@ -487,7 +491,11 @@ function Thanhtoan() {
                                             <div className='h2'>Đặt hàng thành công</div>
                                         </div>
                                         <div className="modal-footer text-center    ">
-                                            <button ref={btn3} onClick={btn3click} type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button ref={btn3} type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                                                <Link to={`/lịch-sử-đặt-hàng/`} >
+                                                    Xem Chi Tiết
+                                                </Link>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

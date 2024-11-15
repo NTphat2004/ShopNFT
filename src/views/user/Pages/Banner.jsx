@@ -26,6 +26,7 @@ const Banner = () => {
     const ListAllBanner = async()=>{
       const res = await axios({url:'http://localhost:8080/FindAllBanner',method:'GET'})
       const api = ListAll(res.data);
+      console.log("banner",res.data)
       dispatch(api);
     }
 
@@ -51,7 +52,7 @@ const Banner = () => {
         >
          {ListBanner.map((banner,index)=>{
         
-          return  <SwiperSlide key={index}><img src={`/images/${banner.hinh_anh}`} onClick={()=>{navigate(`/product/danhmuc/${banner.danhmuc[0].danh_mucId}`) }} className=' img-fluid' alt="Slide 1" /></SwiperSlide>
+          return  <SwiperSlide key={index}><img src={`/images/${banner.hinh_anh}`} onClick={()=>{navigate(`/product/banner/${banner.bannerId}`) }} className=' img-fluid' alt="Slide 1" /></SwiperSlide>
 
 
 

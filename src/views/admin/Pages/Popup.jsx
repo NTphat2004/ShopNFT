@@ -10,17 +10,17 @@ const Popup = () => {
   const IconImage = useSelector(state => state.popup.IconImage)
   const dispatch = useDispatch();
   const handleClickOutside = (event) => {
-   
+
     const card = document.getElementById('popupCard');
-    
+
     if (card && !card.contains(event.target)) {
-          const popupStatus = StatusPopup('none');
-          dispatch(popupStatus)
+      const popupStatus = StatusPopup('none');
+      dispatch(popupStatus)
     }
   };
 
   useEffect(() => {
-   
+
     document.addEventListener('click', handleClickOutside);
 
     return () => {
@@ -29,20 +29,20 @@ const Popup = () => {
 
   }, []);
   return (
-    <div className="card position-fixed  translate-middle " id="popupCard"  style={{ zIndex: 1050 ,minWidth:300,minHeight:300,display:statusPopup,top: '40%', left: '50%',border: `2px solid ${BorderColor}`}}>
-  <div  className="card-body d-flex flex-column justify-content-center align-items-center" style={{minHeight:250}} >
-    
-    
-
-     <img src={`/images/${IconImage}`} alt='' />
+    <div className="card position-fixed  translate-middle " id="popupCard" style={{ zIndex: 1050, minWidth: 300, minHeight: 300, display: statusPopup, top: '40%', left: '50%', border: `2px solid ${BorderColor}` }}>
+      <div className="card-body d-flex flex-column justify-content-center align-items-center" style={{ minHeight: 250 }} >
 
 
-     <p className='mt-3 fw-bold fs-3' >{ContentPopup}</p>
 
-    
-    
-  </div>
-</div>
+        <img src={`/images/${IconImage}`} alt='' />
+
+
+        <p className='mt-3 fw-bold fs-3' >{ContentPopup}</p>
+
+
+
+      </div>
+    </div>
 
   )
 }

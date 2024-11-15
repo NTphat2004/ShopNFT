@@ -1,6 +1,19 @@
-import React, { useState } from 'react'
-import { Table } from 'antd';
+import React, { useEffect, useState } from 'react'
+import { Table, Space } from 'antd';
 import { Editor } from '@tinymce/tinymce-react';
+import axios from 'axios';
+import { render } from '@testing-library/react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import ListItemText from '@mui/material/ListItemText';
+import Select from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
+import ColumnGroup from 'antd/es/table/ColumnGroup';
+
 // Popup
 // PopupID (PK)
 // Ten_san_pham
@@ -11,229 +24,609 @@ import { Editor } from '@tinymce/tinymce-react';
 // Thoi_gian_KT
 // San_phamID (FK)
 // AccountID (FK)
-const columns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Age',
-      dataIndex: 'age',
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-    },
-  ];
-  const dataSource = Array.from({
-    length: 46,
-  }).map((_, i) => ({
-    key: i,
-    name: `Edward King ${i}`,
-    age: 32,
-    address: `London, Park Lane no. ${i}`,
-  }));
+
+
+
+
+
+
 const CrudPOPUP = () => {
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const onSelectChange = (newSelectedRowKeys) => {
-      console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-      setSelectedRowKeys(newSelectedRowKeys);
-    };
-    const rowSelection = {
-      selectedRowKeys,
-      onChange: onSelectChange,
-      selections: [
-        Table.SELECTION_ALL,
-        Table.SELECTION_INVERT,
-        Table.SELECTION_NONE,
-        {
-          key: 'odd',
-          text: 'Select Odd Row',
-          onSelect: (changeableRowKeys) => {
-            let newSelectedRowKeys = [];
-            newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-              if (index % 2 !== 0) {
-                return false;
-              }
-              return true;
-            });
-            setSelectedRowKeys(newSelectedRowKeys);
-          },
+  const userId = localStorage.getItem('account_id');
+  const [createorupdate, setcreateorupdate] = useState(false);
+  const [product_discount, setproduct_discount] = useState([]);
+  const [product_discount2, setproduct_discount2] = useState([]);
+  const [selected, setSelected] = useState(false);
+  const [change, setchange] = useState(0);
+  let listtemp = [];
+  let newid = '';
+  const getnewestid = async () => {
+    const res = await axios({
+      url: 'http://localhost:8080/getnewestID',
+      headers: { 'Content-type': 'application/json' },
+    })
+    newid = res.data;
+    formik.setFieldValue('popupID', newid);
+  }
+
+  const formik = useFormik({
+    initialValues: {
+      popupID: '',
+      han_su_dung: '',
+      ngay_tao: '',
+      hoat_dong: 'Đang hoạt động',
+      users: userId,
+      sanpham: '',
+    }, validationSchema: Yup.object({
+      han_su_dung: Yup.string().required('Hãy Nhập Chọn Banner'),
+      ngay_tao: Yup.date().required('Hãy Nhập Ngày Tạo'),
+      sanpham: Yup.array().required('Hãy Nhập Chọn Chọn ảnh')
+    }),
+    onSubmit: values => {
+      alert(JSON.stringify(values));
+      if (createorupdate) {
+        alert('cap nhat');
+        api(values);
+      } else {
+        alert('them');
+        api(values);
+      }
+    }
+  });
+
+
+  const api = async (values) => {
+    console.log('value', values);
+    const res = await axios({
+      url: 'http://localhost:8080/createnewPopup',
+      method: 'POST',
+      data: {
+        'popupID': values.popupID,
+        'ngay_tao': values.ngay_tao,
+        'han_su_dung': values.han_su_dung,
+        'trang_thai_xoa': values.trang_thai_xoa,
+        'hoat_dong': values.hoat_dong,
+        'users': {
+          'accountID': values.users
         },
-        {
-          key: 'even',
-          text: 'Select Even Row',
-          onSelect: (changeableRowKeys) => {
-            let newSelectedRowKeys = [];
-            newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-              if (index % 2 !== 0) {
-                return true;
-              }
-              return false;
-            });
-            setSelectedRowKeys(newSelectedRowKeys);
-          },
-        },
-      ],
-    };
-    return (
-      <div className='container'>
-  
+        'sanpham': personName.map((item) => ({ 'san_phamId': item }))
+      },
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log(res.data);
+  }
+
+  const [tabledata, settabledata] = useState([]);
+
+
+  const deletepopup = async (id) => {
+    const res = await axios({
+      url: 'http://localhost:8080/changeStatus',
+      method: 'POST',
+      data: {
+        'popupID': id.popupID
+      },
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log(res.data);
+  }
+
+  const getdeletedrecord = async () => {
+    const res = await axios({
+      url: 'http://localhost:8080/getallpopuphasdeletedstatus',
+      headers: { 'Content-type': 'application/json' },
+    })
+    const formattedData = res.data.map((item, index) => ({
+      key: index,
+      popupID: item.popupID,
+      hansudung: item.han_su_dung,
+      hanhdong: item.hanh_dong,
+      hoatdong: item.hoat_dong,
+      ngaytao: item.ngay_tao,
+      trangthaixoa: item?.trang_thai_xoa,
+      accountid: item?.users?.accountID,
+      sanpham: item?.sanpham
+    }));
+    settabledata(formattedData);
+  }
+
+  const columns = [
+    {
+      title: 'PopupID',
+      dataIndex: 'popupID',
+      key: 'popupID',
+    },
+    {
+      title: 'Hạn sử dụng',
+      dataIndex: 'hansudung',
+      key: 'hansudung',
+    },
+    {
+      title: 'Hành động',
+      dataIndex: 'hanhdong',
+      key: 'hanhdong',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'ngaytao',
+      key: 'ngaytao',
+    },
+    {
+
+      dataIndex: 'trangthaixoa',
+      key: 'trangthaixoa',
+    },
+    {
+      title: 'AccountID',
+      dataIndex: 'accountid',
+      key: 'accountid',
+    },
+    {
+      title: 'Nút',
+      key: 'nut',
+      render: (_, record) => (
         <div>
-          <ul className="nav nav-pills nav-fill" id="myTab" role="tablist">
-            <li className="nav-item" role="presentation">
-              <button className="nav-link active fw-bold" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH</button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">BIỂU MẨU</button>
-            </li>
-          </ul>
-          {/* Tab content */}
-          <div className="tab-content mt-3" id="myTabContent">
-            {/* Table content */}
-            <div className="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab">
-              <h3>QUẢN LÍ POPUP</h3>
-              <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
-               
-            </div>
-            {/* Form content */}
-            <div className="tab-pane fade" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab">
-              <form className="row mt-5">
-               
-  
-  
-                <div className="col-md-6 my-2">
-  
-                  <div className="form-floating mb-3">
-                    <input type="pasword" className="form-control" id="floatingPassword" placeholder="Password" />
-                    <label htmlFor="floatingPassword" className='text-primary fw-bold'>POPUP ID</label>
-                  </div>
-  
-                  <select className="form-select form-select mb-4 text-primary fw-bold" aria-label="Large select example">
-                    <option selected >CHỌN BANNER ID</option>
-                    <option value={1}>One</option>
-                    <option value={2}>Two</option>
-                    <option value={3}>Three</option>
-                  </select>
-  
-  
-                  <Editor
-                    apiKey='cdl7m07e6o2g3q2jko7q8ompxq0yenyd414zt85qbpdonj4i' // Sử dụng API key của bạn
-  
-                    init={{
-                      height: 300,
-                      width: '100%',
-  
-                      menubar: false,
-                      plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        // Bỏ bớt các plugin không cần thiết để kiểm tra
-                        'insertdatetime media table paste help',
-                      ],
-                      toolbar:
-                        'undo redo | formatselect | bold italic forecolor backcolor | ' +
-                        'alignleft aligncenter alignright alignjustify | ' +
-                        'bullist numlist outdent indent | removeformat | help',
-                      content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+          <button className='btn btn-danger me-2' onClick={() => {
+
+            deletepopup(record); getData()
+          }} >Xóa</button>
+
+          <button className='btn btn-danger' onClick={() => {
+            formik.setValues(
+              {
+                popupID: record.popupID,
+                han_su_dung: record.hansudung,
+                ngay_tao: record.ngaytao,
+                hoat_dong: record.hoatdong,
+                trang_thai_xoa: record.trangthaixoa,
+                users: record.accountid,
+                sanpham: record.sanpham
+              }
+            );
+
+            let product = [];
+            listtemp = [...product_discount];
+
+            for (let i = 0; i < record.sanpham.length; i++) {
+              listtemp.push(record.sanpham[i]);
+              product.push(
+                record.sanpham[i].san_phamId
+              )
+            }
+
+
+            console.log('listtemp', listtemp);
+            console.log('option', options);
+            console.log('product_discount', product_discount);
+            setPersonName(product);
+            setSelected(true);
+            setproduct_discount2(listtemp);
+            const tab2 = document.querySelector("#form-tab")
+            tab2.click();
+          }} >Edit</button>
+        </div>
+      )
+    },
+
+  ];
+
+  const columns2 = [
+    {
+      title: 'PopupID',
+      dataIndex: 'popupID',
+      key: 'popupID',
+    },
+    {
+      title: 'Hạn sử dụng',
+      dataIndex: 'hansudung',
+      key: 'hansudung',
+    },
+    {
+      title: 'Hành động',
+      dataIndex: 'hanhdong',
+      key: 'hanhdong',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'ngaytao',
+      key: 'ngaytao',
+    },
+    {
+
+      dataIndex: 'trangthaixoa',
+      key: 'trangthaixoa',
+    },
+    {
+      title: 'AccountID',
+      dataIndex: 'accountid',
+      key: 'accountid',
+    },
+    {
+      title: 'Nút',
+      key: 'nut',
+      render: (_, record) => (
+        <div>
+          <button className='btn btn-danger me-2' onClick={() => { undodelete(record); setchange(change+1);
+          
+           }}>Khôi phục</button>
+          {/* 
+          <button className='btn btn-danger' onClick={() => {
+            formik.setValues(
+              {
+                popupID: record.popupID,
+                han_su_dung: record.hansudung,
+                ngay_tao: record.ngaytao,
+                hoat_dong: record.hoatdong,
+                trang_thai_xoa: record.trangthaixoa,
+                users: record.accountid,
+                sanpham: record.sanpham
+              }
+            );
+
+            let product = [];
+            listtemp = [...product_discount];
+
+            for (let i = 0; i < record.sanpham.length; i++) {
+              listtemp.push(record.sanpham[i]);
+              product.push(
+                record.sanpham[i].san_phamId
+              )
+            }
+
+
+            console.log('listtemp', listtemp);
+            console.log('option', options);
+            console.log('product_discount', product_discount);
+            setPersonName(product);
+            setSelected(true);
+            setproduct_discount2(listtemp);
+            const tab2 = document.querySelector("#form-tab")
+            tab2.click();
+          }} >Edit</button> */}
+        </div>
+      )
+    },
+
+  ];
+
+  const undodelete = async (id) => {
+    const res = await axios({
+      url: 'http://localhost:8080/undodelete',
+      method: 'POST',
+      data: {
+        'popupID': id.popupID
+      },
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log(res.data);
+  }
+
+  //handle change select
+  // const handleChange = (value) => {
+  //   console.log(`selected ${value}`);
+  //   setSelectedRowKeys(value);
+  //   console.log('dasd', selectedItems);
+  // };
+
+
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  // const [selectedItems, setSelectedItems] = useState([
+
+  // ]);
+  const [dataSource, setdataSource] = useState([]);
+
+  // data select box
+
+  const options = product_discount.map((item) => ({
+    value: item.san_phamId,
+    label: item.ten_san_pham
+  }))
+  let options2 = product_discount2.map((item) => ({
+    value: item.san_phamId,
+    label: item.ten_san_pham
+  }))
+
+
+  const onSelectChange = (value) => {
+    console.log(`selected ${value}`);
+
+  };
+  const fetchProductHasDiscount = async () => {
+    try {
+      const res = await axios({ url: 'http://localhost:8080/FindProducthaspopupid', method: 'GET' })
+      setproduct_discount(res.data);
+      console.log('fetch data', res.data);
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
+
+  const getData = async () => {
+    try {
+      const res = await axios({ url: 'http://localhost:8080/getallpopupnotdeleted', method: 'GET' })
+      const formattedData = res.data.map((item, index) => ({
+        key: index,
+        popupID: item.popupID,
+        hansudung: item.han_su_dung,
+        hanhdong: item.hanh_dong,
+        hoatdong: item.hoat_dong,
+        ngaytao: item.ngay_tao,
+        trangthaixoa: item?.trang_thai_xoa,
+        accountid: item?.users?.accountID,
+        sanpham: item?.sanpham
+      }));
+      setdataSource(formattedData);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
+
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+
+
+  const [personName, setPersonName] = React.useState([]);
+
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    var temparray = [];
+    temparray.push({ 'san_phamId': value });
+    formik.setFieldValue('sanpham', value);
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+
+
+  };
+
+
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: 'odd',
+        text: 'Select Odd Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: 'even',
+        text: 'Select Even Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+  };
+  const rowSelection2 = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: 'odd',
+        text: 'Select Odd Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: 'even',
+        text: 'Select Even Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+  };
+  useEffect(() => {
+ 
+    getnewestid()
+    getdeletedrecord()
+    getData()
+    fetchProductHasDiscount()
+  }, [])
+  useEffect(() => {
+    getData()
+    getdeletedrecord()
+    console.log('change :',change);
+  },[change])
+
+  useEffect(() => {
+    console.log('options2', options2);
+  }, [personName, listtemp, options2]);
+
+  return (
+    <div className='container'>
+      <div>
+        <ul className="nav nav-pills nav-fill" id="myTab" role="tablist">
+          <li className="nav-item" role="presentation">
+            <button className="nav-link active fw-bold" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH</button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">BIỂU MẨU</button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane2" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Đã xóa</button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane2" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Hành động</button>
+          </li>
+        </ul>
+        {/* Tab content */}
+        <div className="tab-content mt-3" id="myTabContent">
+          {/* Table content */}
+          <div className="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab">
+            <h3>QUẢN LÍ POPUP</h3>
+            <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
+          </div>
+          {/* Form content */}
+          <div className="tab-pane fade" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab">
+            <form onSubmit={formik.handleSubmit} className="row mt-5">
+              <div className="col-md-6 my-2">
+                <div className="form-floating mb-3">
+                  <input type="pasword" className="form-control" value={formik.values.popupID} id="floatingPassword" placeholder="Password" />
+                  <label htmlFor="floatingPassword" className='text-primary fw-bold'>POPUP ID</label>
+
+                </div>
+                <FormControl sx={{ m: 1, width: 600 }}>
+                  <InputLabel id="demo-multiple-checkbox-label">Tag</InputLabel>
+                  <Select
+                    labelId="demo-multiple-checkbox-label"
+                    id="demo-multiple-checkbox"
+                    multiple
+                    value={personName}
+                    onChange={handleChange
+
+                    }
+                    input={<OutlinedInput label="Tag" />}
+                    renderValue={(selected) => selected.join(', ')}
+                    MenuProps={MenuProps}
+                  >
+                    {options2.length == 0 ? options.map((name) => (
+                      <MenuItem key={name.label} value={name.value}>
+                        <Checkbox checked={personName.includes(name.value)} />
+                        <ListItemText primary={name.label} />
+                      </MenuItem>
+                    )) : options2.map((name) => (
+                      <MenuItem key={name.label} value={name.value}>
+                        <Checkbox checked={personName.includes(name.value)} />
+                        <ListItemText primary={name.label} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {formik.errors.sanpham && <div className="text-danger ms-1 fw-bold">{formik.errors.sanpham}</div>}
+              </div>
+              <div className="col-md-6 my-2">
+                <div className="form-floating ">
+                  <input value={formik.values.ngay_tao} type="date" onChange={(e) => {
+                    formik.setFieldValue("ngay_tao", e.target.value);
+                  }} className="form-control" id="floatingPassword" placeholder="Ngày tạo" />
+                  <label htmlFor="floatingPassword" className='text-primary fw-bold'>NGÀY TẠO</label>
+                  {formik.errors.ngay_tao && <div className="text-danger ms-1 fw-bold">{formik.errors.ngay_tao}</div>}
+                </div>
+                <div className="form-floating mt-3 ">
+                  <input value={formik.values.han_su_dung} type="date" onChange={(e) => {
+                    formik.setFieldValue("han_su_dung", e.target.value);
+                  }} className="form-control" id="floatingPassword" placeholder="Ngày hết hạn" />
+                  <label htmlFor="floatingPassword" className='text-primary fw-bold'>HẠN SỬ DỤNG</label>
+                  {formik.errors.han_su_dung && <div className="text-danger ms-1 fw-bold">{formik.errors.han_su_dung}</div>}
+                </div>
+                <div className="form-check form-check-inline mt-4">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="options"
+                    id="option1"
+                    value="Đang hoạt động"
+                    onChange={(e) => {
+                      formik.setFieldValue("hoatdong", e.target.value);
                     }}
-                    name=""
-  
-                    className="mt-5"
+                    checked={formik.values.hoat_dong == "Đang hoạt động"}
                   />
-                </div>
-  
-                <div className="col-md-6 my-2">
-  
-                  <div className="form-floating ">
-                    <input type="date" className="form-control" id="floatingPassword" placeholder="Password" />
-                    <label htmlFor="floatingPassword" className='text-primary fw-bold'>NGÀY TẠO</label>
-                  </div>
-  
-                  <div className="form-check form-check-inline mt-4">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="options"
-                      id="option1"
-                      value="option1"
-                      checked
-                    />
-                    <label className="form-check-label fw-bold text-primary" htmlFor="option1">
-                      Hoạt động
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="options"
-                      id="option2"
-                      value="option2"
-                    />
-                    <label className="form-check-label fw-bold text-primary" htmlFor="option2">
-                      Không hoạt động
-                    </label>
-                  </div>
-  
-  
-  
-                  <label gay="sad" className="custum-file-upload mt-4" htmlFor="file">
-                    <div gay2="sad2" className="gay">
-                      <div className="icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g strokeWidth={0} id="SVGRepo_bgCarrier" /><g strokeLinejoin="round" strokeLinecap="round" id="SVGRepo_tracerCarrier" /><g id="SVGRepo_iconCarrier"> <path d="M10 1C9.73478 1 9.48043 1.10536 9.29289 1.29289L3.29289 7.29289C3.10536 7.48043 3 7.73478 3 8V20C3 21.6569 4.34315 23 6 23H7C7.55228 23 8 22.5523 8 22C8 21.4477 7.55228 21 7 21H6C5.44772 21 5 20.5523 5 20V9H10C10.5523 9 11 8.55228 11 8V3H18C18.5523 3 19 3.44772 19 4V9C19 9.55228 19.4477 10 20 10C20.5523 10 21 9.55228 21 9V4C21 2.34315 19.6569 1 18 1H10ZM9 7H6.41421L9 4.41421V7ZM14 15.5C14 14.1193 15.1193 13 16.5 13C17.8807 13 19 14.1193 19 15.5V16V17H20C21.1046 17 22 17.8954 22 19C22 20.1046 21.1046 21 20 21H13C11.8954 21 11 20.1046 11 19C11 17.8954 11.8954 17 13 17H14V16V15.5ZM16.5 11C14.142 11 12.2076 12.8136 12.0156 15.122C10.2825 15.5606 9 17.1305 9 19C9 21.2091 10.7909 23 13 23H20C22.2091 23 24 21.2091 24 19C24 17.1305 22.7175 15.5606 20.9844 15.122C20.7924 12.8136 18.858 11 16.5 11Z" clipRule="evenodd" fillRule="evenodd" /> </g></svg>
-                      </div>
-                      <div className="text">
-                        <span>Click to upload image</span>
-                      </div>
-                      <input type="file" id='file' name='image' className=' mt-3' />
-                    </div>
+                  <label className="form-check-label fw-bold text-primary" htmlFor="option1">
+                    Hoạt động
                   </label>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
                 </div>
-  
-                <div className="col-md-4 my-2">
-  
-                  
-  
-  
-                  
-  
-  
-  
-  
+                <div className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="options"
+                    id="option2"
+                    value="Không hoạt động"
+                    onChange={(e) => {
+                      formik.setFieldValue("hoatdong", e.target.value);
+                    }}
+                    checked={formik.values.hoat_dong == "Không hoạt động"}
+                  />
+                  <label className="form-check-label fw-bold text-primary" htmlFor="option2">
+                    Không hoạt động
+                  </label>
                 </div>
-  
-  
-  
-                <div className="col-md-12 text-center mt-3">
-  
-                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' style={{ minWidth: 120 }} > Thêm Danh Mục</button>
-                  <button className='btn btn-outline-danger  fw-bold ms-2 mt-2' style={{ minWidth: 120 }}> Xóa Danh Mục</button>
-                  <button className='btn btn-outline-warning fw-bold ms-2 mt-2' style={{ minWidth: 120 }}> Cập nhật Danh Mục</button>
-                  <button className='btn btn-outline-success fw-bold ms-2 mt-2' style={{ minWidth: 120 }}> Làm mới</button>
-  
-                </div>
-  
-              </form>
-            </div>
+              </div>
+              <div className="col-md-4 my-2">
+              </div>
+              <div className="col-md-12 text-center mt-3">
+
+                {selected ? <button className='btn btn-outline-warning fw-bold ms-2 mt-2'
+                  onClick={() => setcreateorupdate(true)} type='submit' style={{ minWidth: 120 }}> Cập nhật Danh Mục</button> :
+                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' onClick={() => setcreateorupdate(false)} type='submit' style={{ minWidth: 120 }} > Thêm Danh Mục</button>}
+                <button className='btn btn-outline-success fw-bold ms-2 mt-2' type='button' onClick={() => {
+                  formik.resetForm();
+                  getnewestid();
+                  setPersonName([]);
+                  setSelected(false);
+                  setproduct_discount2([]);
+                  options2 = [];
+
+                }} style={{ minWidth: 120 }}> Làm mới</button>
+
+              </div>
+            </form>
+          </div>
+          <div className="tab-pane fade " id="table-tab-pane2" role="tabpanel" aria-labelledby="table-tab">
+            <h3>QUẢN LÍ POPUP</h3>
+            <Table rowSelection={rowSelection2} columns={columns2} dataSource={tabledata} />
           </div>
         </div>
-  
-  
-  
-  
-  
       </div>
-    )
+    </div>
+  )
 }
 
 export default CrudPOPUP

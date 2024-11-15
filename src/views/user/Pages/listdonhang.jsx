@@ -107,7 +107,8 @@ function Listdonhang() {
       <div>
         {donhang.map((item, index) => {
           return (
-            <button onClick={() => Show_order_details(item.don_hangid)} className='btn btn-primary'>hủy đơn {item.don_hangid}</button>)
+            <button onClick={() => Show_order_details(item.don_hangid)
+            } className='btn btn-primary'>hủy đơn {item.don_hangid}</button>)
         })}
       </div>
     </>

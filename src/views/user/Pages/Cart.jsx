@@ -6,7 +6,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined
 import { useDispatch, useSelector } from "react-redux";
 import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem, clearItem } from "../Reducer/cartReducer";
 import axios from "axios";
-import { Card, Col, Container, Row } from 'react-bootstrap';
+import { Card, Col, Container, Row } from 'react-bootstrap';import { toast } from 'react-toastify';
 
 
 
@@ -214,12 +214,19 @@ function Cart() {
         console.log(`selected ${value}`);
     };
     const onChangeDistrict = (value) => {
-        console.log(value);
-        const address = document.querySelector('.ant-select-selection-item');
-        address.innerHTML = " ";
-        console.log(address);
-        fechtWard(value.value);
-        setDistrict(value.label + '-' + value.value);
+        try {
+            console.log(value);
+            fechtWard(value.value);
+            setDistrict(value.label + '-' + value.value);
+            const address = document.querySelector('.ant-select-selection-item');
+            address.innerHTML = " ";
+            console.log(address);
+
+        }
+        catch (error) {
+            console.log(error)
+        }
+
     };
     const onChangeWard = (value) => {
         try {
@@ -312,6 +319,7 @@ function Cart() {
         setlistprovince(res.data.data);
     }
     const fechtWard = async (id) => {
+
         console.log('id', id);
         const res = await axios({
             url: 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id', method: 'POST',
@@ -408,6 +416,7 @@ function Cart() {
 
 
     useEffect(() => {
+
         console.log('cart run')
         InformationUser()
         fetchVouchers();
@@ -468,11 +477,20 @@ function Cart() {
                                         {AddressCurrent?.dia_chiID !== address.dia_chiID ? <div className="d-flex align-items-center" style={{ height: '60px' }}>
                                             <button onClick={() => {
                                                 const dataJSON = JSON.stringify(address);
-
-
                                                 localStorage.setItem('addressCurent', dataJSON);
                                                 SetaddressCurrent(JSON.parse(localStorage.getItem('addressCurent')))
                                             }} className="btn btn-primary m-3">Dùng địa chỉ này</button>
+                                            <button onClick={async () => {
+
+                                                if (window.confirm("Bạn có muốn xóa địa chỉ này không")) {
+                                                    // console.log('sadsadsad',index)
+                                                    await axios({ url: `http://localhost:8080/DiaChi/Delete/${address.dia_chiID}`, method: 'DELETE' })
+                                                    const resList = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
+
+                                                    SetaddressList(resList.data)
+                                                    toast.success("Xóa địa chỉ thành công")
+                                                }
+                                            }} className="btn btn-danger m-3" ><DeleteOutlined /> </button>
                                         </div> : <>
                                         </>}
 
@@ -521,12 +539,14 @@ function Cart() {
                                         />
                                     </div>
                                     <div className="me-3">
-                                        <Select
+                                        {/* <Select
                                             showSearch
+
                                             placeholder="Tỉnh/Thành Phố"
                                             optionFilterProp="label"
                                             onChange={onChange}
                                             id="province"
+                                            disabled
                                             onSearch={onSearch}
                                             defaultValue="Thành phố Hồ Chí Minh"
                                             options={[
@@ -536,7 +556,11 @@ function Cart() {
                                                 },
 
                                             ]}
-                                        />
+                                        /> */}
+                                        <select className="form-select form-select-sm province" >
+                                            <option value={'202'} label="Thành phó Hồ Chí Minh" selected>Thành phố Hồ Chí Minh</option>
+                                        </select>
+
                                     </div>
 
 

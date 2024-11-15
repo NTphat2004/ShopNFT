@@ -39,7 +39,16 @@ import Voucher from './views/user/Pages/Voucher';
 import { ToastContainer } from 'react-toastify';
 import ResultPayment from './views/user/Pages/ResultPayment';
 import Listdonhang from './views/user/Pages/listdonhang';
+import Quanlybaidang from './views/user/Pages/quanlybaidang';
+import Login from './views/user/Pages/Login';
+import Register from './views/user/Pages/Sign';
+import PersnalInfo from './views/user/Pages/PersonalInfo';
 import 'react-toastify/dist/ReactToastify.css';
+import OrderCard from './views/user/Pages/OrderCard';
+import OrderDetail from './views/user/Pages/OrderDetail';
+import Feedback from './views/user/Pages/Feedback';
+import PasswordChangeForm from './views/user/Pages/PasswordChangeForm';
+import SearchByBanner from './views/user/Pages/SearchByBanner';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
@@ -72,8 +81,18 @@ root.render(
           <Route path='voucher' element={<Voucher></Voucher>}></Route>
           <Route path='Thanhtoan' element={<Thanhtoan></Thanhtoan>}></Route>
           <Route path='Sanphamyeuthich' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
+          <Route path='Yêu-Thích' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
           <Route path='paymentreturn' element={<ResultPayment></ResultPayment>}></Route>
           <Route path='donhang' element={<Listdonhang></Listdonhang>}></Route>
+          <Route path='donhang2' element={<Quanlybaidang></Quanlybaidang>}></Route>
+          <Route path='login' element={<Login></Login>}></Route>
+          <Route path='register' element={<Register></Register>}></Route>
+          <Route path='thông-tin-cá-nhân' element={<PersnalInfo></PersnalInfo>}></Route>
+          <Route path='lịch-sử-đặt-hàng' element={<OrderCard></OrderCard>}></Route>
+          <Route path='orderdetail/:id' element={<OrderDetail></OrderDetail>}></Route>
+          <Route path='Feedback' element={<Feedback></Feedback>}></Route>
+          <Route path='đổi-mật-khẩu' element={<PasswordChangeForm></PasswordChangeForm>}></Route>
+          <Route path='product/banner/:id' element={<SearchByBanner></SearchByBanner>}></Route>
 
         </Route>
 
