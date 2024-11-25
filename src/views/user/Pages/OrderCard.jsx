@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Steps } from 'antd';
+import { Steps, QRCode } from 'antd';
 
 // CSS styles
 const styles = {
@@ -83,90 +83,166 @@ const DonHang = () => {
 
     const [donhang, setdonhang] = useState([]);
     const [token, settoken] = useState("");
+    const [urlforqrcode, seturlforqrcode] = useState('');
     const getdonhang = async () => {
-      const res = await axios({ url: `http://localhost:8080/getalldonhang`, method: 'GET' })
-      setdonhang(res.data)
+        const res = await axios({ url: `http://localhost:8080/getalldonhang`, method: 'GET' })
+        setdonhang(res.data)
     }
     const getPaypalAccessToken = async () => {
-      const res = await axios({
-        method: 'post',
-        url: 'https://api.sandbox.paypal.com/v1/oauth2/token',
-        data: 'grant_type=client_credentials', // => this is mandatory x-www-form-urlencoded. DO NOT USE json format for this
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',// => needed to handle data parameter
-          'Accept-Language': 'en_US',
-        },
-        auth: {
-          username: "AUuoahug326XM8PupIWATfSZph2ulLyvj714hnfx7DV-Z9MNjC9hSehpDh4VqE6mvtS6ExGgNSkhML2K",
-          password: "EBRxibct4O7BsLjLUR0iAELmNHPVzI0UCU5HQ-LOzW-w3EUVOWRYhiLP4bZK4zM0YNX-IkWs_blvqV8c"
-        },
-  
-      });
-  
-      localStorage.setItem('paypal_token', res.data.access_token);
-      console.log('paypal access token', res.data.access_token);
-      settoken(res.data.access_token);
+        const res = await axios({
+            method: 'post',
+            url: 'https://api.sandbox.paypal.com/v1/oauth2/token',
+            data: 'grant_type=client_credentials', // => this is mandatory x-www-form-urlencoded. DO NOT USE json format for this
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',// => needed to handle data parameter
+                'Accept-Language': 'en_US',
+            },
+            auth: {
+                username: "AUuoahug326XM8PupIWATfSZph2ulLyvj714hnfx7DV-Z9MNjC9hSehpDh4VqE6mvtS6ExGgNSkhML2K",
+                password: "EBRxibct4O7BsLjLUR0iAELmNHPVzI0UCU5HQ-LOzW-w3EUVOWRYhiLP4bZK4zM0YNX-IkWs_blvqV8c"
+            },
+
+        });
+
+        localStorage.setItem('paypal_token', res.data.access_token);
+        console.log('paypal access token', res.data.access_token);
+        settoken(res.data.access_token);
     }
-  
+
+    const repay = async (id) => {
+        console.log("repay");
+        const res = await axios({
+            url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${id}`,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log(res.data);
+        seturlforqrcode(res.data.links.find(link => link.rel === "approve").href);
+    }
+
+
     const Show_order_details = async (id) => {
-      let idauthorization = id.split("-")[1];
-      const res = await axios({
-        url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${idauthorization}`,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      })
-      console.log('order details',res.data);
-      Show_details_for_authorized_payment(res.data.purchase_units[0].payments.authorizations[0].id);
-     
-      Show_captured_payment_details(res.data.purchase_units[0].payments.captures[0].id);
-   
+        let idauthorization = id.split("-")[1];
+        const res = await axios({
+            url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${idauthorization}`,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log('order details', res.data);
+        Show_details_for_authorized_payment(res.data.purchase_units[0].payments.authorizations[0].id);
+        Show_captured_payment_details(res.data.purchase_units[0].payments.captures[0].id);
+
     }
     const Refund_captured_payment = async (url) => {
-      const res = await axios({
-        url: `${url}`,
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        data: {}
-      })
-    console.log(res.data);
+        const res = await axios({
+            url: `${url}`,
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            data: {}
+        })
+        console.log(res.data);
     }
-  
+
     const Show_details_for_authorized_payment = async (id) => {
-  
-      const res = await axios({
-        url: `https://api-m.sandbox.paypal.com/v2/payments/authorizations/${id}`,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      })
-      console.log('authorization details', res.data);
-   
+
+        const res = await axios({
+            url: `https://api-m.sandbox.paypal.com/v2/payments/authorizations/${id}`,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log('authorization details', res.data);
+
     }
     const Show_captured_payment_details = async (id) => {
-      const res = await axios({
-        url: `https://api-m.sandbox.paypal.com/v2/payments/captures/${id} `,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+        const res = await axios({
+            url: `https://api-m.sandbox.paypal.com/v2/payments/captures/${id} `,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log('capture  payment  details', res.data);
+        console.log(res.data.links.find(link => link.rel === "refund").href);
+        Refund_captured_payment(res.data.links.find(link => link.rel === "refund").href);
+
+    }
+
+    const Stepforstatus = (status) => {
+        console.log(status);
+        if (status === "Đang xử lý") {
+            return <>
+                <Steps
+                    direction="vertical"
+                    current={getCurrentStep(status)}
+                    items={[
+                        { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
+                        { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang được chuẩn bị để vận chuyển.' },
+                        { title: 'Đang Giao', description: 'Đơn hàng đang trong quá trình vận chuyển.' },
+                        { title: 'Đã Giao', description: 'Đơn hàng đã được giao đến khách hàng.' },
+                    ]}
+                />
+            </>
         }
-      })
-      console.log('capture  payment  details', res.data);
-      console.log(res.data.links.find(link => link.rel === "refund").href);  
-      Refund_captured_payment(res.data.links.find(link => link.rel === "refund").href);
+        else if (status === "Đã Hủy") {
+            return <>
+                <Steps
+                    direction="vertical"
+                    current={1}
+                    items={[
+                        { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
+                        { title: 'Đã Hủy', description: 'Đơn hàng đã bị hủy bởi người dùng.' },
+                    ]}
+                />
+            </>
+        }
+        else if (status === "Đã Hủy") {
+            return <>
+                <Steps
+                    direction="vertical"
+                    current={getCurrentStep(status)}
+                    items={[
+                        { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
+                        { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang được chuẩn bị để vận chuyển.' },
+                        { title: 'Đang Giao', description: 'Đơn hàng đang trong quá trình vận chuyển.' },
+                        { title: 'Đã Giao', description: 'Đơn hàng đã được giao đến khách hàng.' },
+                    ]}
+                />
+            </>
+        }
+        else if (status === "Chờ Thanh Toán") {
+            return <>
+                <Steps
+                    direction="vertical"
+                    current={getCurrentStep(status)}
+                    items={[
+                        { title: 'Chờ thanh toán', description: 'Đơn hàng đang chờ thanh toán.' },
+                        { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
+                        { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang được chuẩn bị để vận chuyển.' },
+                        { title: 'Đang Giao', description: 'Đơn hàng đang trong quá trình vận chuyển.' },
+                        { title: 'Đã Giao', description: 'Đơn hàng đã được giao đến khách hàng.' },
+                    ]}
+                />
+            </>
+        }
     }
 
     const userId = localStorage.getItem('account_id'); // Retrieve user ID from localStorage
@@ -189,7 +265,7 @@ const DonHang = () => {
                     // Move 'Đã Hủy' and 'Đã Giao' orders to the bottom
                     if ((a.trang_thai === 'Đã Hủy' || a.trang_thai === 'Đã Giao') && !(b.trang_thai === 'Đã Hủy' || b.trang_thai === 'Đã Giao')) return 1;
                     if (!(a.trang_thai === 'Đã Hủy' || a.trang_thai === 'Đã Giao') && (b.trang_thai === 'Đã Hủy' || b.trang_thai === 'Đã Giao')) return -1;
-                    
+
                     // For other orders, sort by date (newest first)
                     return new Date(b.ngay_tao) - new Date(a.ngay_tao);
                 });
@@ -202,7 +278,7 @@ const DonHang = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchDonHang();
     }, [userId]);
     const getCurrentStep = (status) => {
@@ -275,8 +351,7 @@ const DonHang = () => {
                                 <th style={styles.th}>Ngày Tạo</th>
                                 <th style={styles.th}>Người Dùng</th>
                                 <th style={styles.th}>Số Điện Thoại</th>
-                                <th style={styles.th}>Địa Chỉ</th>
-                                <th style={styles.th}>Voucher</th>
+
                                 <th style={styles.th}>Phí Ship</th>
                                 <th style={styles.th}>Tổng Tiền</th>
                                 <th style={styles.th}>Trạng Thái</th>
@@ -290,12 +365,15 @@ const DonHang = () => {
                                     <td style={styles.td}>{new Date(donhang.ngay_tao).toLocaleDateString()}</td>
                                     <td style={styles.td}>{donhang.users ? donhang.users.hovaten : 'N/A'}</td>
                                     <td style={styles.td}>{donhang.so_dien_thoai}</td>
-                                    <td style={styles.td}>{donhang.diachi ? donhang.diachi.dia_chi : 'N/A'}</td>
-                                    <td style={styles.td}>{donhang.voucher ? donhang.voucher.so_tien_giam : 'N/A'}</td>
+
                                     <td style={styles.td}>{donhang.phi_ship.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                     <td style={styles.td}>{donhang.tong_tien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                     <td style={styles.td}>
-                                        {donhang.trang_thai === 'Đã Hủy' ? (
+                                        {Stepforstatus(donhang.trang_thai)}
+                                        {/* {donhang.trang_thai === 'Đang chờ xử lý'?Stepforstatus(donhang.trang_thai):Stepforstatus(donhang.trang_thai)} */}
+
+
+                                        {/* {donhang.trang_thai === 'Đã Hủy' ? (
                                             <Steps
                                                 direction="vertical"
                                                 current={1} // Set to 1 to mark "Đã Hủy" as the current step
@@ -304,31 +382,35 @@ const DonHang = () => {
                                                     { title: 'Đã Hủy', description: 'Đơn hàng đã bị hủy bởi người dùng.' },
                                                 ]}
                                             />
-                                        ) : (
-                                            <Steps
-                                                direction="vertical"
-                                                current={getCurrentStep(donhang.trang_thai)}
-                                                items={[
-                                                    { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
-                                                    { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang được chuẩn bị để vận chuyển.' },
-                                                    { title: 'Đang Giao', description: 'Đơn hàng đang trong quá trình vận chuyển.' },
-                                                    { title: 'Đã Giao', description: 'Đơn hàng đã được giao đến khách hàng.' },
-                                                ]}
-                                            />
-                                        )}
-                                        {donhang.trang_thai === 'Đang chờ xử lý' && (
+                                        ) : Stepforstatus(donhang.trang_thai)
+                                        } */}
+                                        {donhang.trang_thai === 'Đang xử lý' && (
                                             <button
-                                                onClick={() => {handleCancelOrder(donhang.don_hangid)
-                                                    if(donhang.don_hangid.includes("-")){
+                                                onClick={() => {
+                                                    handleCancelOrder(donhang.don_hangid)
+                                                    if (donhang.don_hangid.includes("-")) {
                                                         alert('refunded order')
                                                         Show_order_details(donhang.don_hangid)
                                                     }
                                                 }
-                                                
+
                                                 }
                                                 style={{ ...styles.button, backgroundColor: '#e74c3c' }}
                                             >
                                                 Hủy Đơn
+                                            </button>
+                                        )}
+                                        {donhang.trang_thai === 'Chờ Thanh Toán' && (
+                                            <button data-bs-toggle="modal" data-bs-target="#exampleModal2"
+                                                onClick={() => {
+                                                    repay(donhang.online_payment_id)
+
+                                                }
+
+                                                }
+                                                style={{ ...styles.button, backgroundColor: '#34c9eb' }}
+                                            >
+                                                Thanh toán
                                             </button>
                                         )}
                                     </td>
@@ -339,12 +421,51 @@ const DonHang = () => {
                                         </Link>
                                     </td>
                                 </tr>
-                            ))}
+                            )
+                            )}
                         </tbody>
 
                     </table>
                 )}
             </main>
+
+            <div>
+                <div className="modal fade" id="exampleModal2" tabIndex={-1} >
+                    <div className="modal-dialog modal-dialog-centered" >
+                        <div className="modal-content">
+                            <div className="modal-header" style={{ borderBottom: 'none' }}>
+
+
+                                <div className='row text-center'>
+                                    <div className="col-12 ">  <div className='h2'>Đặt hàng thành công</div></div>
+                                    <div className="col-12 ">
+                                        <QRCode
+                                            errorLevel="H"
+                                            value={urlforqrcode}
+                                            style={{ width: '100%', height: '100%' }}
+                                        />
+                                    </div>
+                                    <div className="col-12 mt-2">
+                                       <button className='btn btn-primary' onClick={()=>{window.open(urlforqrcode,'_blank')}}>Chuyển tiếp đến trang thanh toán</button>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div className="modal-footer text-center    ">
+
+
+                                {/* <button ref={btn3} type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                                    <Link to={`/lịch-sử-đặt-hàng/`} >
+                                        Xem Chi Tiết
+                                    </Link>
+                                </button> */}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

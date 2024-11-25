@@ -35,8 +35,10 @@ const CrudPOPUP = () => {
   const [createorupdate, setcreateorupdate] = useState(false);
   const [product_discount, setproduct_discount] = useState([]);
   const [product_discount2, setproduct_discount2] = useState([]);
+  const [datahanhdong, setdatahanhdong] = useState([]);
   const [selected, setSelected] = useState(false);
   const [change, setchange] = useState(0);
+  const [tabledata, settabledata] = useState([]);
   let listtemp = [];
   let newid = '';
   const getnewestid = async () => {
@@ -65,10 +67,14 @@ const CrudPOPUP = () => {
       alert(JSON.stringify(values));
       if (createorupdate) {
         alert('cap nhat');
-        api(values);
+        updatePopUp(values);
+        // api(values);
+        setchange(change + 1);
       } else {
+
         alert('them');
         api(values);
+        setchange(change + 1);
       }
     }
   });
@@ -95,7 +101,28 @@ const CrudPOPUP = () => {
     console.log(res.data);
   }
 
-  const [tabledata, settabledata] = useState([]);
+  const updatePopUp = async (values) => {
+    console.log('value', values);
+    const res = await axios({
+      url: 'http://localhost:8080/updatePopup',
+      method: 'POST',
+      data: {
+        'popupID': values.popupID,
+        'ngay_tao': values.ngay_tao,
+        'han_su_dung': values.han_su_dung,
+        'trang_thai_xoa': values.trang_thai_xoa,
+        'hoat_dong': values.hoat_dong,
+        'users': {
+          'accountID': values.users
+        },
+        'sanpham': personName.map((item) => ({ 'san_phamId': item }))
+      },
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log(res.data);
+  }
+
+
 
 
   const deletepopup = async (id) => {
@@ -209,6 +236,45 @@ const CrudPOPUP = () => {
 
   ];
 
+  const columnHanhdongs = [
+    {
+      title: 'PopupID',
+      dataIndex: 'popupID',
+      key: 'popupID',
+    },
+    {
+      title: 'Hạn sử dụng',
+      dataIndex: 'hansudung',
+      key: 'hansudung',
+    },
+    {
+      title: 'Hành động',
+      dataIndex: 'hanhdong',
+      key: 'hanhdong',
+    },
+    {
+      title: 'Ngày tạo',
+      dataIndex: 'ngaytao',
+      key: 'ngaytao',
+    },
+    {
+
+      dataIndex: 'trangthaixoa',
+      key: 'trangthaixoa',
+    },
+    {
+      title: 'AccountID',
+      dataIndex: 'accountid',
+      key: 'accountid',
+    },
+    {
+      title: 'hanhdong',
+      dataIndex: 'hanhdong',
+      key: 'hanhdong',
+    },
+  ];
+
+
   const columns2 = [
     {
       title: 'PopupID',
@@ -245,9 +311,10 @@ const CrudPOPUP = () => {
       key: 'nut',
       render: (_, record) => (
         <div>
-          <button className='btn btn-danger me-2' onClick={() => { undodelete(record); setchange(change+1);
-          
-           }}>Khôi phục</button>
+          <button className='btn btn-danger me-2' onClick={() => {
+            undodelete(record); setchange(change + 1);
+
+          }}>Khôi phục</button>
           {/* 
           <button className='btn btn-danger' onClick={() => {
             formik.setValues(
@@ -329,7 +396,6 @@ const CrudPOPUP = () => {
 
   const onSelectChange = (value) => {
     console.log(`selected ${value}`);
-
   };
   const fetchProductHasDiscount = async () => {
     try {
@@ -341,6 +407,28 @@ const CrudPOPUP = () => {
     }
 
   }
+
+
+  const fetchDataHanhDong = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/FindAllPopUpwithDTO'); // Replace with actual API endpoint
+      const formattedData = response.data.map((item, index) => ({
+        key: index,
+        popupID: item.popup.popupID,
+        hansudung: item.popup.han_su_dung,
+        hoatdong: item.popup.hoat_dong,
+        ngaytao: item.popup.ngay_tao,
+        trangthaixoa: item?.popup.trang_thai_xoa,
+        accountid: item?.popup.users?.accountID,
+        sanpham: item?.popup.sanpham,
+        hanhdong: item?.tenHanhDong
+      }));
+      setdatahanhdong(formattedData)
+      console.log('dataaaaaaa', formattedData)
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const getData = async () => {
     try {
@@ -473,17 +561,18 @@ const CrudPOPUP = () => {
     ],
   };
   useEffect(() => {
- 
     getnewestid()
     getdeletedrecord()
     getData()
     fetchProductHasDiscount()
+    fetchDataHanhDong()
   }, [])
   useEffect(() => {
     getData()
     getdeletedrecord()
-    console.log('change :',change);
-  },[change])
+    fetchProductHasDiscount()
+    console.log('change :', change);
+  }, [change])
 
   useEffect(() => {
     console.log('options2', options2);
@@ -503,7 +592,7 @@ const CrudPOPUP = () => {
             <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane2" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Đã xóa</button>
           </li>
           <li className="nav-item" role="presentation">
-            <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane2" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Hành động</button>
+            <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane3" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Hành động</button>
           </li>
         </ul>
         {/* Tab content */}
@@ -620,8 +709,12 @@ const CrudPOPUP = () => {
             </form>
           </div>
           <div className="tab-pane fade " id="table-tab-pane2" role="tabpanel" aria-labelledby="table-tab">
-            <h3>QUẢN LÍ POPUP</h3>
+            <h3>QUẢN LÍ POPUP3</h3>
             <Table rowSelection={rowSelection2} columns={columns2} dataSource={tabledata} />
+          </div>
+          <div className="tab-pane fade " id="table-tab-pane3" role="tabpanel" aria-labelledby="table-tab">
+            <h3>QUẢN LÍ POPUP4</h3>
+            <Table rowSelection={rowSelection} columns={columnHanhdongs} dataSource={datahanhdong} />
           </div>
         </div>
       </div>

@@ -49,6 +49,9 @@ import OrderDetail from './views/user/Pages/OrderDetail';
 import Feedback from './views/user/Pages/Feedback';
 import PasswordChangeForm from './views/user/Pages/PasswordChangeForm';
 import SearchByBanner from './views/user/Pages/SearchByBanner';
+import GoogleLoginButton from './views/user/Pages/GoogleLoginButton';
+import Respone from './views/admin/Pages/Respone';
+import Xetduyetsanpham from './views/admin/Pages/xetduyetsanpham';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
@@ -89,11 +92,12 @@ root.render(
           <Route path='register' element={<Register></Register>}></Route>
           <Route path='thông-tin-cá-nhân' element={<PersnalInfo></PersnalInfo>}></Route>
           <Route path='lịch-sử-đặt-hàng' element={<OrderCard></OrderCard>}></Route>
+          <Route path='orderhistory' element={<OrderCard></OrderCard>}></Route>
           <Route path='orderdetail/:id' element={<OrderDetail></OrderDetail>}></Route>
           <Route path='Feedback' element={<Feedback></Feedback>}></Route>
           <Route path='đổi-mật-khẩu' element={<PasswordChangeForm></PasswordChangeForm>}></Route>
           <Route path='product/banner/:id' element={<SearchByBanner></SearchByBanner>}></Route>
-
+          <Route path='google' element={<GoogleLoginButton></GoogleLoginButton>}></Route>
         </Route>
 
         {/*end page user */}
@@ -103,6 +107,8 @@ root.render(
         <Route path='ga1' element={<Test></Test>}></Route>
         <Route path='danhmuc' element={<CrudCategory></CrudCategory>}></Route>
         <Route path='popup' element={<CrudPOPUP></CrudPOPUP>}></Route>
+        <Route path='respone' element={<Respone></Respone>}></Route>
+        <Route path='duyetsanpham' element={<Xetduyetsanpham></Xetduyetsanpham>}></Route>
        
         
         <Route path='/admin/dashboard' element={

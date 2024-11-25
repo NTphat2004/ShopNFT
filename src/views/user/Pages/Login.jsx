@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import imageChill from 'images/backgoundlogin.png';
+
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -37,6 +37,11 @@ function LoginForm() {
       });
 
       const result = await response.json();
+      if (response.status === 403) {
+        setErrorMessage(result.message || 'Your account has been locked.');
+        return;
+      }
+
       if (result.success) {
         setSuccessMessage('Login successful');
         localStorage.setItem('account_id', result.userId);
@@ -49,6 +54,7 @@ function LoginForm() {
       setErrorMessage('An error occurred during login.');
     }
   };
+
 
   return (
     <div style={{
@@ -171,31 +177,31 @@ function LoginForm() {
 
           {/* Submit Button */}
           <button
-  type="button" // Hoặc "submit" nếu bạn muốn sử dụng nó trong form
-  style={{
-    width: '100%',
-    padding: '15px',
-    fontSize: '1.2em',
-    color: 'white',
-    backgroundColor: '#ff5851',
-    border: 'none',
-    borderRadius: '50px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease, transform 0.2s ease',
-    boxShadow: '0px 8px 16px rgba(0,0,0,0.2)',
-  }}
-  onClick={handleLogin} // Gọi hàm handleLogin khi nhấn nút
-  onMouseEnter={(e) => {
-    e.currentTarget.style.backgroundColor = '#ff4040';
-    e.currentTarget.style.transform = 'scale(1.05)';
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.backgroundColor = '#ff5851';
-    e.currentTarget.style.transform = 'scale(1)';
-  }}
->
-  Login
-</button>
+            type="button" // Hoặc "submit" nếu bạn muốn sử dụng nó trong form
+            style={{
+              width: '100%',
+              padding: '15px',
+              fontSize: '1.2em',
+              color: 'white',
+              backgroundColor: '#ff5851',
+              border: 'none',
+              borderRadius: '50px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease, transform 0.2s ease',
+              boxShadow: '0px 8px 16px rgba(0,0,0,0.2)',
+            }}
+            onClick={handleLogin} // Gọi hàm handleLogin khi nhấn nút
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#ff4040';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ff5851';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            Login
+          </button>
 
         </div>
       </div>

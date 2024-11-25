@@ -95,6 +95,7 @@ const OrderDetail = () => {
     const [order, setOrder] = useState(null);
     const [images, setImages] = useState([]);
     const userId = localStorage.getItem('account_id');
+    const [urlforqrcode, seturlforqrcode] = useState('');
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -141,33 +142,62 @@ const OrderDetail = () => {
 
                     <h2 style={styles.sectionTitle}>Thông Tin Đơn Hàng</h2>
                     {order ? (
-                        <ul>
+                        <ul style={{ listStyleType: 'none', padding: '0' }}>
                             {order.map((item) => (
+
                                 <li style={styles.listItem} key={item.id}>
-                                    <div style={styles.detailText}>
-                                        <strong>Sản Phẩm:</strong>
-                                        <span>{item.sanpham?.ten_san_pham || 'Không có tên sản phẩm'}</span>
+                                    <div className='row' style={{ marginTop: '10px' }}>
+                                        <div className='col-3'>
+                                            <img
+                                                src={`/images/${item.sanpham?.hinhanh[0]?.ten_hinh}`}
+                                                alt="Hình ảnh sản phẩm"
+                                                className='img-fluid'
+                                            />
+                                        </div>
+                                        <div className='col-7 p-0 pt-2'>
+                                            <div >
+                                                <strong>Sản Phẩm:</strong>
+                                                <span>{item.sanpham?.ten_san_pham || 'Không có tên sản phẩm'}</span>
+                                            </div>
+                                            <div>
+                                                <strong>Số Lượng:</strong>
+                                                <span>{item.so_luong}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style={styles.detailText}>
-                                        <strong>Số Lượng:</strong>
-                                        <span>{item.so_luong}</span>
+                                    <div >
+                                    <div className='float-start'>
+                                       <strong> Địa chỉ nhận hàng:</strong>
                                     </div>
-                                    <div style={styles.detailText}>
-                                        <strong>Thành Tiền:</strong>
+                                   <br />
+                                    <div className='float-start'>
+                                        {item.donhang.dia_chi.dia_chi},{(item.donhang.dia_chi.phuong).substring(0, item.donhang.dia_chi.phuong.indexOf('-'))}
+                                        ,{(item.donhang.dia_chi.quan).substring(0, item.donhang.dia_chi.quan.indexOf('-'))},Thành phố Hồ Chí Minh
+                                    </div>
+                                    </div>
+                                    <br/>
+                                    <div >
+                                        <strong>Voucher:</strong>
+                                        <span>{item.voucher == null ? 'Không có' : item.voucher}</span>
+                                    </div>
+                                    <div >
+                                        <strong>Phí ship:</strong>
+                                        <span>{(item.donhang.phi_ship).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                                    </div>
+                                    <div>
+                                        <strong>Tổng tiền hàng:</strong>
                                         <span>{(item.so_luong * item.sanpham?.gia_goc).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                     </div>
-
-                                    <div style={{ marginTop: '10px' }}>
-
-                                        <img
-                                            src={`/images/${item.sanpham?.hinhanh[0]?.ten_hinh}`}
-                                            alt="Hình ảnh sản phẩm"
-                                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '5px', margin: '5px' }}
-                                        />
+                                    <div>
+                                        <strong>Thành tiền:</strong>
+                                        <span>{(item.donhang.tong_tien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                     </div>
 
 
-                                    {item.donhang?.trang_thai === 'Đã Giao' && item.sanpham?.san_phamId (
+
+
+
+                                    {item.donhang?.trang_thai === 'Đã Giao' && item.sanpham?.san_phamId(
                                         <Link to={`/review/${item.sanpham.san_phamId}`} style={styles.button}>
                                             Viết Đánh Giá
                                         </Link>

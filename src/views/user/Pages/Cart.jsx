@@ -6,7 +6,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined
 import { useDispatch, useSelector } from "react-redux";
 import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem, clearItem } from "../Reducer/cartReducer";
 import axios from "axios";
-import { Card, Col, Container, Row } from 'react-bootstrap';import { toast } from 'react-toastify';
+import { Card, Col, Container, Row } from 'react-bootstrap'; import { toast } from 'react-toastify';
 
 
 
@@ -28,6 +28,9 @@ function Cart() {
     const [AddressCurrent, SetaddressCurrent] = useState({});
     const [addressList, SetaddressList] = useState([]);
     const [voucherApplied, setvoucherApplied] = useState(false);
+    const [selectedvoucher, setselectedvoucher] = useState({});
+    const [vouchervalid, setvouchervalid] = useState(false);
+    const [voucherindex, setvoucherindex] = useState(-1);
 
 
 
@@ -46,7 +49,13 @@ function Cart() {
     const shippingfee = React.useRef(null);
     let formatnumber;
 
-
+    const checkvalidvoucher = async () => {
+        const response = await axios.get(`https://localhost:8080/checkifvoucherisvalid/${selectedvoucher.voucherId}`);
+        console.log(response.data);
+        if (response.data) {
+            setvouchervalid(true);
+        }
+    }
 
     const handleToggle = (index) => {
         const newChecked = [...isChecked];
@@ -97,6 +106,7 @@ function Cart() {
 
         // Dispatch action tương ứng
         if (e.target.checked) {
+
             const api = AddSpthanhtoan(cart);
             dispatch(api);
         } else {
@@ -167,12 +177,14 @@ function Cart() {
 
 
     const applyVoucher = (selectedvoucher, index, a, b) => {
+        setvoucherindex(index);
+        localStorage.setItem('voucher', JSON.stringify(selectedvoucher));
         setIsModalVoucherOpen(false)
 
         const nodeList = document.querySelectorAll(".voucher-btn");
         const amount = document.querySelectorAll(".amount")
 
-        console.log('h', a, b);
+        // console.log('h', a, b);
         console.log(parseFloat(amount[0].innerHTML.substring(0, amount[0].innerHTML.length - 1)));
         console.log(amount[0].innerHTML.substring(amount[0].innerHTML.indexOf(',') + 1, amount[0].innerHTML.length));
         const stringtemp = parseInt(amount[0].innerHTML.substring(0, amount[0].innerHTML.length - 1)) * 1000;
@@ -184,6 +196,7 @@ function Cart() {
             }
             setvoucherApplied(true)
             btnforapplyvoucher.current[index].innerHTML = "Đã áp dụng"
+            setvoucherindex(index);
             let total = (a + b) - selectedvoucher.so_tien_giam;
             console.log('discount', total);
             setshipvalue_discount(total)
@@ -193,6 +206,7 @@ function Cart() {
             console.log("ship_discount", total);
             console.log("shipvalue", shipvalue);
         } else {
+            localStorage.setItem('voucher', null);
             setvoucherApplied(false)
             localStorage.setItem('discount', 0);
             localStorage.setItem('total_after', JSON.stringify(0));
@@ -208,6 +222,31 @@ function Cart() {
 
 
     };
+
+    const checkamounttotal = () => {
+        console.log('run', voucherindex);
+        const voucher = JSON.parse(localStorage.getItem('voucher'));
+        if (totalAmount < voucher.don_hang_toi_thieu) {
+            btnforapplyvoucher.current[voucherindex].innerHTML = "Áp dụng"
+            btnforapplyvoucher.current[voucherindex].disabled = true;
+            setvoucherApplied(false);
+            localStorage.setItem('voucher', null);
+            setvoucherindex(-1);
+            setvoucherApplied(false)
+            localStorage.setItem('discount', 0);
+            localStorage.setItem('total_after', JSON.stringify(0));
+            setshipvalue_discount(0)
+        }
+    }
+    const disabledbutton = (don_hang_toi_thieu, index, totalAmount) => {
+        if (don_hang_toi_thieu >= totalAmount && index != voucherindex) {
+            return true;
+        } else if (voucherApplied && index != voucherindex) {
+            return true;
+        }
+    }
+
+
     const onChange = (value) => {
         const address = document.querySelector('input[id^=ward]').value;
         console.log('ward selected', address)
@@ -283,8 +322,8 @@ function Cart() {
                     "insurance_value": 100000,
                     "coupon": null,
                     "cod_failed_amount": 2000,
-                    "from_district_id": 1454,
-                    "from_ward_code": "21211",
+                    "from_district_id": 1449,
+                    "from_ward_code": "20706",
                     "to_district_id": parseInt((addressCurent.quan).substring(addressCurent.quan.indexOf('-') + 1, addressCurent.quan.length)),
                     "to_ward_code": (addressCurent.phuong).substring(addressCurent.phuong.indexOf('-') + 1, addressCurent.phuong.length),
                     "weight": parseInt(a),
@@ -308,11 +347,34 @@ function Cart() {
 
 
 
+
+
+
+
+
+
     const fechtProvince = async () => {
         const res = await axios({
             url: 'https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', method: 'GET',
             headers: {
                 "Token": "b20158be-5619-11ef-8e53-0a00184fe694",
+            }
+        });
+        console.log(res.data.data);
+        setlistprovince(res.data.data);
+    }
+    const fetchpool = async () => {
+        const res = await axios({
+            url: 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/station/get', method: 'POST',
+            headers: {
+                "Token": "b20158be-5619-11ef-8e53-0a00184fe694",
+                "Content-Type": "application/json"
+            }, data: {
+                "district_id": 1449,
+                "ward_code": "20706",
+                "offset": 0,
+                "limit": 1000
+
             }
         });
         console.log(res.data.data);
@@ -368,28 +430,29 @@ function Cart() {
         setCheckedItems(newCheckedItems);
 
         if (isChecked) {
-
+            localStorage.setItem('totalamount', JSON.stringify(totalAmount));
             ListCart.gioHangChiTiet.forEach(cart => {
                 if (cart.sanPham.so_luong > 0) {
                     const api = AddSpthanhtoan(cart);
                     dispatch(api);
                 }
             });
+
         } else {
 
+            localStorage.setItem('totalamount', JSON.stringify(totalAmount));
             ListCart.gioHangChiTiet.forEach(cart => {
                 if (cart.sanPham.so_luong > 0) {
                     const api = DeleteSpthanhtoan(cart);
                     dispatch(api);
                 }
             });
+
         }
     };
 
     const InformationUser = async () => {
-
         const res = await axios({ url: `http://localhost:8080/FindDiaChiByID?id=${userId}`, method: "GET" })
-
         SetaddressList(res.data)
         if (addressCurent != null) {
             SetaddressCurrent(addressCurent);
@@ -404,6 +467,7 @@ function Cart() {
     }
     useEffect(() => {
         if (checkedItems.length !== ListCart.gioHangChiTiet?.length) {
+
             setCheckedItems(new Array(ListCart.gioHangChiTiet?.length).fill(false));
             setCheckedAll(false); // Reset lại checkedAll khi số lượng sản phẩm thay đổi
         }
@@ -411,13 +475,47 @@ function Cart() {
 
 
     useEffect(() => {
+        console.log("voucherApplied :", voucherApplied);
+        console.log("voucherindex :", voucherindex);
+        const voucher = JSON.parse(localStorage.getItem('voucher'));
+        if (voucher != null) {
+            checkamounttotal();
+            // if (voucherApplied) {
+            //     const nodeList = document.querySelectorAll(".voucher-btn");
+            //     for (let i = 0; i < nodeList.length; i++) {
+            //         nodeList[i].disabled = true;
+            //         nodeList[voucherindex].disabled = false;
+            //     }
+
+            // }
+        }
+
+
+
+
+        localStorage.setItem('totalamount', JSON.stringify(totalAmount));
         apishippingfee(totalweight, totallength, totalwidth, totalheight);
+        localStorage.setItem("totalweight", totalweight);
+        localStorage.setItem("totallength", totallength);
+        localStorage.setItem("totalwidth", totalwidth);
+        localStorage.setItem("totalheight", totalheight);
     }, [totalAmount]);
+
+    useEffect(() => {
+        // console.log('ward', Ward);
+        // console.log('district', District);
+    }, [Ward, District]);
+
+    useEffect(() => {
+
+        // console.log("selected voucher ;", selectedvoucher);
+    }, [selectedvoucher]);
 
 
     useEffect(() => {
 
         console.log('cart run')
+        localStorage.setItem('voucher', null);
         InformationUser()
         fetchVouchers();
         fechdistrict();
@@ -471,7 +569,7 @@ function Cart() {
                                             <div className="d-flex align-items-center">
                                                 <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
                                                 <p style={{ fontWeight: 'bold', margin: '0', paddingRight: '80px' }}>Địa chỉ giao hàng:</p>
-                                                <p style={{ margin: '0' }}>{address.dia_chi}, {(address.phuong).substring(0, (address.phuong).indexOf('-'))},  {(address.quan).substring(0, (address.quan).indexOf('-'))} , {address.thanh_pho === "202" ? 'Hồ Chi Minh' : address.thanh_pho}</p>
+                                                <p style={{ margin: '0' }}>{address.dia_chi}, {(address.phuong)?.substring(0, (address.phuong)?.indexOf('-'))},  {(address.quan)?.substring(0, (address.quan)?.indexOf('-'))} , {address.thanh_pho === "202" ? 'Hồ Chi Minh' : address.thanh_pho}</p>
                                             </div>
                                         </div>
                                         {AddressCurrent?.dia_chiID !== address.dia_chiID ? <div className="d-flex align-items-center" style={{ height: '60px' }}>
@@ -505,10 +603,15 @@ function Cart() {
                                 <label style={{ fontWeight: 'bold' }} htmlFor="">Tên người nhận <span style={{ color: 'red' }}>*</span></label>
                                 <Input size="large" name="name" placeholder="Nhập tên người nhận" value={AddressCurrent?.users?.hovaten} prefix={<UserOutlined />} />
                             </div>
-                                <div className="mb-3">
+
+                                {AddressCurrent?.users?.so_dien_thoai == "" ? <div className="mb-3">
                                     <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
-                                    <Input size="large" name="phone" placeholder="Nhập số điện thoại" value={AddressCurrent?.users?.so_dien_thoai} prefix={<PhoneOutlined />} />
-                                </div>
+                                    <Input size="large" name="phone" placeholder="Chưa có số điện thoại" type="number" prefix={<PhoneOutlined />} />
+                                </div> : <div className="mb-3">
+                                    <label style={{ fontWeight: 'bold' }} htmlFor="">Số điện thoại <span style={{ color: 'red' }}>*</span></label>
+                                    <Input size="large" name="phone" type="number" placeholder="Nhập số điện thoại" value={AddressCurrent?.users?.so_dien_thoai} prefix={<PhoneOutlined />} />
+                                </div>}
+
                                 <div className="d-flex  " style={{ height: '40px' }}>
                                     <div className="me-3">
                                         <Select
@@ -591,17 +694,22 @@ function Cart() {
                     <div className="hangthuhai">
                         <img width={32} height={32} src="https://img.icons8.com/windows/32/home.png" alt="home" className="icon" />
                         <p className="tieude">Địa chỉ giao hàng:</p>
-                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi
-                            + "," + AddressCurrent.phuong.substring(0, AddressCurrent.phuong.indexOf('-'))
-                            + "," + AddressCurrent.quan.substring(0, AddressCurrent.quan.indexOf('-')) + ", Hồ Chí Minh" :
-                            <span className="text-danger fw-bold">Chưa nhập địa chỉ</span>}</p>
+                        <p className="noidung" style={{ paddingLeft: '233px' }}>{AddressCurrent?.dia_chi ? AddressCurrent?.dia_chi : <span className="text-danger fw-bold">Chưa nhập địa chỉ</span>}</p>
                     </div>
 
                     <div className="hangthuba">
                         <img width={32} height={32} src="https://img.icons8.com/fluency-systems-regular/50/online-store.png" alt="store" className="icon" />
                         <p className="tieude">Cửa hàng:</p>
-                        <p className="noidung" style={{ paddingLeft: '293px' }}>Quận 7</p>
+                        <p className="noidung" style={{ paddingLeft: '293px' }}>Phường Tân Phong,Quận 7,Hồ Chí Minh</p>
                     </div>
+                    {AddressCurrent?.dia_chi != "" && AddressCurrent?.users?.hovaten != "" && AddressCurrent?.users?.so_dien_thoai != "" ?
+                        <></>
+                        : <div className="d-flex align-items-center" style={{ height: '40px' }}>
+
+
+                            <p className="text-danger fw-bold" style={{ margin: '0', paddingLeft: '400px' }}>Hãy nhập đầy đủ thông tin để có thể thanh toán</p>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -761,17 +869,18 @@ function Cart() {
                                 >
                                     <div className="voucher-container">
                                         {vouchers.map((voucher, index) => (
-                                            <Col key={voucher.voucherID} sm={6} md={4}>
+                                            <Col key={voucher.voucherID} sm={6} md={2}>
                                                 <Card className="mb-3">
                                                     <Card.Img variant="top" src={`/images/${voucher.hinh_anh}`} />
                                                     <Card.Body>
                                                         <Card.Title>Giảm: {voucher.so_tien_giam} VND</Card.Title>
                                                         <Card.Text>Hạn sử dụng: {voucher.han_su_dung}</Card.Text>
-
-
-                                                        <button ref={ref => btnforapplyvoucher.current[index] = ref} className="btn btn-primary voucher-btn"
+                                                        <button disabled={disabledbutton(voucher.don_hang_toi_thieu, index, totalAmount)} ref={ref => btnforapplyvoucher.current[index] = ref} className="btn btn-primary voucher-btn"
                                                             onClick={() => {
+                                                                console.log("don hang toi thieu:", voucher.don_hang_toi_thieu);
+                                                                console.log("totalAmount:", totalAmount);
                                                                 applyVoucher(voucher, index, totalAmount, shipvalue);
+                                                                setselectedvoucher(voucher);
                                                             }}
                                                         >
                                                             Áp dụng
@@ -833,16 +942,15 @@ function Cart() {
                             <NavLink to="/thanhtoan">
                                 <button onClick={
                                     () => {
-                                        localStorage.setItem('totalamount', JSON.stringify(totalAmount));
                                         if (!voucherApplied) {
                                             localStorage.setItem('discount', 0);
                                             localStorage.setItem('total_after', JSON.stringify(0));
                                         }
                                     }
-                                } disabled={ListSPChecked.length === 0} style={{
+                                } disabled={ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == ""} style={{
                                     width: '100%', height: '45px',
                                     borderRadius: '5px', border: 'none',
-                                    backgroundColor: ListSPChecked.length === 0 ? 'black' : 'red',
+                                    backgroundColor: ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == "" ? 'black' : 'red',
                                     color: 'white', fontWeight: 'bolder'
                                 }}>Thanh toán</button>
                             </NavLink>
