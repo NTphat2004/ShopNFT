@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import { Select } from 'antd';
+import { message, Select } from 'antd';
 import { DeleteOutlined, EditOutlined, CreditCardOutlined, WalletOutlined } from '@ant-design/icons';
 import axios from "axios";
 import { Formik, useFormik } from 'formik';
@@ -12,14 +12,18 @@ import { styled } from "@mui/material";
 const userId = localStorage.getItem('account_id');
 let shipfee = localStorage.getItem('shippingfee');
 
+
+
 let total = localStorage.getItem('totalamount');
 let totalafterdiscount = localStorage.getItem('total_after');
 let voucher = (localStorage.getItem('voucher'));
+let voucher2 = JSON.parse(localStorage.getItem('voucher'));
 let discount = localStorage.getItem('discount');
 let totalweight;
 let totallength;
 let totalwidth
 let totalheight;
+
 
 
 
@@ -41,14 +45,14 @@ const options = [
     {
         label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img width={24} height={24} src="/images/vnpay.png" alt="" /> Ví Vnpay (giảm 5% giá trị sản phẩm)
+                <img width={24} height={24} src="https://img.icons8.com/color/48/paypal.png" alt="" /> Paypal(giảm 5% giá trị sản phẩm)
             </div>
         ),
         value: '2',
     }, {
         label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img width={24} height={24} src="/images/vnpay.png" alt="" /> Paypal(giảm 5% giá trị sản phẩm)
+                <img width={24} height={24} src="images/vnpay.png" alt="" /> Ví Vnpay (giảm 5% giá trị sản phẩm)
             </div>
         ),
         value: '3',
@@ -66,6 +70,8 @@ const labelRender = (props) => {
         </span>);
 };
 function Thanhtoan() {
+    const [temptid, settemptid] = useState(1);
+    const [ghichu, setghichu] = useState('');
     const [usingonlinepayment, setusingonlinepayment] = useState(false);
     const userId = localStorage.getItem('account_id');
     const selectedvoucher = localStorage.getItem('voucher') ? JSON.parse(localStorage.getItem('voucher')) : null;
@@ -102,7 +108,6 @@ function Thanhtoan() {
         setlistprovince(res.data.data);
     }
     const checkvalidvoucher = async () => {
-
         const jsonparsevoucher = JSON.parse(voucher);
         if (jsonparsevoucher != null) {
             const object = JSON.parse(localStorage.getItem('voucher'));
@@ -114,14 +119,14 @@ function Thanhtoan() {
 
             if (jsonparsevoucher != null) {
                 if (!response.data) {
-                    seterrormessage("Voucher đã hết hạn hoặc hết số lần sử dụng!");
+                    seterrormessage(errormessage + "Voucher đã hết hạn hoặc hết số lần sử dụng!");
                 }
                 if (respone2.data.length != 0) {
                     seterrormessage(errormessage + " Sản phẩm đã hết hàng ");
                 }
-                if (errormessage.length == 0) {
-                    alert("Thanh toán thanh cong");
-                    create_ghn_order()
+                if (response.data && respone2.data.length === 0) {
+                    alert("Thanh toán thanh công!");
+                    // create_ghn_order()
                 }
             }
         } else {
@@ -130,15 +135,14 @@ function Thanhtoan() {
                 method: "POST",
             })
             if (respone2.data.length != 0) {
-                seterrormessage(errormessage + " Sản phẩm đã hết hàng ");
+                seterrormessage(" Sản phẩm đã hết hàng ");
             }
-            if (errormessage.length == 0) {
-                alert("Thanh toán thanh cong");
-                create_ghn_order()
+            if (respone2.data.length === 0) {
+                alert("Thanh toán thanh công!");
+                //   create_ghn_order()
 
             }
         }
-
     }
     const diachi = React.useRef(null);
     const shippingfee = React.useRef(null);
@@ -200,13 +204,13 @@ function Thanhtoan() {
 
 
 
-
+    // parseInt(totalAmount) + parseInt(shipfee), 
     const apipayment = async (id, paypalid) => {
 
         console.log('run save');
         console.log("method :", method);
         const res = await axios({
-            url: `http://localhost:8080/createpayment?userid=${userId}&spid=${product_id_params}&quantity=${product_quantity_params}&total=${parseInt(totalAmount) + parseInt(shipfee)}&method=${method}&paypalid=${paypalid}`, method: 'POST',
+            url: `http://localhost:8080/createpayment?userid=${userId}&spid=${product_id_params}&quantity=${product_quantity_params}&total=${checkfordiscount()}&method=${method}&paypalid=${paypalid}`, method: 'POST',
             headers: {
                 "Content-Type": "application/json"
             }, data: {
@@ -216,12 +220,12 @@ function Thanhtoan() {
                 'thoi_gianXN': null,
                 'dia_chi': AddressCurrent.dia_chi,
                 'so_dien_thoai': AddressCurrent.users.so_dien_thoai,
-                'ghi_chu': null,
+                'ghi_chu': ghichu ? ghichu : '',
                 'phi_ship': shipfee,
                 'voucher': JSON.parse(voucher),
-                'tong_tien': parseInt(totalAmount) + parseInt(shipfee),
+                'tong_tien': checkfordiscount(),
                 'thoi_gian_du_kien': leadtime.toString(),
-                'online_payment_id': paypalid,
+                'online_payment_id': paypalid ? paypalid : null,
                 'users': {
                     'accountID': AddressCurrent.users.accountID,
                 },
@@ -229,14 +233,25 @@ function Thanhtoan() {
                     'dia_chiID': AddressCurrent.dia_chiID
                 },
                 'phuongthuctt': {
-                    'phuong_thucTTID': method == '1' ? "ptt01" : "ptt02"
+                    'phuong_thucTTID': checkmethod()
                 }
             }
         });
+        if (method == 3) { window.open(res.data); seturlforqrcode(res.data); }
+
         console.log("Response tao don hang: ", res.data);
         setdonhangid(res.data.don_hangid);
     }
+    const checkmethod = () => {
+        if (method == 1) {
+            return "ptt01"
+        } else if (method == 2) {
+            return "ptt02"
+        } else if (method == 3) {
+            return "ptt03"
+        }
 
+    }
 
     Number.prototype.format = function (n, x, s, c) {
         var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
@@ -334,13 +349,15 @@ function Thanhtoan() {
                 }
 
             });
-
-            if (res.data.status == 'CREATED') {
-                apipayment(id, res.data.id);
-                seturlforqrcode(res.data.links.find(link => link.rel === "approve").href);
-                localStorage.setItem('paypal_order_id', res.data.id);
-                console.log('paypal', res.data.links.find(link => link.rel === "approve").href);
+            if (method == '2') {
+                if (res.data.status == 'CREATED') {
+                    apipayment(id, res.data.id);
+                    seturlforqrcode(res.data.links.find(link => link.rel === "approve").href);
+                    localStorage.setItem('paypal_order_id', res.data.id);
+                    console.log('paypal', res.data.links.find(link => link.rel === "approve").href);
+                }
             }
+
 
 
 
@@ -399,10 +416,31 @@ function Thanhtoan() {
         console.log("ghn create data", res.data);
         if (method == "1") {
             console.log(res.data.data.order_code, 'id ghn');
+            settemptid(temptid + 1);
             apipayment(res.data.data.order_code, null);
-        } else {
+        }
+        else if (method == "2") {
             console.log("run paypal");
             paypal_CreateOrder(res.data.data.order_code);
+        } 
+        else {
+            console.log(res.data.data.order_code, 'id ghn');
+            apipayment(res.data.data.order_code, null);
+        }
+    }
+
+    const checkfordiscount = () => {
+        if (discount > 0 && usingonlinepayment) {
+            return (totalafterdiscount - ((totalafterdiscount * 5) / 100));
+        }
+        else if (discount > 0) {
+            return totalafterdiscount;
+        }
+        else if (usingonlinepayment) {
+            return ((parseInt(total) + parseInt(shipfee)) - (((parseInt(total) + parseInt(shipfee)) * 5) / 100));
+        }
+        else {
+            return (parseInt(total) + parseInt(shipfee));
         }
     }
 
@@ -423,13 +461,17 @@ function Thanhtoan() {
         console.log('voucher validation', vouchervalid);
     }, [vouchervalid])
 
+    const returntocart = () => {
+        return <NavLink className={"text-decoration-none "} to={"/cart"}> <span className={"text-decoration-none text-dark"}>Chưa chọn voucher ?</span>  Quay về giỏ hàng</NavLink>
+    }
+
 
     useEffect(() => {
         api();
         // apishippingfee();
         getPaypalAccessToken();
         Calculate_the_expected_delivery_time();
-
+        voucher2 = JSON.parse(localStorage.getItem('voucher'));
         shipfee = localStorage.getItem('shippingfee');
         total = localStorage.getItem('totalamount');
         totalafterdiscount = localStorage.getItem('total_after');
@@ -451,7 +493,7 @@ function Thanhtoan() {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [method, discount]);
+    }, [method, discount, voucher2]);
 
 
     const handleInputClick = () => {
@@ -460,28 +502,7 @@ function Thanhtoan() {
 
     return (
         <>
-            <header className="bg-white border-bottom">
-                <div className="container-fluid py-1">
-                    <div className="row align-items-center">
-                        <div className="col-3 col-md-3 d-flex align-items-center mt-2 ps-3">
-                            <NavLink to="/">
-                                <img src="/images/logo-removebg-preview.png" className="me-3 img-fluid" width={80} alt="" />
-                            </NavLink>
-                        </div>
-                        <div className="col-6 col-md-6 mt-2 mt-md-0 d-flex justify-content-center mt-2 px-2">
-                            <input type="text" className="form-control me-2" style={{ width: '500px' }} placeholder="Tìm kiếm" onClick={handleInputClick} />
-                            <button className="btn btn-outline-secondary" type="submit">
-                                <i className="bi bi-search"></i>
-                            </button>
-                        </div>
-                        <div className="col-3 col-md-3 d-flex justify-content-end align-items-center mt-2">
-                            <NavLink className="me-4 d-flex align-items-center" to="#">
-                                <i className="bi bi-person-circle text-dark fs-4"></i>
-                            </NavLink>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            
 
             <nav className="breaddesign col-11 mx-auto" aria-label="breadcrumb">
                 <ol className="breadcrumb">
@@ -536,10 +557,7 @@ function Thanhtoan() {
                                     <img width={150} height={150} src={`/images/${sp.sanPham.hinhanh[0].ten_hinh}`} alt="Sản phẩm" />
                                     <p style={{ width: '300px' }}>{sp.sanPham.ten_san_pham}</p>
                                 </div>
-                                <div className="d-flex ps-4 align-items-center">
-                                    <EditOutlined />
-                                    <input type="text" className="no-outline" placeholder="Thêm ghi chú" />
-                                </div>
+
                             </div>
 
                             <div className="chitietgiatien d-flex flex-column align-items-center justify-content-center">
@@ -568,7 +586,7 @@ function Thanhtoan() {
                         </div>
                         <div className="d-flex align-items-center" style={{ marginTop: '0' }}>
                             <EditOutlined />
-                            <input type="text" className="no-outline" placeholder="Thêm ghi chú" />
+                            <input type="text" onChange={(e) => { setghichu(e.target.value); console.log(e.target.value) }} className="no-outline" placeholder="Thêm ghi chú" />
                         </div>
                         <div className="mt-4">
                             <p style={{ fontWeight: 'bolder' }}>Phương thức thanh toán</p>
@@ -583,6 +601,8 @@ function Thanhtoan() {
                                     setmethod(value)
                                     if (value != '1') {
                                         setusingonlinepayment(true);
+                                    } else {
+                                        setusingonlinepayment(false);
                                     }
                                 }}
                             />
@@ -593,6 +613,14 @@ function Thanhtoan() {
                             </div>
                             <div className="fw-bolder">
                                 {(total).toLocaleString()} ₫
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center" style={{ height: '45px' }}>
+                            <div>
+                                <p style={{ margin: '0', color: '#777e90' }}>Voucher đã chọn</p>
+                            </div>
+                            <div className="fw-bolder">
+                                {voucher2 ? voucher2.voucherID : returntocart()}
                             </div>
                         </div>
                         <div className="d-flex justify-content-between align-items-center" style={{ height: '45px' }}>
@@ -608,23 +636,31 @@ function Thanhtoan() {
                                 <p style={{ margin: '0', fontWeight: 'bolder' }}>Thành tiền</p>
                             </div>
                             <div className="fw-bolder" style={{ color: 'red' }}>
-                                {discount > 0 ? <span className="text-decoration-line-through me-2"> {(parseInt(total) + parseInt(shipfee)).toLocaleString()}</span> : ''}
-                                {discount > 0 ? (totalafterdiscount).toLocaleString() : (parseInt(total) + parseInt(shipfee)).toLocaleString()} ₫
+                                {checkfordiscount().toLocaleString()} đ
+
+                                {/* {discount > 0 ? usingonlinepayment ? (totalafterdiscount - ((totalafterdiscount * 5) / 100)).toLocaleString() : (totalafterdiscount).toLocaleString() : (parseInt(total) + parseInt(shipfee)).toLocaleString()} ₫ */}
                             </div>
+
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >
-                            <button className="thanhtoanbtn" data-bs-toggle="modal" data-bs-target="#exampleModal2" ref={btn} onClick={() => {
-                                // create_ghn_order()
-                                const jsonparsevoucher = JSON.parse(voucher);
-                                console.log(jsonparsevoucher)
 
-                                checkvalidvoucher(voucher)
+                            {errormessage.length > 0 ?
+                                <Link to={`/cart/`} >  <button style={{
+                                    width: '100%', height: '45px',
+                                    borderRadius: '5px', border: 'none', backgroundColor: 'red',
+                                    color: 'white', fontWeight: 'bolder'
+                                }}>Trở về giỏ hàng</button> </Link> :
+                                <button className="thanhtoanbtn" data-bs-toggle="modal" data-bs-target="#exampleModal2" ref={btn} onClick={() => {
+                                    const jsonparsevoucher = JSON.parse(voucher);
+                                    console.log(jsonparsevoucher)
+                                    checkvalidvoucher(voucher)
+                                }} style={{
+                                    width: '100%', height: '45px',
+                                    borderRadius: '5px', border: 'none', backgroundColor: 'red',
+                                    color: 'white', fontWeight: 'bolder'
+                                }}>Đặt hàng</button>}
 
-                            }} style={{
-                                width: '100%', height: '45px',
-                                borderRadius: '5px', border: 'none', backgroundColor: 'red',
-                                color: 'white', fontWeight: 'bolder'
-                            }}>Đặt hàng</button>
+
                         </div>
                         {/* <div className="col-12 mt-2 thanhtoan" >
                             <button onClick={paypal_CreateOrder} style={{
@@ -644,7 +680,6 @@ function Thanhtoan() {
                                             <div className='h2'>{errormessage.length > 0 ? errormessage : 'Đặt hàng thành công'}</div>
                                         </div>
                                         <div className='row text-center '>
-
                                             <div className="col-12 ">
                                                 <QRCode
                                                     errorLevel="H"

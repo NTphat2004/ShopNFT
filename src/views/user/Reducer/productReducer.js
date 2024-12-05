@@ -6,7 +6,8 @@ const initialState = {
   ListProductThisWeek: [],
   ListProductTopSale: [],
   ListProductDiscount: [],
-  ListProductSearch: []
+  ListProductSearch: [],
+  PopupList: []
 }
 
 const productReducer = createSlice({
@@ -23,14 +24,17 @@ const productReducer = createSlice({
     ListProductDiscount: (state, action) => {
       state.ListProductDiscount = action.payload
     },
-    ListProductSearch: (state,action) =>{
+    ListProductSearch: (state, action) => {
       state.ListProductSearch = action.payload
+    },
+    PopupList1: (state, action) => {
+      state.PopupList = action.payload
     }
 
   }
 });
 
-export const {ListProductThisWeek,ListProductTopSale,ListProductDiscount,ListProductSearch } = productReducer.actions
+export const { ListProductThisWeek, ListProductTopSale, ListProductDiscount, ListProductSearch ,PopupList1} = productReducer.actions
 
 export default productReducer.reducer
 
@@ -38,39 +42,40 @@ export const Call_API_Products = () => {
 
   return async (dispatch) => {
 
-   try {
-    const turnonloading = setLoading('block');
-    dispatch(turnonloading)
-    const [ListProductThisWeekAPI, ListProductTopSaleAPI, ListProductDiscountAPI] = await Promise.all([
-      axios({ url: 'http://localhost:8080/FindProductThisWeekTOP10', method: 'GET' }),
-      axios({ url: 'http://localhost:8080/FindProductTopSell', method: 'GET' }),
-      axios({ url: 'http://localhost:8080/FindProductDiscountTOP10', method: 'GET' })
-     
-      
-    ]);
+    try {
+      const turnonloading = setLoading('block');
+      dispatch(turnonloading)
+      const [ListProductThisWeekAPI, ListProductTopSaleAPI, PopupList, ListProductDiscountAPI] = await Promise.all([
+        axios({ url: 'http://localhost:8080/FindProductThisWeek', method: 'GET' }),
+        axios({ url: 'http://localhost:8080/FindProductTopSell', method: 'GET' }),
+        axios({ url: 'http://localhost:8080/FindAllPopUp', method: 'GET' }),
+        axios({ url: 'http://localhost:8080/FindProductThisWeekTOP100', method: 'GET' })
+      ]);
 
-    // const ListProductThisWeek = await axios({url:'',method:'GET'});
+      // const ListProductThisWeek = await axios({url:'',method:'GET'});
 
-    // const ListProductTopSale = await axios({url:'',method:'GET'});
+      // const ListProductTopSale = await axios({url:'',method:'GET'});
 
-    // const ListProductDiscount = await axios({url:'',method:'GET'});
+      // const ListProductDiscount = await axios({url:'',method:'GET'});
 
-    const API_ListProductThisWeek = ListProductThisWeek(ListProductThisWeekAPI.data);
+      const API_ListProductThisWeek = ListProductThisWeek(ListProductThisWeekAPI.data);
 
-    const API_ListProductTopSale = ListProductTopSale(ListProductTopSaleAPI.data);
+      const API_ListProductTopSale = ListProductTopSale(ListProductTopSaleAPI.data);
 
-    const API_ListProductDiscount = ListProductDiscount(ListProductDiscountAPI.data);
+      const API_ListProductDiscount = ListProductDiscount(ListProductDiscountAPI.data);
+      const API_ListPopup = PopupList1(PopupList.data);
 
-    dispatch(API_ListProductThisWeek);
-    dispatch(API_ListProductTopSale);
-    dispatch(API_ListProductDiscount);
-   
-    // tắt loading
-    const turnoffloading = setLoading('none');
-    dispatch(turnoffloading);
-   } catch (error) {
-    
-   }
+      dispatch(API_ListProductThisWeek);
+      dispatch(API_ListProductTopSale);
+      dispatch(API_ListProductDiscount);
+      dispatch(API_ListPopup);
+
+      // tắt loading
+      const turnoffloading = setLoading('none');
+      dispatch(turnoffloading);
+    } catch (error) {
+
+    }
 
   }
 

@@ -13,6 +13,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import ColumnGroup from 'antd/es/table/ColumnGroup';
+import { Hidden } from '@mui/material';
 
 // Popup
 // PopupID (PK)
@@ -61,10 +62,10 @@ const CrudPOPUP = () => {
     }, validationSchema: Yup.object({
       han_su_dung: Yup.string().required('Hãy Nhập Chọn Banner'),
       ngay_tao: Yup.date().required('Hãy Nhập Ngày Tạo'),
-      sanpham: Yup.array().required('Hãy Nhập Chọn Chọn ảnh')
+      sanpham: Yup.array().required('Hãy chọn sản phẩm hiện thị trên Popup'),
     }),
     onSubmit: values => {
-      alert(JSON.stringify(values));
+      console.log((values));
       if (createorupdate) {
         alert('cap nhat');
         updatePopUp(values);
@@ -83,7 +84,7 @@ const CrudPOPUP = () => {
   const api = async (values) => {
     console.log('value', values);
     const res = await axios({
-      url: 'http://localhost:8080/createnewPopup',
+      url: `http://localhost:8080/createnewPopup?productname=${personName}&userid=${userId}`,
       method: 'POST',
       data: {
         'popupID': values.popupID,
@@ -94,7 +95,7 @@ const CrudPOPUP = () => {
         'users': {
           'accountID': values.users
         },
-        'sanpham': personName.map((item) => ({ 'san_phamId': item }))
+        // 'sanpham': personName.map((item) => ({ 'san_phamId': item }))
       },
       headers: { 'Content-Type': 'application/json' }
     });
@@ -104,9 +105,9 @@ const CrudPOPUP = () => {
   const updatePopUp = async (values) => {
     console.log('value', values);
     const res = await axios({
-      url: 'http://localhost:8080/updatePopup',
+      url: `http://localhost:8080/updatePopup?productname=${personName}&userid=${userId}`,
       method: 'POST',
-      data: {
+      data: JSON.stringify({
         'popupID': values.popupID,
         'ngay_tao': values.ngay_tao,
         'han_su_dung': values.han_su_dung,
@@ -116,7 +117,7 @@ const CrudPOPUP = () => {
           'accountID': values.users
         },
         'sanpham': personName.map((item) => ({ 'san_phamId': item }))
-      },
+      }),
       headers: { 'Content-Type': 'application/json' }
     });
     console.log(res.data);
@@ -146,12 +147,11 @@ const CrudPOPUP = () => {
       key: index,
       popupID: item.popupID,
       hansudung: item.han_su_dung,
-      hanhdong: item.hanh_dong,
       hoatdong: item.hoat_dong,
       ngaytao: item.ngay_tao,
       trangthaixoa: item?.trang_thai_xoa,
-      accountid: item?.users?.accountID,
-      sanpham: item?.sanpham
+      accountid: item?.accountID,
+      chitietsanpham: item?.chitietsanpham
     }));
     settabledata(formattedData);
   }
@@ -167,11 +167,7 @@ const CrudPOPUP = () => {
       dataIndex: 'hansudung',
       key: 'hansudung',
     },
-    {
-      title: 'Hành động',
-      dataIndex: 'hanhdong',
-      key: 'hanhdong',
-    },
+
     {
       title: 'Ngày tạo',
       dataIndex: 'ngaytao',
@@ -181,6 +177,7 @@ const CrudPOPUP = () => {
 
       dataIndex: 'trangthaixoa',
       key: 'trangthaixoa',
+      hidden: true
     },
     {
       title: 'AccountID',
@@ -193,11 +190,12 @@ const CrudPOPUP = () => {
       render: (_, record) => (
         <div>
           <button className='btn btn-danger me-2' onClick={() => {
-
-            deletepopup(record); getData()
+            setchange(change + 1);
+            deletepopup(record);
           }} >Xóa</button>
 
           <button className='btn btn-danger' onClick={() => {
+            console.log('record', record);
             formik.setValues(
               {
                 popupID: record.popupID,
@@ -247,11 +245,7 @@ const CrudPOPUP = () => {
       dataIndex: 'hansudung',
       key: 'hansudung',
     },
-    {
-      title: 'Hành động',
-      dataIndex: 'hanhdong',
-      key: 'hanhdong',
-    },
+
     {
       title: 'Ngày tạo',
       dataIndex: 'ngaytao',
@@ -261,6 +255,7 @@ const CrudPOPUP = () => {
 
       dataIndex: 'trangthaixoa',
       key: 'trangthaixoa',
+      hidden: true
     },
     {
       title: 'AccountID',
@@ -286,11 +281,7 @@ const CrudPOPUP = () => {
       dataIndex: 'hansudung',
       key: 'hansudung',
     },
-    {
-      title: 'Hành động',
-      dataIndex: 'hanhdong',
-      key: 'hanhdong',
-    },
+
     {
       title: 'Ngày tạo',
       dataIndex: 'ngaytao',
@@ -300,6 +291,7 @@ const CrudPOPUP = () => {
 
       dataIndex: 'trangthaixoa',
       key: 'trangthaixoa',
+      hidden: true
     },
     {
       title: 'AccountID',
@@ -312,7 +304,8 @@ const CrudPOPUP = () => {
       render: (_, record) => (
         <div>
           <button className='btn btn-danger me-2' onClick={() => {
-            undodelete(record); setchange(change + 1);
+            undodelete(record);
+            setchange(change + 1);
 
           }}>Khôi phục</button>
           {/* 
@@ -409,6 +402,8 @@ const CrudPOPUP = () => {
   }
 
 
+
+
   const fetchDataHanhDong = async () => {
     try {
       const response = await axios.get('http://localhost:8080/FindAllPopUpwithDTO'); // Replace with actual API endpoint
@@ -437,15 +432,14 @@ const CrudPOPUP = () => {
         key: index,
         popupID: item.popupID,
         hansudung: item.han_su_dung,
-        hanhdong: item.hanh_dong,
         hoatdong: item.hoat_dong,
         ngaytao: item.ngay_tao,
         trangthaixoa: item?.trang_thai_xoa,
         accountid: item?.users?.accountID,
-        sanpham: item?.sanpham
+        sanpham: item?.popupchitiet.map((item) => ({ 'ten_san_pham': item.sanpham.ten_san_pham, 'san_phamId': item.sanpham.san_phamId }))
       }));
       setdataSource(formattedData);
-      console.log(res.data);
+      console.log(formattedData);
     } catch (error) {
       console.error(error);
     }
@@ -480,7 +474,7 @@ const CrudPOPUP = () => {
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
     );
-
+    console.log(personName);
 
   };
 
@@ -571,11 +565,11 @@ const CrudPOPUP = () => {
     getData()
     getdeletedrecord()
     fetchProductHasDiscount()
-    console.log('change :', change);
+    // console.log('change :', change);
   }, [change])
 
   useEffect(() => {
-    console.log('options2', options2);
+    // console.log('options2', options2);
   }, [personName, listtemp, options2]);
 
   return (
@@ -612,7 +606,7 @@ const CrudPOPUP = () => {
 
                 </div>
                 <FormControl sx={{ m: 1, width: 600 }}>
-                  <InputLabel id="demo-multiple-checkbox-label">Tag</InputLabel>
+                  <InputLabel id="demo-multiple-checkbox-label">Sản phẩm</InputLabel>
                   <Select
                     labelId="demo-multiple-checkbox-label"
                     id="demo-multiple-checkbox"
@@ -621,16 +615,16 @@ const CrudPOPUP = () => {
                     onChange={handleChange
 
                     }
-                    input={<OutlinedInput label="Tag" />}
+                    input={<OutlinedInput label="Sản phẩm" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
                   >
-                    {options2.length == 0 ? options.map((name) => (
+                    {options.length == 0 ? options.map((name) => (
                       <MenuItem key={name.label} value={name.value}>
                         <Checkbox checked={personName.includes(name.value)} />
                         <ListItemText primary={name.label} />
                       </MenuItem>
-                    )) : options2.map((name) => (
+                    )) : options.map((name) => (
                       <MenuItem key={name.label} value={name.value}>
                         <Checkbox checked={personName.includes(name.value)} />
                         <ListItemText primary={name.label} />
@@ -659,12 +653,10 @@ const CrudPOPUP = () => {
                   <input
                     className="form-check-input"
                     type="radio"
-                    name="options"
+                    name="hoat_dong"
                     id="option1"
                     value="Đang hoạt động"
-                    onChange={(e) => {
-                      formik.setFieldValue("hoatdong", e.target.value);
-                    }}
+                    onChange={formik.handleChange}
                     checked={formik.values.hoat_dong == "Đang hoạt động"}
                   />
                   <label className="form-check-label fw-bold text-primary" htmlFor="option1">
@@ -675,12 +667,10 @@ const CrudPOPUP = () => {
                   <input
                     className="form-check-input"
                     type="radio"
-                    name="options"
+                    name="hoat_dong"
                     id="option2"
                     value="Không hoạt động"
-                    onChange={(e) => {
-                      formik.setFieldValue("hoatdong", e.target.value);
-                    }}
+                    onChange={formik.handleChange}
                     checked={formik.values.hoat_dong == "Không hoạt động"}
                   />
                   <label className="form-check-label fw-bold text-primary" htmlFor="option2">
@@ -692,9 +682,9 @@ const CrudPOPUP = () => {
               </div>
               <div className="col-md-12 text-center mt-3">
 
-                {selected ? <button className='btn btn-outline-warning fw-bold ms-2 mt-2'
-                  onClick={() => setcreateorupdate(true)} type='submit' style={{ minWidth: 120 }}> Cập nhật Danh Mục</button> :
-                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' onClick={() => setcreateorupdate(false)} type='submit' style={{ minWidth: 120 }} > Thêm Danh Mục</button>}
+                {selected ? <button disabled={personName.length > 3} className='btn btn-outline-warning fw-bold ms-2 mt-2'
+                  onClick={() => setcreateorupdate(true)} type='submit' style={{ minWidth: 120 }}> {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm": "Cập nhật Danh Mục"}</button> :
+                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' onClick={() => setcreateorupdate(false)} disabled={personName.length > 3} type='submit' style={{ minWidth: 120 }} > {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm": "Thêm Danh Mục"} </button>}
                 <button className='btn btn-outline-success fw-bold ms-2 mt-2' type='button' onClick={() => {
                   formik.resetForm();
                   getnewestid();

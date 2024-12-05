@@ -480,7 +480,7 @@ function Xetduyetsanpham() {
                 <div className="tab-content mt-3" id="myTabContent">
                     {/* Table content */}
                     <div className="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab">
-                        <h3>QUẢN LÍ POPUP</h3>
+                        <h3>QUẢN LÍ  PHÊ DUYỆT SẢN PHẨM</h3>
                         <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
                     </div>
                     <div className="tab-pane fade " id="table-tab-pane2" role="tabpanel" aria-labelledby="table-tab">

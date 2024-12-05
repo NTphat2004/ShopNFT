@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom';
@@ -36,6 +35,7 @@ const ListStore = ({ Products, checked }) => {
   useEffect(() => {
     console.log("gay")
     if (TextSearch || danhmuc || sosao || checked || price) {
+      setCurrentPage(1);
       SetfirstSearch(false);
     }
   }, [TextSearch, sosao, danhmuc, checked, price,Products]);
@@ -50,8 +50,8 @@ const ListStore = ({ Products, checked }) => {
       marginTop: '20px'
     }}>
       {firstSearch ? currentProducts.map((product) => {
-        const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
-        const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
+        {/* const totalStars =0; product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
+        const product.sosao =0; product.soluotdanhgia > 0 ? (totalStars / product.soluotdanhgia).toFixed(1) : 0; */}
 
         return (
           <> <div
@@ -84,7 +84,7 @@ const ListStore = ({ Products, checked }) => {
                   }}
                 >
                   <img
-                    src={`/images/${product.hinhanh[0].ten_hinh}`}
+                    src={`/images/${product.hinhanh}`}
                     className="img-fluid"
                     style={{ maxWidth: 200 }}
                     alt={product.ten_san_pham}
@@ -113,9 +113,9 @@ const ListStore = ({ Products, checked }) => {
                     </p>
                   )}
                   <div className="d-flex">
-                    <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                    <p>{product.soluotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                     <p className="text-end ms-auto me-2">
-                      {averageStars} <span className="bi bi-star-fill text-warning" />
+                      {product.sosao} <span className="bi bi-star-fill text-warning" />
                     </p>
                   </div>
                 </div>
@@ -137,7 +137,7 @@ const ListStore = ({ Products, checked }) => {
                   }}
                 >
                   <img
-                    src={`/images/${product.hinhanh[0].ten_hinh}`}
+                    src={`/images/${product.hinhanh}`}
                     className="img-fluid"
                     style={{ maxWidth: 200 }}
                     alt={product.ten_san_pham}
@@ -166,9 +166,9 @@ const ListStore = ({ Products, checked }) => {
                     </p>
                   )}
                   <div className="d-flex">
-                    <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                    <p>{product.soluotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                     <p className="text-end ms-auto me-2">
-                      {averageStars} <span className="bi bi-star-fill text-warning" />
+                      {product.sosao} <span className="bi bi-star-fill text-warning" />
                     </p>
                   </div>
                 </div>
@@ -232,8 +232,8 @@ const ListStore = ({ Products, checked }) => {
             </>
         );
       }) : listProduct.length > 0 ? currentlistProduct.map((product) => {
-        const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
-        const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
+        {/* const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
+        const product.sosao = product.soluotdanhgia > 0 ? (totalStars / product.soluotdanhgia).toFixed(1) : 0; */}
 
         return (
           <div
@@ -265,7 +265,7 @@ const ListStore = ({ Products, checked }) => {
                 }}
               >
                 <img
-                  src={`/images/${product.hinhanh[0].ten_hinh}`}
+                  src={`/images/${product.hinhanh}`}
                   className="img-fluid"
                   style={{ maxWidth: 200 }}
                   alt={product.ten_san_pham}
@@ -274,7 +274,7 @@ const ListStore = ({ Products, checked }) => {
 
               <div className="ms-3 mt-1">
                 <h6>{product.ten_san_pham}</h6>
-                {product.phantram_GG > 0 ? (
+                {product.phan_tram_GG > 0 ? (
                   <div className="d-flex">
                     <p
                       style={{
@@ -294,9 +294,9 @@ const ListStore = ({ Products, checked }) => {
                   </p>
                 )}
                 <div className="d-flex">
-                  <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                  <p>{product.soluotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                   <p className="text-end ms-auto me-2">
-                    {averageStars} <span className="bi bi-star-fill text-warning" />
+                    {product.sosao} <span className="bi bi-star-fill text-warning" />
                   </p>
                 </div>
               </div>
@@ -317,7 +317,7 @@ const ListStore = ({ Products, checked }) => {
                   }}
                 >
                   <img
-                    src={`/images/${product.hinhanh[0].ten_hinh}`}
+                    src={`/images/${product.hinhanh}`}
                     className="img-fluid"
                     style={{ maxWidth: 200 }}
                     alt={product.ten_san_pham}
@@ -346,9 +346,9 @@ const ListStore = ({ Products, checked }) => {
                     </p>
                   )}
                   <div className="d-flex">
-                    <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                    <p>{product.soluotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                     <p className="text-end ms-auto me-2">
-                      {averageStars} <span className="bi bi-star-fill text-warning" />
+                      {product.sosao} <span className="bi bi-star-fill text-warning" />
                     </p>
                   </div>
                 </div>

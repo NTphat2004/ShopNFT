@@ -38,6 +38,7 @@ import PostDetail from './views/user/Pages/PostDetail';
 import Voucher from './views/user/Pages/Voucher';
 import { ToastContainer } from 'react-toastify';
 import ResultPayment from './views/user/Pages/ResultPayment';
+import ResultPaymentVNpay from './views/user/Pages/ResultPaymentVnpay';
 import Listdonhang from './views/user/Pages/listdonhang';
 import Quanlybaidang from './views/user/Pages/quanlybaidang';
 import Login from './views/user/Pages/Login';
@@ -52,6 +53,9 @@ import SearchByBanner from './views/user/Pages/SearchByBanner';
 import GoogleLoginButton from './views/user/Pages/GoogleLoginButton';
 import Respone from './views/admin/Pages/Respone';
 import Xetduyetsanpham from './views/admin/Pages/xetduyetsanpham';
+import UserAddresses from './views/user/Pages/UserAddresses';
+import Wallet from './views/user/Pages/Wallet';
+import VoucherList from './views/user/Pages/VoucherList';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
@@ -86,6 +90,7 @@ root.render(
           <Route path='Sanphamyeuthich' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
           <Route path='Yêu-Thích' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
           <Route path='paymentreturn' element={<ResultPayment></ResultPayment>}></Route>
+          <Route path='paymentreturnvnpay' element={<ResultPaymentVNpay></ResultPaymentVNpay>}></Route>
           <Route path='donhang' element={<Listdonhang></Listdonhang>}></Route>
           <Route path='donhang2' element={<Quanlybaidang></Quanlybaidang>}></Route>
           <Route path='login' element={<Login></Login>}></Route>
@@ -98,6 +103,9 @@ root.render(
           <Route path='đổi-mật-khẩu' element={<PasswordChangeForm></PasswordChangeForm>}></Route>
           <Route path='product/banner/:id' element={<SearchByBanner></SearchByBanner>}></Route>
           <Route path='google' element={<GoogleLoginButton></GoogleLoginButton>}></Route>
+          <Route path='địa-chỉ-của-bạn' element={<UserAddresses></UserAddresses>}></Route>
+          <Route path='ví-đã-liên-kết?' element={<Wallet></Wallet>}></Route>
+          <Route path='mã-giảm-giá' element={<VoucherList></VoucherList>}></Route>
         </Route>
 
         {/*end page user */}
@@ -139,7 +147,7 @@ root.render(
 
       </Routes>
       <ToastContainer pauseOnHover={false} />
-      <Popup></Popup>
+      {/* <Popup></Popup> */}
     </BrowserRouter>
     <Loading></Loading>
   </Provider>

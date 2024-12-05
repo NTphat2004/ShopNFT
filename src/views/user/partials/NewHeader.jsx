@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState,useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ListProductSearch } from '../Reducer/productReducer';
@@ -17,7 +17,7 @@ const NewHeader = () => {
     const [usersId, setUsersId] = useState(null);
     const [Text, SetText] = useState("");
     const [suggest, Setsuggest] = useState([]);
-    const mostpbuyed = useSelector(state => state.product.ListProductTopSale);
+    const [mostpbuyed, Setmostpbuyed] = useState([]);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -37,6 +37,17 @@ const NewHeader = () => {
         }
     }
 
+    const gettopsale = async () => {
+        try {
+            const res = await axios({ url: `http://localhost:8080/Product/Getsanphamname`, method: "GET" });
+            Setmostpbuyed(res.data);
+            console.log("render suggest")
+        } catch (error) {
+            console.error("Lỗi API:", error); // Xử lý lỗi
+        }
+    }
+
+
 
     // Hàm debounce để trì hoãn việc gọi API
     const debounce = (func, delay) => {
@@ -49,16 +60,17 @@ const NewHeader = () => {
         };
     };
 
-    
+
     const debouncedApiSuggest = useCallback(debounce(api_Suggest, 1000), []);
 
     const highlightText = (text, keyword) => {
-        if (!keyword) return text; 
-        const regex = new RegExp(`(${keyword})`, 'gi'); 
-        return text.replace(regex, (match) => `<span class="highlight">${match}</span>`); 
+        if (!keyword) return text;
+        const regex = new RegExp(`(${keyword})`, 'gi');
+        return text.replace(regex, (match) => `<span class="highlight">${match}</span>`);
     };
     // Xử lý khi click bên ngoài để đóng popup
     useEffect(() => {
+        gettopsale()
         setIsLoggedIn(!!userId);
         setUsersId(userId);
         dispatch(CallAPI_Cart(userId))
@@ -133,8 +145,8 @@ const NewHeader = () => {
                 <div className="container-fluid py-1">
                     <div className="row align-items-center">
                         {/* Logo và Dropdown */}
-                    {/* Logo Section */}
-                    <div className="col-3 d-flex align-items-center">
+                        {/* Logo Section */}
+                        <div className="col-3 d-flex align-items-center">
                             <img
                                 src="/images/logosnackshoponline.jpg"
                                 alt="Snack Shop Logo"
@@ -220,7 +232,7 @@ const NewHeader = () => {
                                 </div>
                             )}
 
-                       
+
                             <NavLink className="me-4 d-flex align-items-center" to="#">
                                 <i className="fa fa-bell fs-4 text-dark"></i>
                             </NavLink>
@@ -331,8 +343,7 @@ const NewHeader = () => {
                                         <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
                                             {mostpbuyed.map((sp, index) => {
                                                 return <li key={sp.san_phamId} onClick={async () => {
-
-                                                    const res = await axios({ url: `http://localhost:8080/Product/FindbyName?name=${sp.ten_san_pham}`, method: 'GET' })
+                                                    const res = await axios({ url: `http://localhost:8080/Product/FindbyNamenew?name=${sp.ten_san_pham}`, method: 'GET' })
                                                     const api = ListProductSearch(res.data);
                                                     SetText(sp.ten_san_pham)
                                                     dispatch(api);

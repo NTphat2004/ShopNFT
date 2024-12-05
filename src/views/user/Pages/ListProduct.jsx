@@ -30,8 +30,9 @@ const ListProduct = ({ products }) => {
             }}
         >
             {products.map((product) => {
-                const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
-                const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
+                {/* const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
+                const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0; */}
+
 
                 return (
                     <SwiperSlide key={product.san_phamId}>
@@ -86,14 +87,16 @@ const ListProduct = ({ products }) => {
             {product.so_luong > 0 ? (
                 <NavLink to={`/product/detail/${product.san_phamId}`} className="nav1-link">
                     <img
-                        src={`/images/${product.hinhanh[0].ten_hinh}`}
+                        src={`/images/${product.hinhanh}`}
                         className="img-fluid mx-auto"
                         style={{ maxWidth: 200, maxHeight: 200 }}
                         alt=""
+                        loading='lazy'
+                    
                     />
                     <div className="text-start ms-3 mt-1">
                         <h6>{product.ten_san_pham}</h6>
-                        {product.phantram_GG > 0 ? (
+                        {product.phan_tram_GG > 0 ? (
                             <div className="d-flex">
                                 <p style={{ fontSize: 14, textDecoration: 'line-through' }}>
                                     {product.gia_goc} <span className="text-danger">VND</span>
@@ -109,13 +112,13 @@ const ListProduct = ({ products }) => {
                         )}
                         <div className="d-flex">
                             <p>
-                                {product.danhgia.length}{' '}
+                                {product.luotdanhgia}{' '}
                                 <span className="text-primary" style={{ fontSize: 13 }}>
                                     Đánh giá
                                 </span>
                             </p>
                             <p className="text-end ms-auto me-2">
-                                {averageStars}{' '}
+                                {product.sosao}{' '}
                                 <span className="bi bi-star-fill text-warning" />
                             </p>
                         </div>
@@ -124,10 +127,12 @@ const ListProduct = ({ products }) => {
             ) : (
                 <div>
                     <img
-                        src={`/images/${product.hinhanh[0].ten_hinh}`}
+                        src={`/images/${product.hinhanh}`}
                         className="img-fluid mx-auto"
                         style={{ maxWidth: 200, maxHeight: 200 }}
                         alt=""
+                        loading='lazy'
+                     
                     />
                     <div className="text-start ms-3 mt-1">
                         <h6>{product.ten_san_pham}</h6>
@@ -136,13 +141,13 @@ const ListProduct = ({ products }) => {
                         </p>
                         <div className="d-flex">
                             <p>
-                                {product.danhgia.length}{' '}
+                                {product.luotdanhgia}{' '}
                                 <span className="text-primary" style={{ fontSize: 13 }}>
                                     Đánh giá
                                 </span>
                             </p>
                             <p className="text-end ms-auto me-2">
-                                {averageStars}{' '}
+                                {product.sosao}{' '}
                                 <span className="bi bi-star-fill text-warning" />
                             </p>
                         </div>

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 const ResultPayment = () => {
     const token = localStorage.getItem('paypal_token');
     const [iserror, setiserror] = useState(false);
+    const userId = localStorage.getItem('account_id');
     const paypal_order_id = localStorage.getItem('paypal_order_id');
     console.log(paypal_order_id);
     const capturepaymentfororder = async (orderid) => {
@@ -36,6 +37,35 @@ const ResultPayment = () => {
         details_for_authorized_payment(res.data.purchase_units[0].payments.authorizations[0].id);
 
 
+    }
+
+    const Show_details_order = async () => {
+
+        const res = await axios({
+            url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${paypal_order_id}`,
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }, data: {
+
+            }
+        })
+        saveuserwalletinfo(res.data.payment_source.paypal.account_id);
+    }
+
+
+
+    const saveuserwalletinfo = async (walletid,) => {
+        const res = await axios({
+            url: `http://localhost:8080/saveuserwallet?userid=${userId}&walletid=${walletid}`,
+            method: 'POST',
+            data: {
+             
+            }
+        });
+        console.log(res.data);
     }
 
     const updateStatus = async (id) => {
@@ -76,6 +106,7 @@ const ResultPayment = () => {
 
     useEffect(() => {
         capturepaymentfororder();
+        Show_details_order();
     }, [iserror])
 
     return (
@@ -99,7 +130,7 @@ const ResultPayment = () => {
                                     <p className="message_button">Thank you for your purchase. you package will be delivered within 2 days of your purchase</p>
                                 </div>
                                 <div className="actions_button">
-                                    <button className="history_button" type="button"><Link  style={{ textDecoration: 'none' }} to={`/`} >
+                                    <button className="history_button" type="button"><Link style={{ textDecoration: 'none' }} to={`/`} >
                                         Trang chủ
                                     </Link></button>
                                     <button className="track_button" type="button"> <Link style={{ textDecoration: 'none' }} to={`/lịch-sử-đặt-hàng`} >

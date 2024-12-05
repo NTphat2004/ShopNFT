@@ -106,7 +106,6 @@ function Cart() {
 
         // Dispatch action tương ứng
         if (e.target.checked) {
-
             const api = AddSpthanhtoan(cart);
             dispatch(api);
         } else {
@@ -185,10 +184,10 @@ function Cart() {
         const amount = document.querySelectorAll(".amount")
 
         // console.log('h', a, b);
-        console.log(parseFloat(amount[0].innerHTML.substring(0, amount[0].innerHTML.length - 1)));
-        console.log(amount[0].innerHTML.substring(amount[0].innerHTML.indexOf(',') + 1, amount[0].innerHTML.length));
+        // console.log(parseFloat(amount[0].innerHTML.substring(0, amount[0].innerHTML.length - 1)));
+        // console.log(amount[0].innerHTML.substring(amount[0].innerHTML.indexOf(',') + 1, amount[0].innerHTML.length));
         const stringtemp = parseInt(amount[0].innerHTML.substring(0, amount[0].innerHTML.length - 1)) * 1000;
-        console.log(index);
+        // console.log(index);
         if (!voucherApplied) {
             for (let i = 0; i < nodeList.length; i++) {
                 nodeList[i].disabled = true;
@@ -232,7 +231,6 @@ function Cart() {
             setvoucherApplied(false);
             localStorage.setItem('voucher', null);
             setvoucherindex(-1);
-            setvoucherApplied(false)
             localStorage.setItem('discount', 0);
             localStorage.setItem('total_after', JSON.stringify(0));
             setshipvalue_discount(0)
@@ -296,7 +294,7 @@ function Cart() {
 
     const fetchVouchers = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/loadVoucher');
+            const response = await axios.get(`http://localhost:8080/api/vouchernotbeingused/${userId}`);
             setVouchers(response.data);
 
         } catch (error) {
@@ -306,7 +304,7 @@ function Cart() {
         }
     };
     const apishippingfee = async (a, b, c, d) => {
-        console.log('fee', a, b, c, d);
+        // console.log('fee', a, b, c, d);
         if (a != 0) {
             const res = await axios({
                 url: 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee', method: 'POST',
@@ -342,15 +340,6 @@ function Cart() {
             formatnumber = res.data.data.total.format(0, 3, '.', ',');
         }
     };
-
-
-
-
-
-
-
-
-
 
 
     const fechtProvince = async () => {
@@ -404,8 +393,6 @@ function Cart() {
             }, data: JSON.stringify({ token: "b20158be-5619-11ef-8e53-0a00184fe694", province_id: 202 }),
         });
         setlistDistrict(res2.data.data);
-        // setlistDistrict(res2.data.data);
-        // apishippingfee(getProvince(diachivalue, res1.data.data), getward(diachivalue, res2.data.data), a, b, c, d);
     }
 
     Number.prototype.format = function (n, x, s, c) {
@@ -415,20 +402,14 @@ function Cart() {
         return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
     };
 
-
-
-
     const dispatch = useDispatch();
     dispatch(Thanhtoan(ListSPChecked))
 
     const handleCheckAllChange = (e) => {
         const isChecked = e.target.checked;
         setCheckedAll(isChecked);
-
-
         const newCheckedItems = ListCart.gioHangChiTiet.map(cart => cart.sanPham.so_luong > 0 ? isChecked : false);
         setCheckedItems(newCheckedItems);
-
         if (isChecked) {
             localStorage.setItem('totalamount', JSON.stringify(totalAmount));
             ListCart.gioHangChiTiet.forEach(cart => {
@@ -437,9 +418,7 @@ function Cart() {
                     dispatch(api);
                 }
             });
-
         } else {
-
             localStorage.setItem('totalamount', JSON.stringify(totalAmount));
             ListCart.gioHangChiTiet.forEach(cart => {
                 if (cart.sanPham.so_luong > 0) {
@@ -460,61 +439,40 @@ function Cart() {
         else {
             SetaddressCurrent(res.data[0]);
         }
-
-
-
-
     }
+
     useEffect(() => {
         if (checkedItems.length !== ListCart.gioHangChiTiet?.length) {
-
             setCheckedItems(new Array(ListCart.gioHangChiTiet?.length).fill(false));
             setCheckedAll(false); // Reset lại checkedAll khi số lượng sản phẩm thay đổi
         }
     }, [ListCart.gioHangChiTiet]);
 
-
     useEffect(() => {
         console.log("voucherApplied :", voucherApplied);
         console.log("voucherindex :", voucherindex);
-        const voucher = JSON.parse(localStorage.getItem('voucher'));
-        if (voucher != null) {
+        const voucher = localStorage.getItem('voucher') == null ? JSON.parse(localStorage.getItem('voucher')) : JSON.parse(localStorage.getItem('voucher'));
+        if (voucher !== null) {
+            console.log("Không có voucher");
             checkamounttotal();
-            // if (voucherApplied) {
-            //     const nodeList = document.querySelectorAll(".voucher-btn");
-            //     for (let i = 0; i < nodeList.length; i++) {
-            //         nodeList[i].disabled = true;
-            //         nodeList[voucherindex].disabled = false;
-            //     }
-
-            // }
         }
-
-
-
-
         localStorage.setItem('totalamount', JSON.stringify(totalAmount));
         apishippingfee(totalweight, totallength, totalwidth, totalheight);
         localStorage.setItem("totalweight", totalweight);
         localStorage.setItem("totallength", totallength);
         localStorage.setItem("totalwidth", totalwidth);
         localStorage.setItem("totalheight", totalheight);
+
     }, [totalAmount]);
 
     useEffect(() => {
-        // console.log('ward', Ward);
-        // console.log('district', District);
     }, [Ward, District]);
 
     useEffect(() => {
-
-        // console.log("selected voucher ;", selectedvoucher);
     }, [selectedvoucher]);
 
 
     useEffect(() => {
-
-        console.log('cart run')
         localStorage.setItem('voucher', null);
         InformationUser()
         fetchVouchers();
@@ -734,7 +692,7 @@ function Cart() {
                     </div>
 
                     {ListCart?.gioHangChiTiet?.map((cart, index) => {
-                        return <div className={`col-12 cardgiohang d-flex align-items-start ${cart.sanPham?.so_luong == 0 ? 'disabled-div' : ''}  `} key={index}>
+                        return <div className={`col-12 cardgiohang d-flex align-items-start ${cart.sanPham?.so_luong == 0 || cart.sanPham.hoat_dong === "Off" ? 'disabled-div' : ''}  `} key={index}>
                             <Checkbox
                                 checked={checkedItems[index]}
                                 onChange={handleCheckItemChange(index, cart)}
@@ -743,43 +701,64 @@ function Cart() {
                             />
                             <div>
                                 <div className="d-flex position-relative">
-                                    {cart.sanPham.so_luong === 0 && (
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: '0',
-                                                left: '40px',
-                                                width: '100%',
-                                                height: '100%',
-                                                color: 'red',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: '18px',
-                                                fontWeight: 'bold',
-                                                zIndex: '1',
-                                            }}
-                                        >
-                                            Hết hàng
-                                            <button
-                                                className="btn btn-danger btn-interactive"
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '80%',
-                                                    left: '180px',
-                                                    zIndex: '2',
-                                                    transform: 'translateY(-50%)',
-                                                    minWidth: '180px'
-                                                }}
+                                {cart.sanPham.hoat_dong === 'Off' && cart.sanPham.so_luong == 0 && (
+                                        <>
+                                            <div className="out-of-stock">Không khả dụng</div>
+                                            <Button
+                                                className="btn-interactive "
                                                 onClick={() => {
-                                                    const remove = removeItem({ idcart: cart.id, userId, idsanpham: cart.sanPham.san_phamId });
+                                                    const remove = removeItem({
+                                                        idcart: cart.id,
+                                                        userId,
+                                                        idsanpham: cart.sanPham.san_phamId,
+                                                    });
                                                     dispatch(remove);
                                                 }}
                                             >
                                                 Xóa
-                                            </button>
-                                        </div>
+                                            </Button>
+                                        </>
                                     )}
+                                    {cart.sanPham.hoat_dong === 'Off'  && cart.sanPham.so_luong != 0  && (
+                                        <>
+                                            <div className="out-of-stock">Không khả dụng</div>
+                                            <Button
+                                                className="btn-interactive "
+                                                onClick={() => {
+                                                    const remove = removeItem({
+                                                        idcart: cart.id,
+                                                        userId,
+                                                        idsanpham: cart.sanPham.san_phamId,
+                                                    });
+                                                    dispatch(remove);
+                                                }}
+                                            >
+                                                Xóa
+                                            </Button>
+                                        </>
+                                    )}
+                           
+
+
+                                    {cart.sanPham.so_luong === 0 && cart.sanPham.hoat_dong === 'On' && (
+                                        <>
+                                            <div className="out-of-stock">Hết hàng</div>
+                                            <Button
+                                                className="btn-interactive "
+                                                onClick={() => {
+                                                    const remove = removeItem({
+                                                        idcart: cart.id,
+                                                        userId,
+                                                        idsanpham: cart.sanPham.san_phamId,
+                                                    });
+                                                    dispatch(remove);
+                                                }}
+                                            >
+                                                Xóa
+                                            </Button>
+                                        </>
+                                    )}
+
 
                                     <NavLink to={`/product/detail/${cart.sanPham?.san_phamId}`}><img width={150} height={150} src={`/images/${cart.sanPham?.hinhanh[0]?.ten_hinh}`} alt="Sản phẩm" /></NavLink>
 
@@ -870,22 +849,28 @@ function Cart() {
                                     <div className="voucher-container">
                                         {vouchers.map((voucher, index) => (
                                             <Col key={voucher.voucherID} sm={6} md={2}>
-                                                <Card className="mb-3">
+                                                <Card className="mb-3 " >
                                                     <Card.Img variant="top" src={`/images/${voucher.hinh_anh}`} />
-                                                    <Card.Body>
+                                                    <Card.Body style={{ height: '320px' }}>
                                                         <Card.Title>Giảm: {voucher.so_tien_giam} VND</Card.Title>
+                                                        <Card.Title>Đơn thiểu để dùng: {voucher.don_hang_toi_thieu.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Card.Title>
+                                                        {voucher.don_hang_toi_thieu > totalAmount ? <Card.Text>Cần mua thêm: {voucher.don_hang_toi_thieu - totalAmount}</Card.Text> : null}
                                                         <Card.Text>Hạn sử dụng: {voucher.han_su_dung}</Card.Text>
-                                                        <button disabled={disabledbutton(voucher.don_hang_toi_thieu, index, totalAmount)} ref={ref => btnforapplyvoucher.current[index] = ref} className="btn btn-primary voucher-btn"
-                                                            onClick={() => {
-                                                                console.log("don hang toi thieu:", voucher.don_hang_toi_thieu);
-                                                                console.log("totalAmount:", totalAmount);
-                                                                applyVoucher(voucher, index, totalAmount, shipvalue);
-                                                                setselectedvoucher(voucher);
-                                                            }}
-                                                        >
-                                                            Áp dụng
-                                                        </button>
+                                                        <Card.Text>Lượt dùng còn lại: {voucher.so_luong - voucher.so_luot_SD} lần</Card.Text>
                                                     </Card.Body>
+
+                                                    <button
+                                                        disabled={disabledbutton(voucher.don_hang_toi_thieu, index, totalAmount)} ref={ref => btnforapplyvoucher.current[index] = ref}
+                                                        className="btn btn-primary voucher-btn"
+                                                        onClick={() => {
+                                                            console.log("don hang toi thieu:", voucher.don_hang_toi_thieu);
+                                                            console.log("totalAmount:", totalAmount);
+                                                            applyVoucher(voucher, index, totalAmount, shipvalue);
+                                                            setselectedvoucher(voucher);
+                                                        }}
+                                                    >
+                                                        Áp dụng
+                                                    </button>
                                                 </Card>
                                             </Col>
                                         ))}
@@ -935,7 +920,7 @@ function Cart() {
                                 <p style={{ margin: '0', fontWeight: 'bolder' }}>Thành tiền</p>
                             </div>
                             <div className="fw-bolder amount" style={{ color: 'red' }}>
-                                {shipvalue_discount > 0 ? (shipvalue_discount).toLocaleString() : (totalAmount + shipvalue).toLocaleString()} ₫
+                                {shipvalue_discount > 0 ? (shipvalue_discount).toLocaleString() : totalAmount >0 ? (totalAmount + shipvalue).toLocaleString() : totalAmount.toLocaleString()} ₫
                             </div>
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >

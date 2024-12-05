@@ -127,9 +127,9 @@ const DonHang = () => {
 
 
     const Show_order_details = async (id) => {
-        let idauthorization = id.split("-")[1];
+
         const res = await axios({
-            url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${idauthorization}`,
+            url: `https://api-m.sandbox.paypal.com/v2/checkout/orders/${id}`,
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -214,20 +214,6 @@ const DonHang = () => {
                 />
             </>
         }
-        else if (status === "Đã Hủy") {
-            return <>
-                <Steps
-                    direction="vertical"
-                    current={getCurrentStep(status)}
-                    items={[
-                        { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
-                        { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang được chuẩn bị để vận chuyển.' },
-                        { title: 'Đang Giao', description: 'Đơn hàng đang trong quá trình vận chuyển.' },
-                        { title: 'Đã Giao', description: 'Đơn hàng đã được giao đến khách hàng.' },
-                    ]}
-                />
-            </>
-        }
         else if (status === "Chờ Thanh Toán") {
             return <>
                 <Steps
@@ -244,6 +230,68 @@ const DonHang = () => {
             </>
         }
     }
+    const repayVNpay = async (amount) => {
+        const res = await axios({
+            url: `http://localhost:8080/repayVNpay?total=${amount}`,
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        seturlforqrcode(res.data);
+    }
+
+
+    const buttons = (status, donhang) => {
+        const donhangJson = JSON.parse(donhang)
+
+        if (status === "Chờ Thanh Toán") {
+
+            return <>
+
+                <button data-bs-toggle="modal" data-bs-target="#exampleModal2"
+                    onClick={() => {
+                        if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt02") {
+                            repay(donhangJson.online_payment_id)
+                        } else if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt03") {
+                            localStorage.setItem("donhangidvnpay", donhangJson.don_hangid);
+                            repayVNpay(donhangJson.tong_tien)
+
+                        }
+                    }
+                    }
+                    style={{ ...styles.button, backgroundColor: '#34c9eb' }}
+                >
+                    Thanh toán
+                </button>
+                <button
+                    onClick={() => {
+                        handleCancelOrder(donhangJson.don_hangid)
+                        if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt02") {
+                            alert('refunded order')
+                            Show_order_details(donhangJson.online_payment_id)
+                        }
+                    }
+                    }
+                    style={{ ...styles.button, backgroundColor: '#e74c3c' }}
+                >
+                    Hủy Đơn
+                </button>
+            </>
+        } else if (status === "Đang xử lý") {
+            return <button
+                onClick={() => {
+                    handleCancelOrder(donhangJson.don_hangid)
+                }
+                }
+                style={{ ...styles.button, backgroundColor: '#e74c3c' }}
+            >
+                Hủy Đơn
+            </button>
+        }
+
+    }
 
     const userId = localStorage.getItem('account_id'); // Retrieve user ID from localStorage
     const [donhangList, setDonHangList] = useState([]);
@@ -251,6 +299,7 @@ const DonHang = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        localStorage.setItem("donhangidvnpay", null);
         getPaypalAccessToken();
         getdonhang();
         const fetchDonHang = async () => {
@@ -329,13 +378,15 @@ const DonHang = () => {
                     <h3>Quản Lý Cá Nhân</h3>
                 </Link>
                 <ul style={styles.menu}>
-                    {['Thông tin cá nhân', 'Lịch sử đặt hàng', 'Đổi mật khẩu', 'Feedback', 'Yêu Thích'].map((item, index) => (
-                        <li key={index}>
-                            <Link to={`/${item.replace(/ /g, '-').toLowerCase()}?userId=${userId}`} style={styles.link}>
-                                <button style={styles.button}>{item}</button>
-                            </Link>
-                        </li>
-                    ))}
+                    {['Thông tin cá nhân', 'Lịch sử đặt hàng', 'Đổi mật khẩu', 'Feedback', 'Yêu Thích', 'Mã giảm giá',
+                        "Địa chỉ của bạn",
+                        "Ví đã liên kết",].map((item, index) => (
+                            <li key={index}>
+                                <Link to={`/${item.replace(/ /g, '-').toLowerCase()}?userId=${userId}`} style={styles.link}>
+                                    <button style={styles.button}>{item}</button>
+                                </Link>
+                            </li>
+                        ))}
                 </ul>
             </aside>
 
@@ -384,7 +435,7 @@ const DonHang = () => {
                                             />
                                         ) : Stepforstatus(donhang.trang_thai)
                                         } */}
-                                        {donhang.trang_thai === 'Đang xử lý' && (
+                                        {/* {donhang.trang_thai === 'Đang xử lý' && (
                                             <button
                                                 onClick={() => {
                                                     handleCancelOrder(donhang.don_hangid)
@@ -412,7 +463,8 @@ const DonHang = () => {
                                             >
                                                 Thanh toán
                                             </button>
-                                        )}
+                                        )} */}
+                                        {buttons(donhang.trang_thai, JSON.stringify(donhang))}
                                     </td>
 
                                     <td style={styles.td}>
@@ -446,7 +498,7 @@ const DonHang = () => {
                                         />
                                     </div>
                                     <div className="col-12 mt-2">
-                                       <button className='btn btn-primary' onClick={()=>{window.open(urlforqrcode,'_blank')}}>Chuyển tiếp đến trang thanh toán</button>
+                                        <button className='btn btn-primary' onClick={() => { window.open(urlforqrcode, '_blank') }}>Chuyển tiếp đến trang thanh toán</button>
                                     </div>
 
                                 </div>

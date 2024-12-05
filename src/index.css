@@ -679,15 +679,42 @@ header {
   margin: 0;
 }
 .disabled-div {
-  pointer-events: none;
-  opacity: 0.5; /* Làm mờ div để hiển thị rằng nó đang bị vô hiệu hóa */
+  pointer-events: none; /* Vô hiệu hóa tương tác cho toàn bộ div */
+  position: relative; /* Cần thiết để sử dụng z-index và lớp phủ */
 }
 
+.disabled-div::before {
+  content: ''; /* Tạo lớp phủ */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5); /* Làm mờ */
+  z-index: 1; /* Đảm bảo lớp phủ nằm trên nền */
+}
+
+.disabled-div .out-of-stock {
+  position: absolute;
+  top: 30%; /* Điều chỉnh vị trí chữ "Hết hàng" */
+  left: 53%; /* Điều chỉnh vị trí chữ "Hết hàng" */
+  color: red;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 2;
+   /* Đảm bảo nằm trên lớp phủ */
+}
 
 .disabled-div .btn-interactive {
-  pointer-events: auto; /* Cho phép tương tác với nút */
-  opacity: 1; /* Đảm bảo nút không bị mờ */
-  z-index: 1; /* Đặt z-index nếu cần thiết */
+  position: absolute;
+  bottom: 20%; /* Điều chỉnh vị trí nút "Xóa" */
+  left: 57%; /* Điều chỉnh vị trí nút "Xóa" */
+  z-index: 2; /* Đảm bảo nằm trên lớp phủ */
+  opacity: 1; /* Hiển thị rõ ràng */
+  pointer-events: auto; /* Có thể nhấn nút */
+  border: 1px solid red;
+  color: red;
+  padding: 10px 20px;
 }
 
 .card_button {

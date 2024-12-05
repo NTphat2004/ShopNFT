@@ -14,17 +14,17 @@ import ListProduct from './ListProduct'
 import { setLoading } from '../Reducer/LoadingReducer'
 import ListDanhHieu from './ListDanhHieu'
 const Index = () => {
-   console.log('run')
-   const dispatch = useDispatch();
+  console.log('run')
+  const dispatch = useDispatch();
 
   const ListProductThisWeek = useSelector(state => state.product.ListProductThisWeek);
   const ListProductTopSale = useSelector(state => state.product.ListProductTopSale);
   const ListProductDiscount = useSelector(state => state.product.ListProductDiscount);
   console.log(ListProductThisWeek)
 
-  useEffect(()=>{
-    const modal = new window.bootstrap.Modal(document.getElementById('exampleModal'));
-    modal.show();
+  useEffect(() => {
+    // const modal = new window.bootstrap.Modal(document.getElementById('exampleModal'));
+    // modal.show();
     const turnonloading = setLoading('block');
     dispatch(turnonloading)
     const CallAPIProduct = Call_API_Products();
@@ -33,20 +33,20 @@ const Index = () => {
     dispatch(turnoffloading);
     // Cleanup: Đóng modal khi component unmount
     return () => {
-      modal.hide();
+      // modal.hide();
     };
-  },[])
+  }, [])
   return (
-    
+
     <div className='container-fluid  mb-5' >
-     
+
       <Banner></Banner>
 
       <CategoryNew></CategoryNew>
 
-      <PopupAD></PopupAD>
-      
-      
+      {/* <PopupAD></PopupAD> */}
+
+
       <div className='row '>
 
         <div className='col-md-12 mt-1'>
@@ -76,7 +76,7 @@ const Index = () => {
       <ListProduct products={ListProductThisWeek} ></ListProduct>
 
       <div className="col-md-12 text-center">
-      <NavLink to={'allproduct/FindProductThisWeek'}   >   <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
+        <NavLink to={'allproduct/FindFullListProductThisWEEK'}   >   <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
       </div>
 
       <div className='row '>
@@ -89,7 +89,7 @@ const Index = () => {
 
         <div className='col-md-6'>
 
-          <h3 className='ms-3 text-dark mt-1 fw-bold'>Top các sản phẩm 
+          <h3 className='ms-3 text-dark mt-1 fw-bold'>Top các sản phẩm
             <br />
             Bán chạy
           </h3>
@@ -107,7 +107,7 @@ const Index = () => {
       {/* <ListStore></ListStore> */}
       <ListProduct products={ListProductTopSale} ></ListProduct>
       <div className="col-md-12 text-center">
-        <NavLink to={'allproduct/FindProductTopSell'}    >  <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
+        <NavLink to={'allproduct/FindProductThisWeekTOP100'}    >  <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
       </div>
 
       <div className='row '>
@@ -138,7 +138,7 @@ const Index = () => {
       {/* <ListStore></ListStore> */}
       <ListProduct products={ListProductDiscount} ></ListProduct>
       <div className="col-md-12 text-center">
-          <NavLink to={'allproduct/FindProductDiscount'} className='gradient-button-2' >Xem tất cả sản phẩm</NavLink>
+        <NavLink to={'allproduct/FindFullListProductDiscount'} className='gradient-button-2' >Xem tất cả sản phẩm</NavLink>
       </div>
 
       <div className='row mt-4'>
@@ -164,12 +164,12 @@ const Index = () => {
         </div>
 
       </div>
-      <ListDanhHieu></ListDanhHieu>
-      
+      {/* <ListDanhHieu></ListDanhHieu> */}
 
-      <ListProduct products={ListProductDiscount} ></ListProduct>
-     {/* // post */}
-    <Post></Post>
+
+      {/* <ListProduct products={ListProductDiscount} ></ListProduct> */}
+      {/* // post */}
+      {/* <Post></Post> */}
 
 
 

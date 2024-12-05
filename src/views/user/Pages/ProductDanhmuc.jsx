@@ -1,15 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { addItemToCart } from '../Reducer/cartReducer';
 import { useDispatch } from 'react-redux';
-
+import { Pagination } from 'antd';
 const ProductDanhmuc = ({ Products }) => {
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(8); 
+
+    const currentProducts = Products.slice(
+        (currentPage - 1) * pageSize, currentPage * pageSize
+      );
+
+
+      const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
+        setPageSize(pageSize);
+      };
+
     const dispatch = useDispatch()
     return (
         <div className='row '>
-            {Products.map((product, index) => {
-                const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
-                const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
+            {currentProducts.map((product, index) => {
+                {/* const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
+                const product.sosao = product.luotdanhgia > 0 ? (totalStars / product.luotdanhgia).toFixed(1) : 0; */}
                 
                 return (
                     <div className="col-sm-12 col-md-3 mt-3 d-flex justify-content-center" key={index}>
@@ -50,7 +64,7 @@ const ProductDanhmuc = ({ Products }) => {
                                 >
                                     <div className='d-flex justify-content-center align-content-center'>
                                         <img
-                                            src={`/images/${product.hinhanh[0].ten_hinh}`}
+                                            src={`/images/${product.hinhanh}`}
                                             className="img-fluid mx-auto"
                                             style={{ maxWidth: 200 }}
                                             alt=""
@@ -73,9 +87,9 @@ const ProductDanhmuc = ({ Products }) => {
                                             </p>
                                         )}
                                         <div className="d-flex">
-                                            <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                                            <p>{product.luotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                                             <p className='text-end ms-auto me-2'>
-                                                {averageStars} <span className="bi bi-star-fill text-warning" />
+                                                {product.sosao} <span className="bi bi-star-fill text-warning" />
                                             </p>
                                         </div>
                                     </div>
@@ -85,7 +99,7 @@ const ProductDanhmuc = ({ Products }) => {
                                 <>
                                     <div className='d-flex justify-content-center align-content-center'>
                                         <img
-                                            src={`/images/${product.hinhanh[0].ten_hinh}`}
+                                            src={`/images/${product.hinhanh}`}
                                             className="img-fluid mx-auto"
                                             style={{ maxWidth: 200 }}
                                             alt=""
@@ -97,9 +111,9 @@ const ProductDanhmuc = ({ Products }) => {
                                             {product.gia_goc} <span className='text-danger'>VND</span>
                                         </p>
                                         <div className="d-flex">
-                                            <p>{product.danhgia.length} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
+                                            <p>{product.luotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                                             <p className='text-end ms-auto me-2'>
-                                                {averageStars} <span className="bi bi-star-fill text-warning" />
+                                                {product.sosao} <span className="bi bi-star-fill text-warning" />
                                             </p>
                                         </div>
                                     </div>
@@ -126,6 +140,19 @@ const ProductDanhmuc = ({ Products }) => {
                     </div>
                 );
             })}
+
+            <div className="col-md-12 d-flex justify-content-center align-items-center mt-1 mb-4">
+            <Pagination 
+        current={currentPage}
+        pageSize={pageSize}
+        total={Products.length}
+        onChange={handlePageChange}
+        showSizeChanger
+        pageSizeOptions={['8', '16', '24']}
+        style={{ textAlign: 'center', marginTop: '20px' }}
+      />
+      
+            </div>
         </div>
     );
 }

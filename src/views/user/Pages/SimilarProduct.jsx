@@ -30,8 +30,8 @@ const SimilarProduct = ({ Products }) => {
             }}
         >
             {Products.map((product) => {
-                const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
-                const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0;
+                {/* const totalStars = product.danhgia.reduce((sum, rating) => sum + rating.so_sao, 0);
+                const averageStars = product.danhgia.length > 0 ? (totalStars / product.danhgia.length).toFixed(1) : 0; */}
 
                 return (
                     <SwiperSlide key={product.san_phamId}>
@@ -70,7 +70,7 @@ const SimilarProduct = ({ Products }) => {
                                 {product.so_luong > 0 ? (
                                     <NavLink to={`/product/detail/${product.san_phamId}`} className="nav1-link">
                                         <img
-                                            src={`/images/${product.hinhanh[0].ten_hinh}`}
+                                            src={`/images/${product.hinhanh}`}
                                             className="img-fluid mx-auto"
                                             style={{ maxWidth: 200, maxHeight: 200 }}
                                             alt=""
@@ -93,13 +93,13 @@ const SimilarProduct = ({ Products }) => {
                                             )}
                                             <div className="d-flex">
                                                 <p>
-                                                    {product.danhgia.length}{' '}
+                                                    {product.luot_danh_gia}{' '}
                                                     <span className="text-primary" style={{ fontSize: 13 }}>
                                                         Đánh giá
                                                     </span>
                                                 </p>
                                                 <p className="text-end ms-auto me-2">
-                                                    {averageStars}{' '}
+                                                    {product.sosao}{' '}
                                                     <span className="bi bi-star-fill text-warning" />
                                                 </p>
                                             </div>
@@ -109,7 +109,7 @@ const SimilarProduct = ({ Products }) => {
 
                                     <>
                                         <img
-                                            src={`/images/${product.hinhanh[0].ten_hinh}`}
+                                            src={`/images/${product.hinhanh}`}
                                             className="img-fluid mx-auto"
                                             style={{ maxWidth: 200, maxHeight: 200 }}
                                             alt=""
@@ -121,13 +121,13 @@ const SimilarProduct = ({ Products }) => {
                                             </p>
                                             <div className="d-flex">
                                                 <p>
-                                                    {product.danhgia.length}{' '}
+                                                    {product.luot_danh_gia}{' '}
                                                     <span className="text-primary" style={{ fontSize: 13 }}>
                                                         Đánh giá
                                                     </span>
                                                 </p>
                                                 <p className="text-end ms-auto me-2">
-                                                    {averageStars}{' '}
+                                                    {product.sosao}{' '}
                                                     <span className="bi bi-star-fill text-warning" />
                                                 </p>
                                             </div>
