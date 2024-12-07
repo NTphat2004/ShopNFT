@@ -1,13 +1,14 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { json, NavLink } from "react-router-dom";
+import { json, NavLink, useNavigate } from "react-router-dom";
 import { Checkbox, Button, Modal, Input, Select } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined, PhoneOutlined, HomeOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { useDispatch, useSelector } from "react-redux";
 import { ClearCart, DecreaseItem, IncreaseItem, RemoveItem, AddSpthanhtoan, Clear, DecreaseSpthanhtoan, DeleteSpthanhtoan, IncreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan, CallAPI_Cart, increaseItem, decreaseItem, removeItem, clearItem } from "../Reducer/cartReducer";
 import axios from "axios";
+import Swal from 'sweetalert2'
 import { Card, Col, Container, Row } from 'react-bootstrap'; import { toast } from 'react-toastify';
-
+const { confirm } = Modal;
 
 
 function Cart() {
@@ -47,14 +48,22 @@ function Cart() {
     const [listDistrict, setlistDistrict] = useState([]);
     const [listWard, setlistWard] = useState([]);
     const shippingfee = React.useRef(null);
+    const [errormessage, seterrormessage] = useState('');
+    let voucher = (localStorage.getItem('voucher'));
     let formatnumber;
+    const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan) || [];
+    const product_id_params = ListSPChecked.map(item => item.sanPham.san_phamId);
+    const navigate = useNavigate();
 
-    const checkvalidvoucher = async () => {
-        const response = await axios.get(`https://localhost:8080/checkifvoucherisvalid/${selectedvoucher.voucherId}`);
-        console.log(response.data);
-        if (response.data) {
-            setvouchervalid(true);
-        }
+
+
+    const showSwal = () => {
+        Swal.fire({
+            title: 'Có lỗi đã xảy ra',
+            text: errormessage + 'Vui lòng thử lại!',
+            icon: 'error',
+            confirmButtonText: 'Cool'
+        })
     }
 
     const handleToggle = (index) => {
@@ -63,6 +72,22 @@ function Cart() {
         setIsChecked(newChecked); // Cập nhật lại state
 
     };
+
+
+
+
+    const info = () => {
+        Modal.info({
+            title: 'Có lỗi đã xảy ra',
+            content: (
+                <div>
+                    <p className="h1"> {errormessage} </p>
+                </div>
+            ),
+            onOk() { },
+        });
+    };
+
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -144,7 +169,80 @@ function Cart() {
 
 
 
-    const ListSPChecked = useSelector(state => state.cart.ListSpthanhtoan) || [];
+
+    const checkvalidvoucher = async () => {
+        const jsonparsevoucher = JSON.parse(voucher);
+        if (jsonparsevoucher != null) {
+            const object = JSON.parse(localStorage.getItem('voucher'));
+            const response = await axios({ url: `http://localhost:8080/checkifvoucherisvalid?voucherId=${object.voucherID}&accountID=${userId}&amount=${totalAmount}`, method: 'POST' });
+            const respone2 = await axios({
+                url: `http://localhost:8080/checkifproductsarevalid?selectedproductid=${product_id_params}`,
+                method: "POST",
+            })
+
+            if (jsonparsevoucher != null) {
+                if (!response.data) {
+                    seterrormessage(errormessage + "Voucher đã hết hạn hoặc hết số lần sử dụng!");
+                    return false;
+                }
+                if (respone2.data.length != 0) {
+                    seterrormessage(errormessage + " Sản phẩm đã hết hàng ");
+
+                    return false;
+                }
+                if (response.data && respone2.data.length === 0) {
+                    // alert("Thanh toán thanh công! 1");
+                    return true;
+                }
+            }
+        } else {
+            const respone2 = await axios({
+                url: `http://localhost:8080/checkifproductsarevalid?selectedproductid=${product_id_params}`,
+                method: "POST",
+            })
+            if (respone2.data.length != 0) {
+                seterrormessage(" Sản phẩm đã hết hàng ");
+                return false;
+            }
+            if (respone2.data.length === 0) {
+                // alert("Thanh toán thanh công! 2");
+                return true;
+
+            }
+        }
+        return false
+    }
+
+    function resultcheckcart() {
+        return checkvalidvoucher().
+            then(function (response) {
+                var userid = JSON.parse(response);
+                userid ? voucherApplied ? navigate('/thanhtoan') : navigatetoCart() : showSwal();
+            });
+        // .then(function (data) {
+        //     var userid = JSON.parse(data);
+        //     console.log(userid);
+        //     console.log(userid);
+        //     if (userid) {
+        //         if (!voucherApplied) {
+        //             localStorage.setItem('discount', 0);
+        //             localStorage.setItem('total_after', JSON.stringify(0));
+        //             navigate('/thanhtoan')
+        //         } else {
+        //             navigate('/thanhtoan')
+        //         }
+        //     }
+
+        // })
+    }
+    const navigatetoCart = () => {
+        localStorage.setItem('discount', 0);
+        localStorage.setItem('total_after', JSON.stringify(0));
+        navigate('/thanhtoan')
+    }
+
+
+
 
 
     const totalAmount = Array.isArray(ListSPChecked)
@@ -223,18 +321,24 @@ function Cart() {
     };
 
     const checkamounttotal = () => {
-        console.log('run', voucherindex);
-        const voucher = JSON.parse(localStorage.getItem('voucher'));
-        if (totalAmount < voucher.don_hang_toi_thieu) {
-            btnforapplyvoucher.current[voucherindex].innerHTML = "Áp dụng"
-            btnforapplyvoucher.current[voucherindex].disabled = true;
-            setvoucherApplied(false);
-            localStorage.setItem('voucher', null);
-            setvoucherindex(-1);
-            localStorage.setItem('discount', 0);
-            localStorage.setItem('total_after', JSON.stringify(0));
-            setshipvalue_discount(0)
+
+        try {
+            console.log('run', voucherindex);
+            const voucher = JSON.parse(localStorage.getItem('voucher'));
+            if (totalAmount < voucher.don_hang_toi_thieu) {
+                btnforapplyvoucher.current[voucherindex].innerHTML = "Áp dụng"
+                btnforapplyvoucher.current[voucherindex].disabled = true;
+                setvoucherApplied(false);
+                localStorage.setItem('voucher', null);
+                setvoucherindex(-1);
+                localStorage.setItem('discount', 0);
+                localStorage.setItem('total_after', JSON.stringify(0));
+                setshipvalue_discount(0)
+            }
+        } catch (error) {
+
         }
+
     }
     const disabledbutton = (don_hang_toi_thieu, index, totalAmount) => {
         if (don_hang_toi_thieu >= totalAmount && index != voucherindex) {
@@ -701,7 +805,7 @@ function Cart() {
                             />
                             <div>
                                 <div className="d-flex position-relative">
-                                {cart.sanPham.hoat_dong === 'Off' && cart.sanPham.so_luong == 0 && (
+                                    {cart.sanPham.hoat_dong === 'Off' && cart.sanPham.so_luong == 0 && (
                                         <>
                                             <div className="out-of-stock">Không khả dụng</div>
                                             <Button
@@ -719,7 +823,7 @@ function Cart() {
                                             </Button>
                                         </>
                                     )}
-                                    {cart.sanPham.hoat_dong === 'Off'  && cart.sanPham.so_luong != 0  && (
+                                    {cart.sanPham.hoat_dong === 'Off' && cart.sanPham.so_luong != 0 && (
                                         <>
                                             <div className="out-of-stock">Không khả dụng</div>
                                             <Button
@@ -737,7 +841,7 @@ function Cart() {
                                             </Button>
                                         </>
                                     )}
-                           
+
 
 
                                     {cart.sanPham.so_luong === 0 && cart.sanPham.hoat_dong === 'On' && (
@@ -920,27 +1024,36 @@ function Cart() {
                                 <p style={{ margin: '0', fontWeight: 'bolder' }}>Thành tiền</p>
                             </div>
                             <div className="fw-bolder amount" style={{ color: 'red' }}>
-                                {shipvalue_discount > 0 ? (shipvalue_discount).toLocaleString() : totalAmount >0 ? (totalAmount + shipvalue).toLocaleString() : totalAmount.toLocaleString()} ₫
+                                {shipvalue_discount > 0 ? (shipvalue_discount).toLocaleString() : totalAmount > 0 ? (totalAmount + shipvalue).toLocaleString() : totalAmount.toLocaleString()} ₫
                             </div>
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >
-                            <NavLink to="/thanhtoan">
-                                <button onClick={
-                                    () => {
-                                        if (!voucherApplied) {
-                                            localStorage.setItem('discount', 0);
-                                            localStorage.setItem('total_after', JSON.stringify(0));
-                                        }
-                                    }
-                                } disabled={ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == ""} style={{
-                                    width: '100%', height: '45px',
-                                    borderRadius: '5px', border: 'none',
-                                    backgroundColor: ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == "" ? 'black' : 'red',
-                                    color: 'white', fontWeight: 'bolder'
-                                }}>Thanh toán</button>
-                            </NavLink>
-                        </div>
+                            <button className="btn btn-danger" onClick={showSwal}> test</button>
+                            <button onClick={
+                                () => {
+                                    // if (!resultcheckcart()) {
+                                    //     showSwal()
+                                    //     console.log(resultcheckcart(),'fale');
 
+                                    // } else {
+                                    //     console.log(resultcheckcart(),'true');
+                                    //     if (!voucherApplied) {
+                                    //         localStorage.setItem('discount', 0);
+                                    //         localStorage.setItem('total_after', JSON.stringify(0));
+                                    //         navigate('/thanhtoan')
+                                    //     } else {
+                                    //         navigate('/thanhtoan')
+                                    //     }
+                                    // }
+                                    resultcheckcart();
+                                }
+                            } disabled={ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == ""} style={{
+                                width: '100%', height: '45px',
+                                borderRadius: '5px', border: 'none',
+                                backgroundColor: ListSPChecked.length === 0 || AddressCurrent?.dia_chi == "" || AddressCurrent?.users?.hovaten == "" || AddressCurrent?.users?.so_dien_thoai == "" ? 'black' : 'red',
+                                color: 'white', fontWeight: 'bolder'
+                            }}>Thanh toán</button>
+                        </div>
                     </div>
                 </div>
             </div>

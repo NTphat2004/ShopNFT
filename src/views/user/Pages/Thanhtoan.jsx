@@ -5,9 +5,10 @@ import { message, Select } from 'antd';
 import { DeleteOutlined, EditOutlined, CreditCardOutlined, WalletOutlined } from '@ant-design/icons';
 import axios from "axios";
 import { Formik, useFormik } from 'formik';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { QRCode } from 'antd';
 import { styled } from "@mui/material";
+import { clearListSpthanhtoan2 } from "../Reducer/cartReducer";
 
 const userId = localStorage.getItem('account_id');
 let shipfee = localStorage.getItem('shippingfee');
@@ -29,6 +30,7 @@ let totalheight;
 
 
 const AddressCurrent = localStorage.getItem('addressCurent') ? JSON.parse(localStorage.getItem('addressCurent')) : null;
+
 
 console.log('test', (((parseInt(total) + parseInt(shipfee)) * 0.00003951).toString()));
 console.log(Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(
@@ -69,7 +71,9 @@ const labelRender = (props) => {
             Phương thức thanh toán
         </span>);
 };
+
 function Thanhtoan() {
+    const dispatch = useDispatch();
     const [temptid, settemptid] = useState(1);
     const [ghichu, setghichu] = useState('');
     const [usingonlinepayment, setusingonlinepayment] = useState(false);
@@ -116,7 +120,6 @@ function Thanhtoan() {
                 url: `http://localhost:8080/checkifproductsarevalid?selectedproductid=${product_id_params}`,
                 method: "POST",
             })
-
             if (jsonparsevoucher != null) {
                 if (!response.data) {
                     seterrormessage(errormessage + "Voucher đã hết hạn hoặc hết số lần sử dụng!");
@@ -127,6 +130,7 @@ function Thanhtoan() {
                 if (response.data && respone2.data.length === 0) {
                     alert("Thanh toán thanh công!");
                     // create_ghn_order()
+                    dispatch(clearListSpthanhtoan2());
                 }
             }
         } else {
@@ -140,6 +144,7 @@ function Thanhtoan() {
             if (respone2.data.length === 0) {
                 alert("Thanh toán thanh công!");
                 //   create_ghn_order()
+                dispatch(clearListSpthanhtoan2());
 
             }
         }
@@ -215,7 +220,7 @@ function Thanhtoan() {
                 "Content-Type": "application/json"
             }, data: {
                 'don_hangid': id,
-                'trang_thai': method == "1" ? "Nhận đơn" : "Chờ Thanh Toán",
+                'trang_thai': method == "1" ? "Đang chờ xử lý" : "Chờ Thanh Toán",
                 'ngay_tao': new Date(),
                 'thoi_gianXN': null,
                 'dia_chi': AddressCurrent.dia_chi,
@@ -422,11 +427,12 @@ function Thanhtoan() {
         else if (method == "2") {
             console.log("run paypal");
             paypal_CreateOrder(res.data.data.order_code);
-        } 
+        }
         else {
             console.log(res.data.data.order_code, 'id ghn');
             apipayment(res.data.data.order_code, null);
         }
+
     }
 
     const checkfordiscount = () => {
@@ -493,7 +499,7 @@ function Thanhtoan() {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [method, discount, voucher2]);
+    }, [method, discount, voucher2,ListSPChecked]);
 
 
     const handleInputClick = () => {
@@ -502,7 +508,7 @@ function Thanhtoan() {
 
     return (
         <>
-            
+
 
             <nav className="breaddesign col-11 mx-auto" aria-label="breadcrumb">
                 <ol className="breadcrumb">
@@ -643,14 +649,13 @@ function Thanhtoan() {
 
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >
-
                             {errormessage.length > 0 ?
                                 <Link to={`/cart/`} >  <button style={{
                                     width: '100%', height: '45px',
                                     borderRadius: '5px', border: 'none', backgroundColor: 'red',
                                     color: 'white', fontWeight: 'bolder'
                                 }}>Trở về giỏ hàng</button> </Link> :
-                                <button className="thanhtoanbtn" data-bs-toggle="modal" data-bs-target="#exampleModal2" ref={btn} onClick={() => {
+                                <button disabled={ListSPChecked.length == 0 ? true : false} className="thanhtoanbtn" data-bs-toggle="modal" data-bs-target="#exampleModal2" ref={btn} onClick={() => {
                                     const jsonparsevoucher = JSON.parse(voucher);
                                     console.log(jsonparsevoucher)
                                     checkvalidvoucher(voucher)
@@ -658,9 +663,7 @@ function Thanhtoan() {
                                     width: '100%', height: '45px',
                                     borderRadius: '5px', border: 'none', backgroundColor: 'red',
                                     color: 'white', fontWeight: 'bolder'
-                                }}>Đặt hàng</button>}
-
-
+                                }}>{ListSPChecked.length == 0 ? "Vui lòng chọn sản phẩm ở giỏ hàng" : "Đặt hàng"}</button>}
                         </div>
                         {/* <div className="col-12 mt-2 thanhtoan" >
                             <button onClick={paypal_CreateOrder} style={{
@@ -672,7 +675,7 @@ function Thanhtoan() {
 
 
                         <div>
-                            <div className="modal fade" id="exampleModal2" tabIndex={-1} >
+                            <div className="modal fade" id="exampleModal2" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex={-1} >
                                 <div className="modal-dialog modal-dialog-centered" >
                                     <div className="modal-content">
                                         <div className="modal-header" style={{ borderBottom: 'none' }}>
@@ -680,16 +683,36 @@ function Thanhtoan() {
                                             <div className='h2'>{errormessage.length > 0 ? errormessage : 'Đặt hàng thành công'}</div>
                                         </div>
                                         <div className='row text-center '>
-                                            <div className="col-12 ">
-                                                <QRCode
-                                                    errorLevel="H"
-                                                    value={urlforqrcode}
-                                                    style={{ width: '100%', height: '100%' }}
-                                                />
+                                            <div className="modal-body" >
+                                                {method == 1 ?
+                                                    <>
+                                                        <button data-bs-dismiss="modal"  className='btn btn-primary' onClick={() => {
+                                                            redirect('/lịch-sử-đặt-hàng');
+                                                        }}>
+                                                            Chuyển tiếp đến trang đơn hàng
+                                                        </button>
+                                                    </>
+                                                    : <>
+                                                        <div className="col-12 ">
+                                                            <QRCode
+                                                                errorLevel="H"
+                                                                value={urlforqrcode}
+                                                                style={{ width: '100%', height: '100%' }}
+                                                            />
+                                                        </div>
+                                                        <div className="col-12 mt-1">
+                                                            <button className='btn btn-primary'  data-bs-dismiss="modal"  onClick={() => {
+                                                                // window.open(urlforqrcode, '_blank');
+                                                                // window.open('about:blank', '_self');
+                                                                window.close();
+                                                            }}>
+                                                                Chuyển tiếp đến trang thanh toán
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                }
                                             </div>
-                                            <div className="col-12 mt-1">
-                                                <button className='btn btn-primary' onClick={() => { window.open(urlforqrcode, '_blank') }}>Chuyển tiếp đến trang thanh toán</button>
-                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

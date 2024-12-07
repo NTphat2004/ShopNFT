@@ -188,7 +188,7 @@ const DonHang = () => {
 
     const Stepforstatus = (status) => {
         console.log(status);
-        if (status === "Đang xử lý") {
+        if (status === "Đang chờ xử lý") {
             return <>
                 <Steps
                     direction="vertical"
@@ -279,7 +279,7 @@ const DonHang = () => {
                     Hủy Đơn
                 </button>
             </>
-        } else if (status === "Đang xử lý") {
+        } else if (status === "Đang chờ xử lý") {
             return <button
                 onClick={() => {
                     handleCancelOrder(donhangJson.don_hangid)

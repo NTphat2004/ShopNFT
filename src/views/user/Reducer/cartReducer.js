@@ -128,6 +128,11 @@ const cartReducer = createSlice({
     initialState,
     reducers: {
 
+        clearListSpthanhtoan2  : (state, action) => {
+            state.ListSpthanhtoan2 = [];
+        },
+
+
         ListAllCartByid: (state, action) => {
             state.CartDatabase = action.payload;
         },
@@ -360,7 +365,7 @@ const cartReducer = createSlice({
 
 });
 
-export const { ListAllCartByid, AddItem, RemoveItem, IncreaseItem, ClearCart, DecreaseItem, AddSpthanhtoan, DeleteSpthanhtoan, Clear, IncreaseSpthanhtoan, DecreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan } = cartReducer.actions
+export const {clearListSpthanhtoan2, ListAllCartByid, AddItem, RemoveItem, IncreaseItem, ClearCart, DecreaseItem, AddSpthanhtoan, DeleteSpthanhtoan, Clear, IncreaseSpthanhtoan, DecreaseSpthanhtoan, RemoveSpthanhtoan, Thanhtoan } = cartReducer.actions
 
 export default cartReducer.reducer
 
