@@ -2,7 +2,7 @@ import { useMediaQuery, Box, Drawer } from '@mui/material';
 import SidebarItems from './SidebarItems';
 import { Upgrade } from './Updrade';
 import { Sidebar, Logo } from 'react-mui-sidebar';
-import logo from '../../../assets/images/logos/dark1-logo.svg'
+import logo from '../../../assets/images/logos/eeb4fc81748fcfd1969e-removebg-preview.png'
 
 const MSidebar = (props) => {
 
@@ -64,7 +64,7 @@ const MSidebar = (props) => {
               {/* ------------------------------------------- */}
               {/* Logo */}
               {/* ------------------------------------------- */}
-              <Logo img={logo} />
+              <Logo img={logo}  />
               <Box>
                 {/* ------------------------------------------- */}
                 {/* Sidebar Items */}
@@ -106,7 +106,7 @@ const MSidebar = (props) => {
         {/* Logo */}
         {/* ------------------------------------------- */}
 
-        <Logo img={logo} />
+        <Logo img={logo} style={{ width: '450px' }}/>
 
         {/* ------------------------------------------- */}
         {/* Sidebar For Mobile */}

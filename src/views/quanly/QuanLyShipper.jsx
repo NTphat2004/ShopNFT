@@ -21,13 +21,13 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
-const Voucher = () => {
+const QuanLyShipper = () => {
   const [voucherData, setVoucherData] = useState([]);
   const [hoatDong, setHoatDong] = useState("Hoạt động");
   const [selectedVoucher, setSelectedVoucher] = useState({
     voucherID: "",
-    hoat_dong: "On",
-    //hanh_dong: "Thêm", // Giá trị mặc định
+    hoat_dong: "Hoạt động",
+    hanh_dong: "Thêm", // Giá trị mặc định
     ngay_tao: "",
     han_su_dung: "",
   });
@@ -42,8 +42,6 @@ const Voucher = () => {
   const [isAddDisabled, setIsAddDisabled] = useState(false);
   const [isDeleteDisabled, setIsDeleteDisabled] = useState(false);
   const [newVoucherID, setNewVoucherID] = useState("");
-  const [listNhatKyNe, setListNhatKyNe] = useState([]);
-  const [listHetHanNe, setListHetHanNe] = useState([]);
 
   // Kiểm tra quyền admin
   const isAdmin = userData && userData.roles.includes("Admin");
@@ -155,7 +153,7 @@ const Voucher = () => {
     }));
 
     setFileList(initialFileList);
-    if (voucher.hoat_dong === "On") {
+    if (voucher.hoat_dong === "Hoạt động") {
       setIsDisabled(true);
       setIsAddDisabled(true);
       setIsDeleteDisabled(true);
@@ -177,42 +175,48 @@ const Voucher = () => {
 
   const fetchVoucherData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/voucher/listAll"
-      );
-      getNewVoucherID();
-      setVoucherData(response.data);
-      console.log("Dữ liệu voucher mới nè trời ơi: ", response.data);
-    } catch (error) {}
+      const response = await fetch("http://localhost:8080/api/listVoucher");
+      const data = await response.json();
+      console.log("Dữ liệu là: ", data);
+      const formattedData = data.map((item) => ({
+        key: item[0], // voucherID
+        voucherID: item[0],
+        ma_voucher: item[1],
+        dieu_kien: item[2],
+        don_hang_toi_thieu: item[3],
+        han_su_dung: item[4],
+        hinh_anh: item[5],
+        hoat_dong: item[6],
+        so_luong: item[7],
+        so_luot_SD: item[8],
+        so_tien_giam: item[9],
+        trang_thai_xoa: item[10],
+        hanh_dong: item[11],
+        ngay_tao: item[12],
+        accountID: item[13],
+      }));
+      setVoucherData(formattedData);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu voucher:", error);
+    }
+    getNewVoucherID();
   };
-  // const fetchVoucherData = async () => {
-  //   try {
-  //     const response = await fetch("http://localhost:8080/api/listVoucher");
-  //     const data = await response.json();
-  //     console.log("Dữ liệu là: ", data);
-  //     const formattedData = data.map((item) => ({
-  //       key: item[0], // voucherID
-  //       voucherID: item[0],
-  //       ma_voucher: item[1],
-  //       dieu_kien: item[2],
-  //       don_hang_toi_thieu: item[3],
-  //       han_su_dung: item[4],
-  //       hinh_anh: item[5],
-  //       hoat_dong: item[6],
-  //       so_luong: item[7],
-  //       so_luot_SD: item[8],
-  //       so_tien_giam: item[9],
-  //       trang_thai_xoa: item[10],
-  //       hanh_dong: item[11],
-  //       ngay_tao: item[12],
-  //       accountID: item[13],
-  //     }));
-  //     setVoucherData(formattedData);
-  //   } catch (error) {
-  //     console.error("Lỗi khi lấy dữ liệu voucher:", error);
-  //   }
-  //   getNewVoucherID();
-  // };
+
+  useEffect(() => {
+    fetchVoucherData();
+    setSelectedVoucher((prev) => ({
+      ...prev,
+      ngay_tao: prev.ngay_tao || getCurrentDate(),
+    }));
+
+    const data = JSON.parse(localStorage.getItem("data"));
+    setUserData(data);
+
+    // Nếu người dùng không phải admin, tự động chuyển sang tab 1
+    if (data && !data.roles.includes("Admin")) {
+      setActiveKey("1");
+    }
+  }, []);
 
   let voucher = {};
   const voucherChung = () => {
@@ -232,47 +236,6 @@ const Voucher = () => {
     };
   };
 
-  const listNhatKy = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/api/voucher/list/nhatky"
-      );
-      setListNhatKyNe(response.data);
-      console.log("Nhật ký nè: ", response.data);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu voucher:", error);
-    }
-  };
-
-  const listHetHan = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/api/voucher/list/hethan"
-      );
-      setListHetHanNe(response.data);
-      console.log("Hết hạn nè: ", response.data);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu voucher:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchVoucherData();
-    listNhatKy();
-    listHetHan();
-    setSelectedVoucher((prev) => ({
-      ...prev,
-      ngay_tao: prev.ngay_tao || getCurrentDate(),
-    }));
-
-    const data = JSON.parse(localStorage.getItem("data"));
-    setUserData(data);
-
-    // Nếu người dùng không phải admin, tự động chuyển sang tab 1
-    if (data && !data.roles.includes("Admin")) {
-      setActiveKey("1");
-    }
-  }, []);
   const handleSave = async (e) => {
     e.preventDefault();
     voucherChung();
@@ -286,6 +249,7 @@ const Voucher = () => {
     for (const key in voucher) {
       formData.append(key, voucher[key]);
     }
+    formData.append("hanh_dong", "Thêm");
     const accountData = JSON.parse(localStorage.getItem("data")); // Giả sử bạn lưu dữ liệu trong khóa "data"
     if (accountData && accountData.accountID) {
       formData.append("accountID", accountData.accountID);
@@ -324,7 +288,6 @@ const Voucher = () => {
   };
 
   const handleUpdate = async () => {
-    const accountID = JSON.parse(localStorage.getItem("data"));
     voucherChung();
 
     const formData = new FormData();
@@ -332,11 +295,12 @@ const Voucher = () => {
       formData.append(key, voucher[key]);
     }
 
+    formData.append("hanh_dong", "Cập nhật");
     // Nếu có hình ảnh mới, thêm vào formData
     fileList.forEach((file) => {
       formData.append("hinh_anh", file.originFileObj);
     });
-    formData.append("accountID", accountID.accountID);
+
     try {
       const response = await fetch(
         `http://localhost:8080/api/voucher/update/${voucher.voucherID}`,
@@ -367,11 +331,9 @@ const Voucher = () => {
   };
 
   const handleDeleteToGarbageTable = async (voucherID) => {
-    const accountData = JSON.parse(localStorage.getItem("data"));
-    const accountID = accountData.accountID;
     try {
       const response = await fetch(
-        `http://localhost:8080/api/voucher/deleteToGarbage/${voucherID}?accountID=${accountID}`,
+        `http://localhost:8080/api/voucher/deleteToGarbage/${voucherID}`,
         {
           method: "PUT",
         }
@@ -382,13 +344,11 @@ const Voucher = () => {
         console.log("Voucher không biên xóa:", data);
         alert("Xóa voucher thành công!");
         fetchVoucherData();
-        listNhatKy();
-        listHetHan();
         clear();
       } else {
         const errorData = await response.json();
         console.error("Lỗi khi xóa voucher:", response.statusText, errorData);
-        alert("Không thể xóa voucher!");
+        alert("Xóa voucher thể bắt động!");
       }
     } catch (error) {
       console.error("Lỗi:", error);
@@ -427,11 +387,9 @@ const Voucher = () => {
   };
 
   const handleReloadToGarbageTable = async (voucherID) => {
-    const accountData = JSON.parse(localStorage.getItem("data"));
-    const accountID = accountData.accountID;
     try {
       const response = await fetch(
-        `http://localhost:8080/api/voucher/reloadFromGarbage/${voucherID}?accountID=${accountID}`,
+        `http://localhost:8080/api/voucher/reloadFromGarbage/${voucherID}`,
         {
           method: "PUT",
         }
@@ -442,8 +400,6 @@ const Voucher = () => {
         console.log("Voucher không biên xóa:", data);
         alert("Khôi phục voucher thành công!");
         fetchVoucherData();
-        listNhatKy();
-        listHetHan();
       } else {
         const errorData = await response.json();
         console.error("Lỗi khi xóa voucher:", response.statusText, errorData);
@@ -456,11 +412,9 @@ const Voucher = () => {
 
   const handleDeleteToGarbageInput = async () => {
     voucherChung();
-    const accountData = JSON.parse(localStorage.getItem("data"));
-    const accountID = accountData.accountID;
     try {
       const response = await fetch(
-        `http://localhost:8080/api/voucher/deleteToGarbage/${voucher.voucherID}?accountID=${accountID}`,
+        `http://localhost:8080/api/voucher/deleteToGarbage/${voucher.voucherID}`,
         {
           method: "PUT",
         }
@@ -471,8 +425,6 @@ const Voucher = () => {
         console.log("Voucher không biên xóa:", data);
         alert("Xóa voucher thành công");
         fetchVoucherData();
-        listNhatKy();
-        listHetHan();
         clear();
       } else {
         const errorData = await response.json();
@@ -499,7 +451,7 @@ const Voucher = () => {
     setIsAddDisabled(false);
     setFileList([]);
     setSelectedVoucher({
-      hoat_dong: "Off",
+      hoat_dong: "Hoạt động",
       ngay_tao: getCurrentDate(), // Giá trị mặc định
     });
   };
@@ -539,6 +491,28 @@ const Voucher = () => {
     }
   };
 
+  // const deleteVoucherInput = async () => {
+  //   voucherChung();
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8080/api/voucher/delete/${voucher.voucherID}`,
+  //       {
+  //         method: "DELETE",
+  //       }
+  //     );
+
+  //     if (response.ok) {
+  //       alert("Voucher đã được xóa thành công!");
+  //       fetchVoucherData();
+  //       clear();
+  //       // Cập nhật lại danh sách vouchers nếu cần
+  //     } else {
+  //       alert("Lỗi khi xóa voucher.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi gọi API:", error);
+  //   }
+  // };
   const deleteVoucherTableFromGarbage = async (voucherID) => {
     try {
       const response = await fetch(
@@ -725,10 +699,10 @@ const Voucher = () => {
             style={{ cursor: "pointer", color: "#1890ff" }}
             onClick={() => handleReloadTable(record.voucherID)}
           />
-          {/* <DeleteOutlined
+          <DeleteOutlined
             style={{ cursor: "pointer", color: "red" }}
             onClick={() => handleDeleteTableFromGarbage(record.voucherID)}
-          /> */}
+          />
         </div>
       ),
     },
@@ -737,29 +711,6 @@ const Voucher = () => {
     columnsGarbage = columnsGarbage.filter((col) => col.key !== "hanhdong"); // Lọc cột "hanhdong" nếu là admin
   }
   const columnsNhatKyHoatDong = [
-    {
-      title: "Mã voucher",
-      dataIndex: "voucherID",
-      key: "voucherID",
-    },
-    {
-      title: "Tên hành động",
-      dataIndex: "ten_hanh_dong",
-      key: "ten_hanh_dong",
-    },
-    {
-      title: "Ngày hành động",
-      dataIndex: "ngay_hanh_dong",
-      key: "ngay_hanh_dong",
-    },
-    {
-      title: "Người thực hiện",
-      dataIndex: "accountID",
-      key: "accountID",
-    },
-  ];
-
-  let columnsHetHan = [
     {
       title: "Mã voucher",
       dataIndex: "voucherID",
@@ -781,14 +732,14 @@ const Voucher = () => {
       key: "don_hang_toi_thieu",
     },
     {
+      title: "Ngày tạo",
+      dataIndex: "ngay_tao",
+      key: "ngay_tao",
+    },
+    {
       title: "Hạn sử dụng",
       dataIndex: "han_su_dung",
       key: "han_su_dung",
-    },
-    {
-      title: "Hoạt động",
-      dataIndex: "hoat_dong",
-      key: "hoat_dong",
     },
     {
       title: "Số lượng",
@@ -819,18 +770,11 @@ const Voucher = () => {
     },
     {
       title: "Hành động",
-      dataIndex: "hanhdong",
-      key: "hanhdong",
-      render: (text, record) => (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <EditOutlined
-            style={{ cursor: "pointer", color: "#1890ff" }}
-            onClick={() => handleEdit(record)}
-          />
-        </div>
-      ),
+      dataIndex: "hanh_dong",
+      key: "hanh_dong",
     },
   ];
+
   // Lọc trạng thái
   /*const filteredVoucherData = searchStatus
     ? voucherData.filter((voucher) => voucher.hoat_dong === searchStatus)
@@ -851,9 +795,11 @@ const Voucher = () => {
   });
 
   const filteredVoucherDataGarbage = voucherData.filter((voucher) => {
-    return voucher.trang_thai_xoa !== null;
+    return (
+      voucher.trang_thai_xoa !== null && voucher.hanh_dong !== "Xóa hoàn toàn"
+    );
   });
-  console.log("Thùng rác nè:", filteredVoucherDataGarbage);
+  //console.log("Thùng rác", filteredVoucherDataGarbage);
 
   const filteredVoucherDataNhatKy = voucherData.filter((voucher) => {
     return voucher.hanh_dong !== null;
@@ -908,7 +854,7 @@ const Voucher = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="productCode">Mã voucher</label>
+                  <label htmlFor="productCode">AccountID</label>
                   <input
                     type="text"
                     id="ma_voucher"
@@ -924,7 +870,7 @@ const Voucher = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="productName">Điều kiện</label>
+                  <label htmlFor="productName">Họ và tên</label>
                   <input
                     type="text"
                     id="dieu_kien"
@@ -943,7 +889,7 @@ const Voucher = () => {
 
               <div className="input-container">
                 <div className="form-group">
-                  <label htmlFor="">Đơn hàng tối thiểu</label>
+                  <label htmlFor="">Mật khẩu</label>
                   <input
                     type="number"
                     id="don_hang_toi_thieu"
@@ -958,7 +904,7 @@ const Voucher = () => {
                     }
                   />
                 </div>
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label htmlFor="createDate">Ngày tạo</label>
                   <input
                     type="date"
@@ -994,12 +940,12 @@ const Voucher = () => {
                   {errorMessage && (
                     <p style={{ color: "red" }}>{errorMessage}</p>
                   )}
-                </div>
+                </div> */}
               </div>
 
               <div className="input-container">
                 <div className="form-group">
-                  <label htmlFor="warehouseStatus">Hoạt động</label>
+                  <label htmlFor="warehouseStatus">Vai trò</label>
                   <Select
                     value={selectedVoucher.hoat_dong || "Hoạt động"} // Đồng bộ với state selectedVoucher
                     onChange={(value) =>
@@ -1009,8 +955,8 @@ const Voucher = () => {
                       })
                     }
                     options={[
-                      { value: "On", label: "On" },
-                      { value: "Off", label: "Off" },
+                      { value: "Hoạt động", label: "Hoạt động" },
+                      { value: "Ngừng hoạt động", label: "Ngừng hoạt động" },
                     ]}
                     styles={{
                       control: (base) => ({
@@ -1023,7 +969,7 @@ const Voucher = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="so_luong">Số lượng</label>
+                  <label htmlFor="so_luong">Số điện thoại</label>
                   <input
                     type="number"
                     id="so_luong"
@@ -1055,7 +1001,7 @@ const Voucher = () => {
                   />
                 </div> */}
                 <div className="form-group">
-                  <label htmlFor="productQuantity">Số tiền giảm giá</label>
+                  <label htmlFor="productQuantity">Địa chỉ</label>
                   <input
                     type="number"
                     id="so_tien_giam"
@@ -1164,20 +1110,20 @@ const Voucher = () => {
                 onChange={setSearchStatus} // Cập nhật trạng thái tìm kiếm
                 options={[
                   { value: "", label: "Tất cả" }, // Không lọc
-                  { value: "On", label: "On" },
-                  { value: "Off", label: "Off" },
+                  { value: "Hoạt động", label: "Hoạt động" },
+                  { value: "Ngừng hoạt động", label: "Ngừng hoạt động" },
                 ]}
               />
               <Table
                 dataSource={filteredVoucherData}
                 columns={columns}
-                pagination={true}
+                pagination={false}
               />
             </div>
           ),
         },
         {
-          label: `Voucher hết hạn`,
+          label: `Danh sách ngừng hoạt động`,
           key: "3",
           children: (
             <div className="tab-content">
@@ -1212,37 +1158,80 @@ const Voucher = () => {
                 ]}
               />
               <Table
-                dataSource={listHetHanNe}
-                columns={columnsHetHan}
-                pagination={true}
+                dataSource={filteredVoucherData}
+                columns={columns}
+                pagination={false}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Voucher hết hạn`,
+          key: "2",
+          children: (
+            <div className="tab-content">
+              <h1>Danh sách voucher</h1>
+              <button
+                style={{
+                  marginBottom: "20px",
+                  float: "right",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                className="buttonexcel"
+                onClick={exportToExcel}
+                disabled={isAdmin}
+              >
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
+                excel
+              </button>
+              <label htmlFor="searchStatus">Tìm kiếm theo trạng thái</label>
+              <Select
+                defaultValue="Tất cả"
+                style={{
+                  width: "100%",
+                  borderRadius: "8px",
+                  height: "40px",
+                }}
+                onChange={setSearchStatus} // Cập nhật trạng thái tìm kiếm
+                options={[
+                  { value: "", label: "Tất cả" }, // Không lọc
+                  { value: "Hoạt động", label: "Hoạt động" },
+                  { value: "Ngừng hoạt động", label: "Ngừng hoạt động" },
+                ]}
+              />
+              <Table
+                dataSource={filteredVoucherData}
+                columns={columns}
+                pagination={false}
               />
             </div>
           ),
         },
         {
           label: "Lịch sử xóa",
-          key: "4",
+          key: "3",
           children: (
             <div className="tab-content">
               <h1>Lịch sử xóa</h1>
               <Table
                 dataSource={filteredVoucherDataGarbage}
                 columns={columnsGarbage}
-                pagination={true}
+                pagination={false}
               />
             </div>
           ),
         },
         {
           label: "Nhật ký hoạt động",
-          key: "5",
+          key: "4",
           children: (
             <div className="tab-content">
               <h1>Nhật kí hoạt động</h1>
               <Table
-                dataSource={listNhatKyNe}
+                dataSource={filteredVoucherDataNhatKy}
                 columns={columnsNhatKyHoatDong}
-                pagination={true}
+                pagination={false}
               />
             </div>
           ),
@@ -1252,4 +1241,4 @@ const Voucher = () => {
   );
 };
 
-export default Voucher;
+export default QuanLyShipper;

@@ -38,6 +38,20 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
+    title: "Quản lý danh mục",
+    icon: IconLayoutDashboard,
+    href: "/danhmuc",
+    roles: ["Admin"],
+  },
+  {
+    id: uniqueId(),
+    title: "Quản lý shipper",
+    icon: IconLayoutDashboard,
+    href: "/shipper",
+    roles: ["Admin"],
+  },
+  {
+    id: uniqueId(),
     title: "Quản lý thương hiệu",
     icon: IconLayoutDashboard,
     href: "/thuonghieu",

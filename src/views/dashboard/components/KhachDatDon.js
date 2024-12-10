@@ -16,7 +16,7 @@ const KhachDatDon = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setKhachHang(data);
+        setKhachHang(data || 0);
       });
   }, []);
 

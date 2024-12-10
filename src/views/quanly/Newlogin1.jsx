@@ -17,7 +17,47 @@ import { useNavigate } from "react-router-dom";
 const Newlogin1 = () => {
   const [accountID, setAccountID] = useState("");
   const [password, setPassword] = useState("");
+  const [hinhanh, setHinhanh] = useState("");
   const navigate = useNavigate();
+
+  // const testDeploy = async () => {
+  //   const response = await fetch(
+  //     "https://thanhnehihi.as.r.appspot.com/xinchao",
+  //     {
+  //       method: "GET",
+  //     }
+  //   ); // Hoặc .text() nếu API trả về texts
+  //   const data = await response.text();
+  //   console.log("Đây nè trời: ", data);
+  // };
+
+  // const testDeploy = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8080/xinchao", {
+  //       method: "GET",
+  //     });
+
+  //     // Đợi chuyển đổi từ JSON
+  //     const data = await response.json();
+
+  //     // Kiểm tra dữ liệu trả về
+  //     console.log("Đây nè trời: ", data);
+
+  //     // Nếu data là mảng, lấy phần tử đầu tiên
+  //     if (Array.isArray(data) && data.length > 0) {
+  //       console.log("Hình ảnh nè trời: ", data[0].hinhanh);
+  //       setHinhanh(data[0].hinhanh); // Đặt hình ảnh từ phần tử đầu tiên
+  //     } else {
+  //       console.log("Dữ liệu không hợp lệ hoặc rỗng.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi gọi API: ", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   testDeploy();
+  // }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -82,7 +122,6 @@ const Newlogin1 = () => {
             <span className="login100-form-title p-b-43">
               Login to continue
             </span>
-
             <div
               className="wrap-input100 validate-input"
               data-validate="Valid email is required: ex@abc.xyz"

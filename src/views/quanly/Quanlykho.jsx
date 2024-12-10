@@ -207,7 +207,7 @@ const Kho = () => {
   return (
     <Tabs
       className="mx-auto"
-      style={{ width: "1170px", margin: "auto" }}
+      style={{ width: "1200px", margin: "auto" }}
       onChange={onChange}
       type="card"
       items={[
@@ -240,7 +240,7 @@ const Kho = () => {
                     onChange={handleChange}
                   />
                 </div>
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label htmlFor="createDate">Ngày tạo</label>
                   <input
                     type="date"
@@ -250,8 +250,8 @@ const Kho = () => {
                     value={selectedKho.ngay_tao || getCurrentDate()}
                     onChange={handleChange}
                   />
-                </div>
-                <div className="form-group">
+                </div> */}
+                {/* <div className="form-group">
                   <label htmlFor="productQuantity">Số lượng</label>
                   <input
                     type="number"
@@ -261,10 +261,7 @@ const Kho = () => {
                     value={selectedKho.so_luong}
                     onChange={handleChange}
                   />
-                </div>
-              </div>
-
-              <div className="input-container">
+                </div> */}
                 <div className="form-group">
                   <label htmlFor="createDate">Chiều cao</label>
                   <input
@@ -276,6 +273,9 @@ const Kho = () => {
                     onChange={handleChange}
                   />
                 </div>
+              </div>
+
+              <div className="input-container">
                 <div className="form-group">
                   <label htmlFor="productQuantity">Chiều dài</label>
                   <input
@@ -324,7 +324,7 @@ const Kho = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="productQuantity">Danh mục</label>
+                  <label htmlFor="productQuantity">Trạng thái kho</label>
                   <Select
                     options={[
                       { value: "Hoạt động", label: "Hoạt động" },
@@ -341,7 +341,7 @@ const Kho = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="productQuantity">Thương hiệu</label>
+                  <label htmlFor="productQuantity">Trạng thái nhập hàng</label>
                   <Select
                     options={[
                       { value: "Hoạt động", label: "Hoạt động" },
@@ -360,7 +360,7 @@ const Kho = () => {
               </div>
 
               <div className="input-container">
-                <div className="form-group">
+                {/* <div className="form-group">
                   <button
                     className="button"
                     id="themvoucher"
@@ -368,7 +368,7 @@ const Kho = () => {
                   >
                     Thêm
                   </button>
-                </div>
+                </div> */}
                 <div className="form-group">
                   <button className="button">Cập nhật</button>
                 </div>
@@ -383,7 +383,7 @@ const Kho = () => {
           ),
         },
         {
-          label: `Hàng mới nhập`,
+          label: `Hàng tồn kho`,
           key: "2",
           children: (
             <div className="tab-content">
@@ -403,13 +403,13 @@ const Kho = () => {
               <Table
                 dataSource={khoData}
                 columns={columns}
-                pagination={false}
+                pagination={true}
               />
             </div>
           ),
         },
         {
-          label: `Hàng tồn kho`,
+          label: `Hàng xuất kho`,
           key: "3",
           children: (
             <div className="tab-content">
@@ -417,13 +417,13 @@ const Kho = () => {
               <Table
                 dataSource={khoData}
                 columns={columns}
-                pagination={false}
+                pagination={true}
               />
             </div>
           ),
         },
         {
-          label: `Cần nhập hàng`,
+          label: `Hàng mới nhập kho`,
           key: "4",
           children: (
             <div className="tab-content">
@@ -431,13 +431,13 @@ const Kho = () => {
               <Table
                 dataSource={khoData}
                 columns={columns}
-                pagination={false}
+                pagination={true}
               />
             </div>
           ),
         },
         {
-          label: `Sản phẩm không còn bán nữa`,
+          label: `Hết hàng`,
           key: "5",
           children: (
             <div className="tab-content">
@@ -445,7 +445,35 @@ const Kho = () => {
               <Table
                 dataSource={khoData}
                 columns={columns}
-                pagination={false}
+                pagination={true}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Lịch sử xóa`,
+          key: "6",
+          children: (
+            <div className="tab-content">
+              <h1>Sản phẩm không còn bán nữa</h1>
+              <Table
+                dataSource={khoData}
+                columns={columns}
+                pagination={true}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Nhật ký hoạt động`,
+          key: "7",
+          children: (
+            <div className="tab-content">
+              <h1>Sản phẩm không còn bán nữa</h1>
+              <Table
+                dataSource={khoData}
+                columns={columns}
+                pagination={true}
               />
             </div>
           ),

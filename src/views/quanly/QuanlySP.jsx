@@ -7,11 +7,15 @@ import {
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { get } from "jquery";
+import axios from "axios";
 
 const Sanpham = () => {
   const [sanphamData, setSanphamData] = useState([]);
   const [activeKey, setActiveKey] = useState("1");
-  const [hoatDong, setHoatDong] = useState("Hoạt động");
+  //const [hoatDong, setHoatDong] = useState("On");
+  const [accountIDNe, setAccountIDNe] = useState("");
+  const [listKhuyenMai, setListKhuyenMai] = useState([]);
+  const [listNhatKy, setListNhatKy] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState({
     san_phamId: "",
     ten_san_pham: "",
@@ -24,41 +28,37 @@ const Sanpham = () => {
   });
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const updateGiaKhuyenMaiHetHan = async (products) => {
-    const currentDate = new Date();
-
-    products.forEach((product) => {
-      const hanGg = new Date(product.han_gg);
-      if (hanGg < currentDate) {
-        product.gia_km = 0;
-        product.phantram_GG = 0;
-      }
-    });
-  }
-
+  const accountID = JSON.parse(localStorage.getItem("data"));
   const fetchsanphamData = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/listSanPham");
-      const data = await response.json();
-      console.log("Dữ liệu là: ", data);
-      const formattedData = data.map((item) => ({
-        key: item.san_phamId,
-        san_phamId: item.san_phamId,
-        ten_san_pham: item.ten_san_pham,
-        gia_goc: item.gia_goc,
-        gia_km: item.gia_km,
-        mo_ta: item.mo_ta,
-        luot_mua: item.luot_mua,
-        phantram_GG: item.phantram_GG,
-        han_gg: item.han_gg,
-        hoat_dong: item.hoat_dong,
-      }));
-      setSanphamData(formattedData);
-      updateGiaKhuyenMaiHetHan(formattedData);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu voucher:", error);
-    }
+      const response = await axios.get("http://localhost:8080/api/listSanPham");
+      setSanphamData(response.data);
+      console.log("List danh sách nè: ", response.data);
+    } catch (error) {}
   };
+  // const fetchsanphamData = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8080/api/listSanPham");
+  //     const data = await response.json();
+  //     console.log("Dữ liệu là: ", data);
+  //     const formattedData = data.map((item) => ({
+  //       key: item.san_phamId,
+  //       san_phamId: item.san_phamId,
+  //       ten_san_pham: item.ten_san_pham,
+  //       gia_goc: item.gia_goc,
+  //       gia_km: item.gia_km,
+  //       mo_ta: item.mo_ta,
+  //       luot_mua: item.luot_mua,
+  //       phantram_GG: item.phantram_GG,
+  //       han_gg: item.han_gg,
+  //       hoat_dong: item.hoat_dong,
+  //     }));
+  //     setSanphamData(formattedData);
+  //     console.log("Sản phẩm nè trời: ", formattedData);
+  //   } catch (error) {
+  //     console.error("Lỗi khi lấy dữ liệu voucher:", error);
+  //   }
+  // };
 
   const sanPhamInput = async () => {
     const sanPhamKho = {
@@ -69,44 +69,85 @@ const Sanpham = () => {
       mo_ta: document.getElementById("mo_ta").value,
       phantram_GG: parseInt(document.getElementById("phantram_GG").value),
       han_gg: document.getElementById("han_gg").value,
-      hoat_dong: hoatDong,
+      hoat_dong: selectedProduct.hoat_dong,
+      accountID: accountIDNe,
     };
     //return sanPhamKho;
     const formBody = Object.keys(sanPhamKho)
-      .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(sanPhamKho[key]))
-      .join('&');
+      .map(
+        (key) =>
+          encodeURIComponent(key) + "=" + encodeURIComponent(sanPhamKho[key])
+      )
+      .join("&");
 
     return formBody;
-  }
+  };
 
   useEffect(() => {
     fetchsanphamData();
+    danhSachKhuyenMai();
+    setAccountIDNe(accountID.accountID);
+    danhSachNhatKy();
   }, []);
 
-  const handleEditClick = async (record) => {
-    console.log("Record data: ", record);
+  const danhSachKhuyenMai = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/edit/sanpham/${record.san_phamId}`
+      const response = await axios.get(
+        "http://localhost:8080/api/sanPham/QLSP/danhsach/khuyenmai"
       );
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedProduct(data); // Đặt sản phẩm đã lấy vào state
-        console.log(data);
-        setActiveKey("1");
-      }
+      console.log("Danh sách khuyến mãi nè: ", response.data);
+      setListKhuyenMai(response.data);
+    } catch {}
+  };
+  const handleEditClick = async (record) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/sanPham/QLSP/edit/${record.san_phamId}`
+      );
+      const data = response.data;
+      console.log("Khi nhấn edit nè: ", data[0]);
+      setSelectedProduct(data[0]);
+      setActiveKey("1");
     } catch (error) {
-      console.error("Lỗi khi lấy thông tin sản phẩm:", error);
-    }
-    if(record.hoat_dong !== "Hoạt động"){ 
-      setIsDisabled(true);
-    }
-    else{
-      setIsDisabled(false);
+      console.log(error);
     }
   };
+  // const handleEditClick = async (record) => {
+  //   console.log("Record data: ", record);
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8080/api/edit/sanpham/${record.san_phamId}`
+  //     );
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setSelectedProduct(data); // Đặt sản phẩm đã lấy vào state
+  //       console.log(data);
+  //       setActiveKey("1");
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+  //   }
+  //   if (record.hoat_dong !== "On") {
+  //     setIsDisabled(true);
+  //   } else {
+  //     setIsDisabled(false);
+  //   }
+  // };
 
+  const danhSachNhatKy = async () => {
+    try{
+      const response = await axios.get(
+        "http://localhost:8080/api/sanPham/QLSP/danhsach/nhatky"
+      );
+      console.log("Danh sách nhất ký nè: ", response.data);
+      setListNhatKy(response.data);
+    }catch{
+
+    }
+  }
   const handleUpdate = async () => {
+    const accountID = JSON.parse(localStorage.getItem("data"));
+    console.log("AccountID nè: ", accountID.accountID);
     const sanPhamData = await sanPhamInput();
     console.log("Dữ liệu khi nhấn update: ", sanPhamData);
     try {
@@ -129,8 +170,13 @@ const Sanpham = () => {
         setSelectedProduct("");
       } else {
         const errorData = await response.json(); // Lấy dữ liệu lỗi từ phản hồi
-        console.error("Lỗi khi cập nhật sản phẩm:", errorData.message || errorData);
-        alert(`Lỗi khi cập nhật sản phẩm: ${errorData.message || "Không xác định"}`);
+        console.error(
+          "Lỗi khi cập nhật sản phẩm:",
+          errorData.message || errorData
+        );
+        alert(
+          `Lỗi khi cập nhật sản phẩm: ${errorData.message || "Không xác định"}`
+        );
       }
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu cập nhật:", error);
@@ -194,18 +240,52 @@ const Sanpham = () => {
             style={{ cursor: "pointer", color: "#1890ff" }}
             onClick={() => handleEditClick(record)}
           />
-          {record.hoat_dong !== "Hoạt động" && <DeleteOutlined />}
         </div>
       ),
     },
   ];
 
-  const filteredSanPhamData = sanphamData.filter((item) => item.hoat_dong === "Hoạt động");
+  const columnsNhatKy = [
+    {
+      title: "Mã sản phẩm",
+      dataIndex: "san_phamId",
+      key: "san_phamId",
+    },
+    {
+      title: "Hành động",
+      dataIndex: "ten_hanh_dong",
+      key: "ten_hanh_dong",
+    },
+    {
+      title: "Ngày thực hiện",
+      dataIndex: "ngay_hanh_dong",
+      key: "ngay_hanh_dong",
+    },
+    {
+      title: "Người thực hiện",
+      dataIndex: "accountID",
+      key: "accountID",
+    },
+  ];
+
+  const filteredSanPhamData = sanphamData.filter(
+    (item) =>
+      item.hoat_dong === "On" &&
+      item.phe_duyet === "Đã phê duyệt" &&
+      item.trang_thai_xoa === null
+  );
+
+  const filteredSanPhamNgungHoatDongData = sanphamData.filter(
+    (item) =>
+      item.hoat_dong === "Off" &&
+      item.phe_duyet === "Đã phê duyệt" &&
+      item.trang_thai_xoa === null
+  );
 
   return (
     <Tabs
       className="mx-auto"
-      style={{ width: "1100px", margin: "auto" }}
+      style={{ width: "1230px", margin: "auto" }}
       activeKey={activeKey} // Điều khiển tab hiện tại
       onChange={(key) => setActiveKey(key)}
       type="card"
@@ -290,9 +370,10 @@ const Sanpham = () => {
                     value={selectedProduct.mo_ta || ""}
                     onChange={(e) =>
                       setSelectedProduct((prev) => ({
-                      ...prev,
-                      mo_ta: e.target.value,
-                    }))}
+                        ...prev,
+                        mo_ta: e.target.value,
+                      }))
+                    }
                   />
                 </div>
                 <div className="form-group">
@@ -311,7 +392,9 @@ const Sanpham = () => {
                       const discountPercent = parseFloat(e.target.value) || 0;
                       setSelectedProduct((prev) => {
                         const originalPrice = prev.gia_goc || 0;
-                        const discountPrice = originalPrice - (originalPrice * discountPercent) / 100;
+                        const discountPrice =
+                          originalPrice -
+                          (originalPrice * discountPercent) / 100;
                         return {
                           ...prev,
                           phantram_GG: discountPercent,
@@ -342,7 +425,7 @@ const Sanpham = () => {
                 <div className="form-group">
                   <label htmlFor="warehouseStatus">Hoạt động</label>
                   <Select
-                    value={selectedProduct.hoat_dong || "Hoạt động"}
+                    value={selectedProduct.hoat_dong || "On"}
                     onChange={(value) =>
                       setSelectedProduct({
                         ...selectedProduct,
@@ -355,8 +438,8 @@ const Sanpham = () => {
                       height: "40px",
                     }}
                     options={[
-                      { value: "Hoạt động", label: "Hoạt động" },
-                      { value: "Ngừng hoạt động", label: "Ngừng hoạt động" },
+                      { value: "On", label: "On" },
+                      { value: "Off", label: "Off" },
                     ]}
                   />
                 </div>
@@ -370,7 +453,7 @@ const Sanpham = () => {
           ),
         },
         {
-          label: `Danh sách sản phẩm`,
+          label: `Danh sách hoạt động`,
           key: "2",
           children: (
             <div className="tab-content">
@@ -388,8 +471,90 @@ const Sanpham = () => {
                 excel
               </button>
               <Table
+                rowKey="san_phamId"
                 dataSource={filteredSanPhamData}
                 columns={columns}
+                pagination={false}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Danh sách ngừng hoạt động`,
+          key: "3",
+          children: (
+            <div className="tab-content">
+              <h1>Danh sách sản phẩm</h1>
+              <button
+                style={{
+                  marginBottom: "20px",
+                  float: "right",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                className="buttonexcel"
+              >
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
+                excel
+              </button>
+              <Table
+                rowKey="san_phamId"
+                dataSource={filteredSanPhamNgungHoatDongData}
+                columns={columns}
+                pagination={false}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Đang khuyến mãi`,
+          key: "4",
+          children: (
+            <div className="tab-content">
+              <h1>Danh sách sản phẩm</h1>
+              <button
+                style={{
+                  marginBottom: "20px",
+                  float: "right",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                className="buttonexcel"
+              >
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
+                excel
+              </button>
+              <Table
+                rowKey="san_phamId"
+                dataSource={listKhuyenMai}
+                columns={columns}
+                pagination={false}
+              />
+            </div>
+          ),
+        },
+        {
+          label: `Nhật ký hoạt động`,
+          key: "5",
+          children: (
+            <div className="tab-content">
+              <h1>Danh sách sản phẩm</h1>
+              <button
+                style={{
+                  marginBottom: "20px",
+                  float: "right",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                className="buttonexcel"
+              >
+                <ExportOutlined style={{ marginRight: "8px" }} /> Xuất file
+                excel
+              </button>
+              <Table
+                rowKey="san_phamId"
+                dataSource={listNhatKy}
+                columns={columnsNhatKy}
                 pagination={false}
               />
             </div>

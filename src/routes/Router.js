@@ -12,6 +12,9 @@ import QuanLyDonHang from "../views/quanly/QuanLyDonHang";
 import NhapHang from "../views/quanly/QuanLyNhapHang";
 import Kho from "../views/quanly/QuanLyKho";
 import DanhGia from "../views/quanly/QuanLyDanhGia";
+import QuanLyShipper from "../views/quanly/QuanLyShipper";
+import UploadFile from "../views/quanly/UploadFile";
+import CrudCategory from "../views/quanly/CrudCategory";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -41,7 +44,11 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: "/", element: <Navigate to="/dashboard" /> },
+      { path: "upload", element: <UploadFile /> },
+      { path: "danhmuc", element: <CrudCategory /> },
+      { path: "DuAnTotNghiep", element: <Dashboard /> },
       { path: "dashboard", element: <Thongtincanhan /> },
+      { path: "shipper", element: <QuanLyShipper /> },
       { path: "thongke", element: <Dashboard /> },
       { path: "voucher", element: <Voucher /> },
       { path: "nhaphang", element: <NhapHang /> },
@@ -58,16 +65,16 @@ const Router = [
       { path: "*", element: <Navigate to="/auth/404" /> },
     ],
   },
-  {
-    path: "/auth",
-    element: <BlankLayout />,
-    children: [
-      { path: "404", element: <Error /> },
-      { path: "register", element: <Register /> },
-      { path: "login", element: <Login /> },
-      { path: "*", element: <Navigate to="/auth/404" /> },
-    ],
-  },
+  // {
+  //   path: "/auth",
+  //   element: <BlankLayout />,
+  //   children: [
+  //     { path: "404", element: <Error /> },
+  //     { path: "register", element: <Register /> },
+  //     { path: "login", element: <Login /> },
+  //     { path: "*", element: <Navigate to="/auth/404" /> },
+  //   ],
+  // },
   { path: "/login", element: <Newlogin1 /> },
   { path: "naptien", element: <Naptien /> },
 ];
