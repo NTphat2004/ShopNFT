@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { QRCode } from 'antd';
 import { styled } from "@mui/material";
 import { clearListSpthanhtoan2 } from "../Reducer/cartReducer";
+import Swal from 'sweetalert2'
 
 const userId = localStorage.getItem('account_id');
 let shipfee = localStorage.getItem('shippingfee');
@@ -128,8 +129,8 @@ function Thanhtoan() {
                     seterrormessage(errormessage + " Sản phẩm đã hết hàng ");
                 }
                 if (response.data && respone2.data.length === 0) {
-                    alert("Thanh toán thanh công!");
-                    // create_ghn_order()
+                    // alert("Thanh toán thanh công!");
+                    create_ghn_order()
                     dispatch(clearListSpthanhtoan2());
                 }
             }
@@ -142,8 +143,8 @@ function Thanhtoan() {
                 seterrormessage(" Sản phẩm đã hết hàng ");
             }
             if (respone2.data.length === 0) {
-                alert("Thanh toán thanh công!");
-                //   create_ghn_order()
+                // alert("Thanh toán thanh công!");
+                create_ghn_order()
                 dispatch(clearListSpthanhtoan2());
 
             }
@@ -215,7 +216,7 @@ function Thanhtoan() {
         console.log('run save');
         console.log("method :", method);
         const res = await axios({
-            url: `http://localhost:8080/createpayment?userid=${userId}&spid=${product_id_params}&quantity=${product_quantity_params}&total=${checkfordiscount()}&method=${method}&paypalid=${paypalid}`, method: 'POST',
+            url: `http://localhost:8080/createpayment?userid=${userId}&spid=${product_id_params}&quantity=${product_quantity_params}&total=${Math.round(checkfordiscount())}&method=${method}&paypalid=${paypalid}`, method: 'POST',
             headers: {
                 "Content-Type": "application/json"
             }, data: {
@@ -246,6 +247,18 @@ function Thanhtoan() {
 
         console.log("Response tao don hang: ", res.data);
         setdonhangid(res.data.don_hangid);
+        sendmail();
+        
+    }
+    const sendmail = async () => {
+        const res = await axios({
+            url: `http://localhost:8080/sendmail?accountid=${userId}`, method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            }, data: {
+              
+            }
+        });
     }
     const checkmethod = () => {
         if (method == 1) {
@@ -323,11 +336,19 @@ function Thanhtoan() {
         setleadtime(res.data.data.leadtime);
     }
 
+    const askiftheywanttocontinue = () => {
+        Swal.fire({
+            title: "Thông báo về việc thanh toán thông qua VNpay!",
+            text: "Khi thanh toán thông qua bán VNpay thì bạn sẽ không được hoàn tiền khi hủy đơn! Hãy xuy nghĩ kỹ",
+            confirmButtonText: "Tiếp tục thanh toán",
+            denyButtonText: `Don't save`
+          })
+    }
+
 
     const paypal_CreateOrder = async (id) => {
         console.log("create paypal order");
         console.log(getPaypalAccessToken());
-
         try {
             const res = await axios({
                 url: `https://api-m.sandbox.paypal.com/v2/checkout/orders `, method: 'POST',
@@ -419,19 +440,23 @@ function Thanhtoan() {
 
         })
         console.log("ghn create data", res.data);
-        if (method == "1") {
-            console.log(res.data.data.order_code, 'id ghn');
-            settemptid(temptid + 1);
-            apipayment(res.data.data.order_code, null);
+
+        if (res.data.code === 200) {
+            if (method == "1") {
+                console.log(res.data.data.order_code, 'id ghn');
+                settemptid(temptid + 1);
+                apipayment(res.data.data.order_code, null);
+            }
+            else if (method == "2") {
+                console.log("run paypal");
+                paypal_CreateOrder(res.data.data.order_code);
+            }
+            else {
+                console.log(res.data.data.order_code, 'id ghn');
+                apipayment(res.data.data.order_code, null);
+            }
         }
-        else if (method == "2") {
-            console.log("run paypal");
-            paypal_CreateOrder(res.data.data.order_code);
-        }
-        else {
-            console.log(res.data.data.order_code, 'id ghn');
-            apipayment(res.data.data.order_code, null);
-        }
+  
 
     }
 
@@ -473,6 +498,8 @@ function Thanhtoan() {
 
 
     useEffect(() => {
+        const currentLocation = window.location.pathname;
+        localStorage.setItem('currentLocation', currentLocation);
         api();
         // apishippingfee();
         getPaypalAccessToken();
@@ -499,7 +526,7 @@ function Thanhtoan() {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [method, discount, voucher2,ListSPChecked]);
+    }, [method, discount, voucher2, ListSPChecked]);
 
 
     const handleInputClick = () => {
@@ -605,6 +632,9 @@ function Thanhtoan() {
                                 options={options}
                                 onChange={(value) => {
                                     setmethod(value)
+                           if(value == '3'){
+                               askiftheywanttocontinue()
+                           }
                                     if (value != '1') {
                                         setusingonlinepayment(true);
                                     } else {
@@ -656,9 +686,14 @@ function Thanhtoan() {
                                     color: 'white', fontWeight: 'bolder'
                                 }}>Trở về giỏ hàng</button> </Link> :
                                 <button disabled={ListSPChecked.length == 0 ? true : false} className="thanhtoanbtn" data-bs-toggle="modal" data-bs-target="#exampleModal2" ref={btn} onClick={() => {
+                                   if(userId.includes("null")){
+                                    redirect('/login');
+                              
+                                   }else{
                                     const jsonparsevoucher = JSON.parse(voucher);
                                     console.log(jsonparsevoucher)
-                                    checkvalidvoucher(voucher)
+                                    checkvalidvoucher(voucher);
+                                   }
                                 }} style={{
                                     width: '100%', height: '45px',
                                     borderRadius: '5px', border: 'none', backgroundColor: 'red',
@@ -686,7 +721,7 @@ function Thanhtoan() {
                                             <div className="modal-body" >
                                                 {method == 1 ?
                                                     <>
-                                                        <button data-bs-dismiss="modal"  className='btn btn-primary' onClick={() => {
+                                                        <button data-bs-dismiss="modal" className='btn btn-primary' onClick={() => {
                                                             redirect('/lịch-sử-đặt-hàng');
                                                         }}>
                                                             Chuyển tiếp đến trang đơn hàng
@@ -701,8 +736,8 @@ function Thanhtoan() {
                                                             />
                                                         </div>
                                                         <div className="col-12 mt-1">
-                                                            <button className='btn btn-primary'  data-bs-dismiss="modal"  onClick={() => {
-                                                                // window.open(urlforqrcode, '_blank');
+                                                            <button className='btn btn-primary' data-bs-dismiss="modal" onClick={() => {
+                                                                window.open(urlforqrcode, '_blank');
                                                                 // window.open('about:blank', '_self');
                                                                 window.close();
                                                             }}>

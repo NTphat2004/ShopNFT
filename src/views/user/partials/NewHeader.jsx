@@ -70,6 +70,7 @@ const NewHeader = () => {
     };
     // Xử lý khi click bên ngoài để đóng popup
     useEffect(() => {
+   
         gettopsale()
         setIsLoggedIn(!!userId);
         setUsersId(userId);
@@ -103,7 +104,7 @@ const NewHeader = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('userId');
+        localStorage.removeItem('account_id');
         setIsLoggedIn(false);
         navigate('/login');
     };
@@ -194,7 +195,7 @@ const NewHeader = () => {
                                     </button>
                                     <ul className="dropdown-menu" aria-labelledby="userMenuDropdown">
                                         <li>
-                                            <NavLink className="dropdown-item" to={`/thông-tin-cá-nhân?userId=${userId}`}>
+                                            <NavLink className="dropdown-item" to={`personal-info`}>
                                                 Quản lý cá nhân
                                             </NavLink>
                                         </li>

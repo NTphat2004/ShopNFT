@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useReducer } from 'react';
 import { Table, Space } from 'antd';
 import { Editor } from '@tinymce/tinymce-react';
 import axios from 'axios';
@@ -14,6 +15,7 @@ import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import ColumnGroup from 'antd/es/table/ColumnGroup';
 import { Hidden } from '@mui/material';
+import Swal from 'sweetalert2'
 
 // Popup
 // PopupID (PK)
@@ -38,13 +40,20 @@ const CrudPOPUP = () => {
   const [product_discount2, setproduct_discount2] = useState([]);
   const [datahanhdong, setdatahanhdong] = useState([]);
   const [selected, setSelected] = useState(false);
-  const [change, setchange] = useState(0);
+  const [change, setchange] = React.useState(1);
   const [tabledata, settabledata] = useState([]);
+  const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+  const [beingedit, setbeingedit] = useState(false);
   let listtemp = [];
   let newid = '';
+  const updateStatus = async () => {
+    const res = await axios({ url: 'http://localhost:8080/api/popup/getPopupsAfterUpdateStatus', method: 'GET' });
+
+  }
   const getnewestid = async () => {
     const res = await axios({
-      url: 'http://localhost:8080/getnewestID',
+      url: 'http://localhost:8080/api/popup/getnewestID',
+      method: 'GET',
       headers: { 'Content-type': 'application/json' },
     })
     newid = res.data;
@@ -56,7 +65,7 @@ const CrudPOPUP = () => {
       popupID: '',
       han_su_dung: '',
       ngay_tao: '',
-      hoat_dong: 'Đang hoạt động',
+      hoat_dong: 'On',
       users: userId,
       sanpham: '',
     }, validationSchema: Yup.object({
@@ -66,25 +75,56 @@ const CrudPOPUP = () => {
     }),
     onSubmit: values => {
       console.log((values));
+
+      const currentday = new Date();
+
       if (createorupdate) {
-        alert('cap nhat');
-        updatePopUp(values);
-        // api(values);
-        setchange(change + 1);
+
+       
+
+        
+
+        new Date(values.ngay_tao)  <= currentday ? alertCurrent() : values.ngay_tao > values.han_su_dung ? alertExpriredday()  :  updatePopUp(values); ;
+
+
+
+       
+
+
+
+
       } else {
 
-        alert('them');
-        api(values);
-        setchange(change + 1);
+        new Date(values.ngay_tao)  <= currentday ? alertCurrent() : values.ngay_tao > values.han_su_dung ? alertExpriredday()  :     api(values); ;
+
+    
+
       }
     }
   });
 
 
+  const alertCurrent = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Sai thông tin đầu vào",
+      text: "Ngày tạo phải lớn hơn ngày hiện tại!",
+    });
+  }
+
+  const alertExpriredday = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Sai thông tin đầu vào",
+      text: "Ngày hết hạn phải lớn hơn ngày tạo!",
+    });
+  }
+
+
   const api = async (values) => {
     console.log('value', values);
     const res = await axios({
-      url: `http://localhost:8080/createnewPopup?productname=${personName}&userid=${userId}`,
+      url: `http://localhost:8080/api/popup/createnewPopup?productname=${personName}&userid=${userId}`,
       method: 'POST',
       data: {
         'popupID': values.popupID,
@@ -105,7 +145,7 @@ const CrudPOPUP = () => {
   const updatePopUp = async (values) => {
     console.log('value', values);
     const res = await axios({
-      url: `http://localhost:8080/updatePopup?productname=${personName}&userid=${userId}`,
+      url: `http://localhost:8080/api/popup/updatePopup?productname=${personName}&userid=${userId}`,
       method: 'POST',
       data: JSON.stringify({
         'popupID': values.popupID,
@@ -128,7 +168,7 @@ const CrudPOPUP = () => {
 
   const deletepopup = async (id) => {
     const res = await axios({
-      url: 'http://localhost:8080/changeStatus',
+      url: `http://localhost:8080/api/popup/changeStatus?userid=${userId}`,
       method: 'POST',
       data: {
         'popupID': id.popupID
@@ -136,11 +176,12 @@ const CrudPOPUP = () => {
       headers: { 'Content-Type': 'application/json' }
     });
     console.log(res.data);
+    setchange(change + 1);
   }
 
   const getdeletedrecord = async () => {
     const res = await axios({
-      url: 'http://localhost:8080/getallpopuphasdeletedstatus',
+      url: 'http://localhost:8080/api/popup/getallpopuphasdeletedstatus',
       headers: { 'Content-type': 'application/json' },
     })
     const formattedData = res.data.map((item, index) => ({
@@ -150,7 +191,7 @@ const CrudPOPUP = () => {
       hoatdong: item.hoat_dong,
       ngaytao: item.ngay_tao,
       trangthaixoa: item?.trang_thai_xoa,
-      accountid: item?.accountID,
+      accountid: item?.users.accountID,
       chitietsanpham: item?.chitietsanpham
     }));
     settabledata(formattedData);
@@ -180,7 +221,7 @@ const CrudPOPUP = () => {
       hidden: true
     },
     {
-      title: 'AccountID',
+      title: 'Người tạo',
       dataIndex: 'accountid',
       key: 'accountid',
     },
@@ -190,8 +231,9 @@ const CrudPOPUP = () => {
       render: (_, record) => (
         <div>
           <button className='btn btn-danger me-2' onClick={() => {
-            setchange(change + 1);
             deletepopup(record);
+
+
           }} >Xóa</button>
 
           <button className='btn btn-danger' onClick={() => {
@@ -217,8 +259,6 @@ const CrudPOPUP = () => {
                 record.sanpham[i].san_phamId
               )
             }
-
-
             console.log('listtemp', listtemp);
             console.log('option', options);
             console.log('product_discount', product_discount);
@@ -226,7 +266,10 @@ const CrudPOPUP = () => {
             setSelected(true);
             setproduct_discount2(listtemp);
             const tab2 = document.querySelector("#form-tab")
+            setbeingedit(true);
+
             tab2.click();
+
           }} >Edit</button>
         </div>
       )
@@ -247,7 +290,7 @@ const CrudPOPUP = () => {
     },
 
     {
-      title: 'Ngày tạo',
+      title: 'Ngày thực hiện',
       dataIndex: 'ngaytao',
       key: 'ngaytao',
     },
@@ -258,7 +301,7 @@ const CrudPOPUP = () => {
       hidden: true
     },
     {
-      title: 'AccountID',
+      title: 'Người thực hiện',
       dataIndex: 'accountid',
       key: 'accountid',
     },
@@ -294,9 +337,10 @@ const CrudPOPUP = () => {
       hidden: true
     },
     {
-      title: 'AccountID',
+      title: 'Người tạo',
       dataIndex: 'accountid',
       key: 'accountid',
+
     },
     {
       title: 'Nút',
@@ -305,7 +349,7 @@ const CrudPOPUP = () => {
         <div>
           <button className='btn btn-danger me-2' onClick={() => {
             undodelete(record);
-            setchange(change + 1);
+
 
           }}>Khôi phục</button>
           {/* 
@@ -350,7 +394,7 @@ const CrudPOPUP = () => {
 
   const undodelete = async (id) => {
     const res = await axios({
-      url: 'http://localhost:8080/undodelete',
+      url: `http://localhost:8080/api/popup/undodelete?userid=${userId}`,
       method: 'POST',
       data: {
         'popupID': id.popupID
@@ -358,6 +402,7 @@ const CrudPOPUP = () => {
       headers: { 'Content-Type': 'application/json' }
     });
     console.log(res.data);
+    setchange(change + 1);
   }
 
   //handle change select
@@ -406,15 +451,15 @@ const CrudPOPUP = () => {
 
   const fetchDataHanhDong = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/FindAllPopUpwithDTO'); // Replace with actual API endpoint
+      const response = await axios.get('http://localhost:8080/api/popup/FindAllPopUpwithDTO'); // Replace with actual API endpoint
       const formattedData = response.data.map((item, index) => ({
         key: index,
         popupID: item.popup.popupID,
         hansudung: item.popup.han_su_dung,
         hoatdong: item.popup.hoat_dong,
-        ngaytao: item.popup.ngay_tao,
+        ngaytao: item.ngay_tao,
         trangthaixoa: item?.popup.trang_thai_xoa,
-        accountid: item?.popup.users?.accountID,
+        accountid: item?.users?.accountID,
         sanpham: item?.popup.sanpham,
         hanhdong: item?.tenHanhDong
       }));
@@ -427,7 +472,7 @@ const CrudPOPUP = () => {
 
   const getData = async () => {
     try {
-      const res = await axios({ url: 'http://localhost:8080/getallpopupnotdeleted', method: 'GET' })
+      const res = await axios({ url: 'http://localhost:8080/api/popup/getallpopupnotdeleted', method: 'GET' })
       const formattedData = res.data.map((item, index) => ({
         key: index,
         popupID: item.popupID,
@@ -439,7 +484,7 @@ const CrudPOPUP = () => {
         sanpham: item?.popupchitiet.map((item) => ({ 'ten_san_pham': item.sanpham.ten_san_pham, 'san_phamId': item.sanpham.san_phamId }))
       }));
       setdataSource(formattedData);
-      console.log(formattedData);
+      console.log("formattedData: ", formattedData);
     } catch (error) {
       console.error(error);
     }
@@ -555,21 +600,25 @@ const CrudPOPUP = () => {
     ],
   };
   useEffect(() => {
+    updateStatus()
+    getData()
     getnewestid()
     getdeletedrecord()
-    getData()
+
     fetchProductHasDiscount()
     fetchDataHanhDong()
   }, [])
   useEffect(() => {
+    console.log('change: ', change);
     getData()
     getdeletedrecord()
-    fetchProductHasDiscount()
-    // console.log('change :', change);
+    updateStatus()
+    getnewestid()
+    fetchDataHanhDong()
   }, [change])
 
   useEffect(() => {
-    // console.log('options2', options2);
+
   }, [personName, listtemp, options2]);
 
   return (
@@ -615,6 +664,8 @@ const CrudPOPUP = () => {
                     onChange={handleChange
 
                     }
+                    disabled={formik.values.hoat_dong == "On" && beingedit}
+
                     input={<OutlinedInput label="Sản phẩm" />}
                     renderValue={(selected) => selected.join(', ')}
                     MenuProps={MenuProps}
@@ -636,14 +687,14 @@ const CrudPOPUP = () => {
               </div>
               <div className="col-md-6 my-2">
                 <div className="form-floating ">
-                  <input value={formik.values.ngay_tao} type="date" onChange={(e) => {
+                  <input value={formik.values.ngay_tao} type="date" disabled={formik.values.hoat_dong == "On" && beingedit} onChange={(e) => {
                     formik.setFieldValue("ngay_tao", e.target.value);
                   }} className="form-control" id="floatingPassword" placeholder="Ngày tạo" />
                   <label htmlFor="floatingPassword" className='text-primary fw-bold'>NGÀY TẠO</label>
                   {formik.errors.ngay_tao && <div className="text-danger ms-1 fw-bold">{formik.errors.ngay_tao}</div>}
                 </div>
                 <div className="form-floating mt-3 ">
-                  <input value={formik.values.han_su_dung} type="date" onChange={(e) => {
+                  <input value={formik.values.han_su_dung} disabled={formik.values.hoat_dong == "On" && beingedit} type="date" onChange={(e) => {
                     formik.setFieldValue("han_su_dung", e.target.value);
                   }} className="form-control" id="floatingPassword" placeholder="Ngày hết hạn" />
                   <label htmlFor="floatingPassword" className='text-primary fw-bold'>HẠN SỬ DỤNG</label>
@@ -651,13 +702,14 @@ const CrudPOPUP = () => {
                 </div>
                 <div className="form-check form-check-inline mt-4">
                   <input
+                    disabled={formik.values.hoat_dong == "On" && beingedit}
                     className="form-check-input"
                     type="radio"
                     name="hoat_dong"
                     id="option1"
-                    value="Đang hoạt động"
+                    value="On"
                     onChange={formik.handleChange}
-                    checked={formik.values.hoat_dong == "Đang hoạt động"}
+                    checked={formik.values.hoat_dong == "On"}
                   />
                   <label className="form-check-label fw-bold text-primary" htmlFor="option1">
                     Hoạt động
@@ -665,13 +717,14 @@ const CrudPOPUP = () => {
                 </div>
                 <div className="form-check form-check-inline">
                   <input
+                    disabled={formik.values.hoat_dong == "On" && beingedit}
                     className="form-check-input"
                     type="radio"
                     name="hoat_dong"
                     id="option2"
-                    value="Không hoạt động"
+                    value="Off"
                     onChange={formik.handleChange}
-                    checked={formik.values.hoat_dong == "Không hoạt động"}
+                    checked={formik.values.hoat_dong == "Off"}
                   />
                   <label className="form-check-label fw-bold text-primary" htmlFor="option2">
                     Không hoạt động
@@ -683,10 +736,11 @@ const CrudPOPUP = () => {
               <div className="col-md-12 text-center mt-3">
 
                 {selected ? <button disabled={personName.length > 3} className='btn btn-outline-warning fw-bold ms-2 mt-2'
-                  onClick={() => setcreateorupdate(true)} type='submit' style={{ minWidth: 120 }}> {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm": "Cập nhật Danh Mục"}</button> :
-                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' onClick={() => setcreateorupdate(false)} disabled={personName.length > 3} type='submit' style={{ minWidth: 120 }} > {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm": "Thêm Danh Mục"} </button>}
+                  onClick={() => setcreateorupdate(true)} type='submit' style={{ minWidth: 120 }}> {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm" : "Cập nhật Danh Mục"}</button> :
+                  <button className='btn btn-outline-primary fw-bold ms-2 mt-2' onClick={() => setcreateorupdate(false)} disabled={personName.length > 3} type='submit' style={{ minWidth: 120 }} > {personName.length > 3 ? "Chỉ có thể chọn tối đa 3 sản phẩm" : "Thêm Danh Mục"} </button>}
                 <button className='btn btn-outline-success fw-bold ms-2 mt-2' type='button' onClick={() => {
                   formik.resetForm();
+                  setbeingedit(false);
                   getnewestid();
                   setPersonName([]);
                   setSelected(false);

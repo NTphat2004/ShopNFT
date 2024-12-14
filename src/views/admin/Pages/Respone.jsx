@@ -252,7 +252,7 @@ function Respone() {
 
                     }} >Phản hồi </button>
 
-                    
+
                 </div>
             )
         },
@@ -526,7 +526,7 @@ function Respone() {
 
     const dorespone = async (values) => {
         const res = await axios({
-            url: 'http://localhost:8080/respone/do',
+            url: `http://localhost:8080/respone/do?accountId= ${userId}`,
             method: 'POST',
             data: {
                 'feedbackID': values.feedbackID,

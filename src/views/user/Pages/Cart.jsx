@@ -62,7 +62,7 @@ function Cart() {
             title: 'Có lỗi đã xảy ra',
             text: errormessage + 'Vui lòng thử lại!',
             icon: 'error',
-            confirmButtonText: 'Cool'
+            confirmButtonText: 'OK'
         })
     }
 
@@ -166,10 +166,6 @@ function Cart() {
         }
     }
 
-
-
-
-
     const checkvalidvoucher = async () => {
         const jsonparsevoucher = JSON.parse(voucher);
         if (jsonparsevoucher != null) {
@@ -182,16 +178,15 @@ function Cart() {
 
             if (jsonparsevoucher != null) {
                 if (!response.data) {
-                    seterrormessage(errormessage + "Voucher đã hết hạn hoặc hết số lần sử dụng!");
+               
+                    seterrormessage(errormessage.includes("Voucher đã hết hạn hoặc hết số lần sử dụng!")? errormessage+"" :errormessage+"Voucher đã hết hạn hoặc hết số lần sử dụng!");
                     return false;
                 }
                 if (respone2.data.length != 0) {
-                    seterrormessage(errormessage + " Sản phẩm đã hết hàng ");
-
+                    seterrormessage(errormessage.includes("Sản phẩm đã hết hàng  ") ? errormessage + "" : errormessage + " Sản phẩm đã hết hàng ");
                     return false;
                 }
                 if (response.data && respone2.data.length === 0) {
-                    // alert("Thanh toán thanh công! 1");
                     return true;
                 }
             }
@@ -201,13 +196,11 @@ function Cart() {
                 method: "POST",
             })
             if (respone2.data.length != 0) {
-                seterrormessage(" Sản phẩm đã hết hàng ");
+                seterrormessage(errormessage.includes("Sản phẩm đã hết hàng  ") ? errormessage + "" : errormessage + " Sản phẩm đã hết hàng ");
                 return false;
             }
             if (respone2.data.length === 0) {
-                // alert("Thanh toán thanh công! 2");
                 return true;
-
             }
         }
         return false
@@ -219,21 +212,6 @@ function Cart() {
                 var userid = JSON.parse(response);
                 userid ? voucherApplied ? navigate('/thanhtoan') : navigatetoCart() : showSwal();
             });
-        // .then(function (data) {
-        //     var userid = JSON.parse(data);
-        //     console.log(userid);
-        //     console.log(userid);
-        //     if (userid) {
-        //         if (!voucherApplied) {
-        //             localStorage.setItem('discount', 0);
-        //             localStorage.setItem('total_after', JSON.stringify(0));
-        //             navigate('/thanhtoan')
-        //         } else {
-        //             navigate('/thanhtoan')
-        //         }
-        //     }
-
-        // })
     }
     const navigatetoCart = () => {
         localStorage.setItem('discount', 0);
@@ -1028,9 +1006,10 @@ function Cart() {
                             </div>
                         </div>
                         <div className="col-12 mt-2 thanhtoan" >
-                            <button className="btn btn-danger" onClick={showSwal}> test</button>
+                  
                             <button onClick={
                                 () => {
+                                    console.log("error:", errormessage);
                                     // if (!resultcheckcart()) {
                                     //     showSwal()
                                     //     console.log(resultcheckcart(),'fale');

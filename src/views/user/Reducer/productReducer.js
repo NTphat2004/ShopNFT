@@ -47,8 +47,8 @@ export const Call_API_Products = () => {
       dispatch(turnonloading)
       const [ListProductThisWeekAPI, ListProductTopSaleAPI, PopupList, ListProductDiscountAPI] = await Promise.all([
         axios({ url: 'http://localhost:8080/FindProductThisWeek', method: 'GET' }),
-        axios({ url: 'http://localhost:8080/FindProductTopSell', method: 'GET' }),
-        axios({ url: 'http://localhost:8080/FindAllPopUp', method: 'GET' }),
+        axios({ url: 'http://localhost:8080/FindBySanPhamTopSellByMonth', method: 'GET' }),
+        axios({ url: 'http://localhost:8080/api/popup/FindAllPopUp', method: 'GET' }),
         axios({ url: 'http://localhost:8080/FindProductThisWeekTOP100', method: 'GET' })
       ]);
 

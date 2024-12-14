@@ -89,7 +89,7 @@ const ProductDanhmuc = ({ Products }) => {
                                         <div className="d-flex">
                                             <p>{product.luotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                                             <p className='text-end ms-auto me-2'>
-                                                {product.sosao} <span className="bi bi-star-fill text-warning" />
+                                                {product.sosao?.toFixed(1) }<span className="bi bi-star-fill text-warning" />
                                             </p>
                                         </div>
                                     </div>
@@ -113,7 +113,7 @@ const ProductDanhmuc = ({ Products }) => {
                                         <div className="d-flex">
                                             <p>{product.luotdanhgia} <span className='text-primary' style={{ fontSize: 13 }}>Đánh giá</span></p>
                                             <p className='text-end ms-auto me-2'>
-                                                {product.sosao} <span className="bi bi-star-fill text-warning" />
+                                                {product.sosao?.toFixed(1)} <span className="bi bi-star-fill text-warning" />
                                             </p>
                                         </div>
                                     </div>

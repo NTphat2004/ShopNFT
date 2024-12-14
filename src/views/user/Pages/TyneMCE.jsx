@@ -15,6 +15,7 @@ const TyneMCE = () => {
         <div className="col-md-6">
 
         <Editor
+        disabled
         apiKey='cdl7m07e6o2g3q2jko7q8ompxq0yenyd414zt85qbpdonj4i' // Sử dụng API key của bạn
         value={content}
         init={{

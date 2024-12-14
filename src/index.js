@@ -43,7 +43,7 @@ import Listdonhang from './views/user/Pages/listdonhang';
 import Quanlybaidang from './views/user/Pages/quanlybaidang';
 import Login from './views/user/Pages/Login';
 import Register from './views/user/Pages/Sign';
-import PersnalInfo from './views/user/Pages/PersonalInfo';
+import PersonalInfo from './views/user/Pages/PersonalInfo';
 import 'react-toastify/dist/ReactToastify.css';
 import OrderCard from './views/user/Pages/OrderCard';
 import OrderDetail from './views/user/Pages/OrderDetail';
@@ -56,6 +56,7 @@ import Xetduyetsanpham from './views/admin/Pages/xetduyetsanpham';
 import UserAddresses from './views/user/Pages/UserAddresses';
 import Wallet from './views/user/Pages/Wallet';
 import VoucherList from './views/user/Pages/VoucherList';
+import Order from './views/user/Pages/OrderCardTempt';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
@@ -88,24 +89,25 @@ root.render(
           <Route path='voucher' element={<Voucher></Voucher>}></Route>
           <Route path='Thanhtoan' element={<Thanhtoan></Thanhtoan>}></Route>
           <Route path='Sanphamyeuthich' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
-          <Route path='Yêu-Thích' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
+          <Route path='favorites' element={<YeuThichSanPham></YeuThichSanPham>}></Route>
           <Route path='paymentreturn' element={<ResultPayment></ResultPayment>}></Route>
           <Route path='paymentreturnvnpay' element={<ResultPaymentVNpay></ResultPaymentVNpay>}></Route>
           <Route path='donhang' element={<Listdonhang></Listdonhang>}></Route>
           <Route path='donhang2' element={<Quanlybaidang></Quanlybaidang>}></Route>
           <Route path='login' element={<Login></Login>}></Route>
           <Route path='register' element={<Register></Register>}></Route>
-          <Route path='thông-tin-cá-nhân' element={<PersnalInfo></PersnalInfo>}></Route>
+          <Route path='personal-info' element={<PersonalInfo></PersonalInfo>} />
           <Route path='lịch-sử-đặt-hàng' element={<OrderCard></OrderCard>}></Route>
           <Route path='orderhistory' element={<OrderCard></OrderCard>}></Route>
-          <Route path='orderdetail/:id' element={<OrderDetail></OrderDetail>}></Route>
+          <Route path='OrderDetail/:id' element={<OrderDetail></OrderDetail>}></Route>
           <Route path='Feedback' element={<Feedback></Feedback>}></Route>
-          <Route path='đổi-mật-khẩu' element={<PasswordChangeForm></PasswordChangeForm>}></Route>
+          <Route path='change-password' element={<PasswordChangeForm></PasswordChangeForm>}></Route>
           <Route path='product/banner/:id' element={<SearchByBanner></SearchByBanner>}></Route>
           <Route path='google' element={<GoogleLoginButton></GoogleLoginButton>}></Route>
-          <Route path='địa-chỉ-của-bạn' element={<UserAddresses></UserAddresses>}></Route>
-          <Route path='ví-đã-liên-kết?' element={<Wallet></Wallet>}></Route>
-          <Route path='mã-giảm-giá' element={<VoucherList></VoucherList>}></Route>
+          <Route path='addresses' element={<UserAddresses></UserAddresses>}></Route>
+          <Route path='linked-wallets' element={<Wallet></Wallet>}></Route>
+          <Route path='discounts' element={<VoucherList></VoucherList>}></Route>
+          <Route path='/order-history' element={<Order></Order>} />
         </Route>
 
         {/*end page user */}
@@ -147,11 +149,12 @@ root.render(
 
       </Routes>
       <ToastContainer pauseOnHover={false} />
-      {/* <Popup></Popup> */}
+      <Popup></Popup>
     </BrowserRouter>
     <Loading></Loading>
   </Provider>
   
 );
+
 
 reportWebVitals();

@@ -118,7 +118,7 @@ const ListProduct = ({ products }) => {
                                 </span>
                             </p>
                             <p className="text-end ms-auto me-2">
-                                {product.sosao}{' '}
+                                {product.sosao?.toFixed(1)}{' '}
                                 <span className="bi bi-star-fill text-warning" />
                             </p>
                         </div>

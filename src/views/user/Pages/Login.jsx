@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 function LoginForm() {
@@ -8,6 +9,7 @@ function LoginForm() {
   const [passwordError, setPasswordError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const  navigate = useNavigate();
 
   const validateEmail = (email) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
   const validatePassword = (password) => /^\d{6}$/.test(password);
@@ -54,6 +56,13 @@ function LoginForm() {
       setErrorMessage('An error occurred during login.');
     }
   };
+  useEffect(() => {
+    const account_id = localStorage.getItem('account_id');
+
+    if (account_id) {
+      navigate(-1);
+    }
+  }, []);
 
 
   return (

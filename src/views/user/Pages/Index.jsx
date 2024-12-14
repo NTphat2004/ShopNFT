@@ -20,11 +20,15 @@ const Index = () => {
   const ListProductThisWeek = useSelector(state => state.product.ListProductThisWeek);
   const ListProductTopSale = useSelector(state => state.product.ListProductTopSale);
   const ListProductDiscount = useSelector(state => state.product.ListProductDiscount);
+
   console.log(ListProductThisWeek)
 
   useEffect(() => {
-    // const modal = new window.bootstrap.Modal(document.getElementById('exampleModal'));
-    // modal.show();
+
+
+
+    const modal = new window.bootstrap.Modal(document.getElementById('exampleModal'));
+    modal.show();
     const turnonloading = setLoading('block');
     dispatch(turnonloading)
     const CallAPIProduct = Call_API_Products();
@@ -33,18 +37,18 @@ const Index = () => {
     dispatch(turnoffloading);
     // Cleanup: Đóng modal khi component unmount
     return () => {
-      // modal.hide();
+      modal.hide();
     };
   }, [])
   return (
 
     <div className='container-fluid  mb-5' >
 
-      <Banner></Banner>
+      <Banner></Banner> 
 
       <CategoryNew></CategoryNew>
 
-      {/* <PopupAD></PopupAD> */}
+      <PopupAD></PopupAD>
 
 
       <div className='row '>
@@ -107,7 +111,7 @@ const Index = () => {
       {/* <ListStore></ListStore> */}
       <ListProduct products={ListProductTopSale} ></ListProduct>
       <div className="col-md-12 text-center">
-        <NavLink to={'allproduct/FindProductThisWeekTOP100'}    >  <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
+        <NavLink to={'allproduct/FindBySanPhamTopSellByMonth'}    >  <button className='gradient-button-2' >Xem tất cả sản phẩm</button></NavLink>
       </div>
 
       <div className='row '>
@@ -169,7 +173,7 @@ const Index = () => {
 
       {/* <ListProduct products={ListProductDiscount} ></ListProduct> */}
       {/* // post */}
-      {/* <Post></Post> */}
+      <Post></Post>
 
 
 

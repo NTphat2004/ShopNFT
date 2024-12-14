@@ -24,7 +24,7 @@ const ProductDetail = () => {
     const shareOnZalo = () => {
         const currentUrl = window.location.href; // Lấy URL hiện tại
         const zaloShareUrl = `https://zalo.me/share?app_id=554&url=${encodeURIComponent(currentUrl)}&title=Chia sẻ từ website của tôi`;
-    
+
         // Mở cửa sổ chia sẻ mà không kiểm tra trình duyệt
         window.open(zaloShareUrl, '_blank');
     };
@@ -33,7 +33,7 @@ const ProductDetail = () => {
         const currentUrl = window.location.href; // Lấy URL hiện tại
         navigator.clipboard.writeText(currentUrl)  // Sao chép URL vào clipboard
             .then(() => {
-               toast.success("Sao chép link thành công")
+                toast.success("Sao chép link thành công")
             })
             .catch((err) => {
                 console.error("Lỗi khi sao chép: ", err);
@@ -122,7 +122,7 @@ const ProductDetail = () => {
     }
 
     useEffect(() => {
-
+        SetQuantityProduct(1);
         API_Product_Detail()
         Yeuthich()
 
@@ -166,7 +166,7 @@ const ProductDetail = () => {
 
                     {ProductDetail.phantram_GG > 0 ? <h2 className="fw-bold mt-3">{ProductDetail.gia_km} đ</h2> : <h2 className="fw-bold mt-3">{ProductDetail.gia_goc} đ</h2>}
 
-                    <h6 className="fw-bold mt-2">{ProductDetail.mo_ta}  {QuantityProduct}</h6>
+                    <h6 className="fw-bold mt-2">{ProductDetail.mo_ta} </h6>
 
                     {/* <ul className='mt-3'>
                         <li style={{ marginBottom: '10px' }}> <b>Dưa Hấu Giống Mỹ</b> có vỏ màu xanh và sọc dưa đậm, ruột đỏ, hột đen. Quả có vỏ cứng, dày, ăn rất ngon, độ đường cao, hương vị thơm ngon, hấp dẫn.</li>
@@ -228,11 +228,18 @@ const ProductDetail = () => {
 
                         <button disabled={QuantityProduct == 0} onClick={() => {
 
-                            const addCart = addItemToCart({
-                                ProductDetail: ProductDetail,
-                                QuantityProduct: QuantityProduct,
-                            });
-                            dispatch(addCart)
+
+                            if (userId.includes("null")) {
+                                navigate("/login")
+                     
+                            } else {
+                                console.log("userId", userId)
+                                const addCart = addItemToCart({
+                                    ProductDetail: ProductDetail,
+                                    QuantityProduct: QuantityProduct,
+                                }); dispatch(addCart)
+                            }
+
 
                         }} className={`${QuantityProduct == 0 ? 'gradient2-button' : 'gradient-button'}   ms-4 fw-bold`}>
                             Thêm vào giỏ hàng
@@ -254,7 +261,7 @@ const ProductDetail = () => {
                                     <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                                 </div>
                                 <div className="modal-body my-5 d-flex justify-content-center align-items-center">
-                                    <a  className="btn btn-outline-primary mx-2" title="Share on Facebook">
+                                    <a className="btn btn-outline-primary mx-2" title="Share on Facebook">
                                         <i className="fab fa-facebook-square fa-2x"></i>
                                     </a>
                                     <a className="btn btn-outline-info mx-2" title="Share on Twitter">

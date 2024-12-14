@@ -6,6 +6,7 @@ import { NavLink } from 'react-router-dom';
 import { addItemToCart } from '../Reducer/cartReducer';
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom';
+import Sidebar from '../partials/Sidebar';
 const YeuThichSanPham = () => {
     const [Data, SetData] = useState([]);
     const userId = localStorage.getItem('account_id');
@@ -23,25 +24,12 @@ const YeuThichSanPham = () => {
 
     return (
 
-        <div style={containerStyle}>
-        <aside style={sidebarStyle}>
-          <Link to="/" style={linkStyle}>
-            <h3>Quản Lý Cá Nhân</h3>
-          </Link>
-          <ul style={menuStyle}>
-            {['Thông tin cá nhân', 'Lịch sử đặt hàng', 'Đổi mật khẩu', 'Feedback', 'Yêu Thích', 'Mã giảm giá','Địa chỉ của bạn','Ví đã liên kết'].map(
-              (item, index) => (
-                <li key={index}>
-                  <Link to={`/${item.replace(/ /g, '-').toLowerCase()}?userId=${userId}`} style={linkStyle}>
-                    <button style={buttonStyle}>{item}</button>
-                  </Link>
-                </li>
-              )
-            )}
-          </ul>
-        </aside>
-  
-        <main style={mainContentStyle}>
+        <div className="row vh-100 m-0">
+        <div className="col-2 bg-dark text-white p-0">
+          <Sidebar userId={userId} />
+        </div>
+
+        <main className="col-10 bg-light  justify-content-center align-items-center">
         <div className='container-fluid'>
             <div className="row mt-3">
                 <div className="col-md-12">

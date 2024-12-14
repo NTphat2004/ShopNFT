@@ -36,6 +36,7 @@ function Xetduyetsanpham() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [dataSource, setdataSource] = useState([]);
     const [dataSource2, setdataSource2] = useState([]);
+    const [dataSource3, setdataSource3] = useState([]);
     const [datahanhdong, setdatahanhdong] = useState([]);
     const [imagePreview, setImagePreview] = useState(null);
     const [hinhAnh, setHinhAnh] = useState(null);
@@ -159,11 +160,7 @@ function Xetduyetsanpham() {
             dataIndex: 'ten_san_pham',
             key: 'ten_san_pham',
         },
-        {
-            title: 'Ngày tạo',
-            dataIndex: 'ngay_tao',
-            key: 'ngay_tao',
-        },
+
         {
             title: 'Giá sản phẩm',
             dataIndex: 'gia_goc',
@@ -185,6 +182,17 @@ function Xetduyetsanpham() {
             dataIndex: 'users',
             key: 'users',
         },
+        {
+            title: 'Ngày thực hiện',
+            dataIndex: 'ngay_tao',
+            key: 'ngay_tao',
+        },
+        {
+            title: 'Người thực hiện',
+            dataIndex: 'personwhodid',
+            key: 'personwhodid',
+        },
+        
         {
             title: 'hanhdong',
             dataIndex: 'hanhdong',
@@ -228,33 +236,105 @@ function Xetduyetsanpham() {
             dataIndex: 'users',
             key: 'users',
         },
+        // {
+        //     title: 'Nút',
+        //     key: 'nut',
+        //     render: (_, record) => (
+        //         <div>
+
+        //             <button className='btn btn-danger me-2' data-bs-toggle="modal" data-bs-target="#chitietmodal" onClick={() => {
+        //                 formik2.setValues(
+        //                     {
+        //                         responseID: record.responseID,
+        //                         han_su_dung: record.hansudung,
+        //                         ngay_tao: record.ngay_tao,
+        //                         loai_yeu_cau: record.loai_yeu_cau,
+        //                         noi_dung: record.noi_dung,
+        //                         users: record.users,
+        //                         hinh_anh: record.hinh_anh,
+        //                         feedback: record.feedback,
+        //                         noi_dung_feedback: record.noi_dung_feedback
+        //                     }
+        //                 );
+
+        //             }} >Xem chi tiết </button>
+
+
+        //         </div>
+        //     )
+        // },
+
+    ];
+    const columnrespone2 = [
         {
-            title: 'Nút',
-            key: 'nut',
-            render: (_, record) => (
-                <div>
-
-                    <button className='btn btn-danger me-2' data-bs-toggle="modal" data-bs-target="#chitietmodal" onClick={() => {
-                        formik2.setValues(
-                            {
-                                responseID: record.responseID,
-                                han_su_dung: record.hansudung,
-                                ngay_tao: record.ngay_tao,
-                                loai_yeu_cau: record.loai_yeu_cau,
-                                noi_dung: record.noi_dung,
-                                users: record.users,
-                                hinh_anh: record.hinh_anh,
-                                feedback: record.feedback,
-                                noi_dung_feedback: record.noi_dung_feedback
-                            }
-                        );
-
-                    }} >Xem chi tiết </button>
-
-
-                </div>
-            )
+            title: 'ID',
+            dataIndex: 'san_phamId',
+            key: 'san_phamId',
         },
+        {
+            title: 'Tên sản phẩm',
+            dataIndex: 'ten_san_pham',
+            key: 'ten_san_pham',
+        },
+        {
+            title: 'Ngày tạo',
+            dataIndex: 'ngay_tao',
+            key: 'ngay_tao',
+        },
+        {
+            title: 'Giá sản phẩm',
+            dataIndex: 'gia_goc',
+            key: 'gia_goc',
+        },
+        {
+            title: 'Số lượng nhập',
+            dataIndex: 'so_luong',
+            key: 'so_luong',
+        },
+        {
+            title: 'Lý do từ chối',
+            dataIndex: 'ghi_chu',
+            key: 'ghi_chu',
+        },
+        {
+            title: 'Hình ảnh',
+            dataIndex: 'hinhanh',
+            key: 'hinhanh',
+            hidden: true
+        },
+        {
+            title: 'Người gửi yêu cầu',
+            dataIndex: 'users',
+            key: 'users',
+        },
+        // {
+        //     title: 'Nút',
+        //     key: 'nut',
+        //     render: (_, record) => (
+        //         <div>
+
+        //             <button className='btn btn-danger me-2' data-bs-toggle="modal" data-bs-target="#chitietmodal" onClick={() => {
+        //                 formik2.setValues(
+        //                     {
+        //                         responseID: record.responseID,
+        //                         han_su_dung: record.hansudung,
+        //                         ngay_tao: record.ngay_tao,
+        //                         loai_yeu_cau: record.loai_yeu_cau,
+        //                         noi_dung: record.noi_dung,
+        //                         users: record.users,
+        //                         hinh_anh: record.hinh_anh,
+        //                         feedback: record.feedback,
+        //                         ghi_chu:record.ghi_chu,
+        //                         noi_dung_feedback: record.noi_dung_feedback
+        //                     }
+        //                 );
+
+        //             }} >Xem chi tiết </button>
+
+
+        //         </div>
+        //     )
+        // },
 
     ];
     const formik2 = useFormik({
@@ -286,7 +366,9 @@ function Xetduyetsanpham() {
                 gia_goc: item.sanpham.gia_goc,
                 so_luong: item.sanpham.so_luong,
                 users: item.sanpham?.users?.accountID,
-                hanhdong: item?.tenHanhDong
+                hanhdong: item?.tenHanhDong,
+                ngay_tao: item.ngay_tao,
+                personwhodid: item?.users?.accountID
             }));
             setdatahanhdong(formattedData)
             console.log('dataaaaaaa', formattedData)
@@ -373,35 +455,48 @@ function Xetduyetsanpham() {
 
 
     const getallresponse = async () => {
-        const response = await axios.get('http://localhost:8080/findProductnotValid');
+        const response = await axios.get('http://localhost:8080/Product/getproductsHaventBeenApproved');
         const formattedData = response.data.map((item, index) => ({
             key: index,
             san_phamId: item.san_phamId,
             ten_san_pham: item.ten_san_pham,
-            ngay_tao: item.ngay_tao,
+            ngay_tao: item.ngayTao,
             hinh_anh: item.hinh_anh,
-            ngay_tao: item.ngay_tao,
             gia_goc: item.gia_goc,
             so_luong: item.so_luong,
-            users: item?.users?.accountID,
+            users: item?.accountid,
         }));
         setdataSource(formattedData);
     }
 
     const getallresponse2 = async () => {
-        const response = await axios.get('http://localhost:8080/findProductValid');
+        const response = await axios.get('http://localhost:8080/Product/getproductsHaveBeenApproved');
         const formattedData = response.data.map((item, index) => ({
             key: index,
             san_phamId: item.san_phamId,
             ten_san_pham: item.ten_san_pham,
-            ngay_tao: item.ngay_tao,
+            ngay_tao: item.ngayTao,
             hinh_anh: item.hinh_anh,
-            ngay_tao: item.ngay_tao,
             gia_goc: item.gia_goc,
             so_luong: item.so_luong,
-            users: item?.users?.accountID,
+            users: item?.accountid,
         }));
         setdataSource2(formattedData);
+    }
+    const getallresponse3 = async () => {
+        const response = await axios.get('http://localhost:8080/Product/getproductsHaveBeenNotApproved');
+        const formattedData = response.data.map((item, index) => ({
+            key: index,
+            san_phamId: item.san_phamId,
+            ten_san_pham: item.ten_san_pham,
+            ngay_tao: item.ngayTao,
+            hinh_anh: item.hinh_anh,
+            gia_goc: item.gia_goc,
+            so_luong: item.so_luong,
+            users: item?.accountid,
+            ghi_chu: item?.ghi_chu
+        }));
+        setdataSource3(formattedData);
     }
 
 
@@ -414,39 +509,20 @@ function Xetduyetsanpham() {
 
     const dorespone = async (values) => {
         const res = await axios({
-            url: 'http://localhost:8080/approveproduct',
+            url: `http://localhost:8080/approveproduct?productid=${values.san_phamId}&ghichu=${values.ghi_chu}&accountId=${userId}`,
             method: 'POST',
             data: {
-                san_phamId: values.san_phamId,
-                ten_san_pham: values.ten_san_pham,
-                ngay_tao: values.ngay_tao,
-                hinh_anh: values.hinh_anh,
-                ngay_tao: values.ngay_tao,
-                gia_goc: values.gia_goc,
-                so_luong: values.so_luong,
-                users: {
-                    accountID: values?.users
-                },
+           
             },
             headers: { 'Content-Type': 'application/json' }
         })
     }
     const dorespone2 = async (values) => {
         const res = await axios({
-            url: 'http://localhost:8080/notapprove',
+            url: `http://localhost:8080/notapprove?productid=${values.san_phamId}&ghichu=${values.ghi_chu},&accountId=${userId}`,
             method: 'POST',
             data: {
-                san_phamId: values.san_phamId,
-                ten_san_pham: values.ten_san_pham,
-                ngay_tao: values.ngay_tao,
-                hinh_anh: values.hinh_anh,
-                ngay_tao: values.ngay_tao,
-                gia_goc: values.gia_goc,
-                so_luong: values.so_luong,
-                ghi_chu: values.ghi_chu,
-                users: {
-                    accountID: values?.users
-                },
+           
             },
             headers: { 'Content-Type': 'application/json' }
         })
@@ -457,6 +533,7 @@ function Xetduyetsanpham() {
 
         getallresponse();
         getallresponse2();
+        getallresponse3();
         fetchDataHanhDong();
     }, [fileList]);
 
@@ -470,10 +547,13 @@ function Xetduyetsanpham() {
                         <button className="nav-link active fw-bold" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH</button>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <button className="nav-link  fw-bold" id="table-tab2" data-bs-toggle="tab" data-bs-target="#table-tab-pane2" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH ĐÃ PHẢN HỒI</button>
+                        <button className="nav-link  fw-bold" id="table-tab2" data-bs-toggle="tab" data-bs-target="#table-tab-pane2" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH SẢN PHẨM ĐÃ DUYỆT </button>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane3" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Hành động</button>
+                        <button className="nav-link  fw-bold" id="table-tab3" data-bs-toggle="tab" data-bs-target="#table-tab-pane3" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">DANH SÁCH SẢN PHẨM ĐÃ TỪ CHỐI</button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                        <button className="nav-link fw-bold" id="form-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane4" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">Hành động</button>
                     </li>
                 </ul>
                 {/* Tab content */}
@@ -484,11 +564,15 @@ function Xetduyetsanpham() {
                         <Table rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
                     </div>
                     <div className="tab-pane fade " id="table-tab-pane2" role="tabpanel" aria-labelledby="table-tab">
-                        <h3>Danh sách feedback đã phản hồi</h3>
+                        <h3>Danh sách sản phẩm đã duyệt </h3>
                         <Table rowSelection={rowSelection} columns={columnrespone} dataSource={dataSource2} />
                     </div>
-                    {/* Form content */}
                     <div className="tab-pane fade " id="table-tab-pane3" role="tabpanel" aria-labelledby="table-tab">
+                        <h3>Danh sách sản phẩm bị từ chối</h3>
+                        <Table rowSelection={rowSelection} columns={columnrespone2} dataSource={dataSource3} />
+                    </div>
+                    {/* Form content */}
+                    <div className="tab-pane fade " id="table-tab-pane4" role="tabpanel" aria-labelledby="table-tab">
                         <h3>QUẢN LÍ POPUP4</h3>
                         <Table rowSelection={rowSelection} columns={columnHanhdongs} dataSource={datahanhdong} />
                     </div>

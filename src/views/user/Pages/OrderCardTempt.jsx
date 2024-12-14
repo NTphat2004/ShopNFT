@@ -1,85 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Steps, QRCode } from 'antd';
 
-// CSS styles
-const styles = {
-    container: {
-        display: 'flex',
-        height: '100vh',
-        fontFamily: 'Arial, sans-serif',
-    },
-    sidebar: {
-        width: '250px',
-        backgroundColor: '#2c3e50',
-        color: '#fff',
-        padding: '20px',
-        boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
-    },
-    link: {
-        textDecoration: 'none',
-        color: 'white',
-    },
-    menu: {
-        listStyleType: 'none',
-        padding: '0',
-    },
-    button: {
-        width: '100%',
-        padding: '12px',
-        backgroundColor: '#34495e',
-        color: 'white',
-        border: 'none',
-        textAlign: 'left',
-        cursor: 'pointer',
-        fontSize: '16px',
-        marginBottom: '10px',
-        borderRadius: '5px',
-        transition: 'background-color 0.3s',
-    },
-    mainContent: {
-        flex: 1,
-        padding: '40px',
-        backgroundColor: '#ecf0f1',
-        overflowY: 'auto',
-    },
-    table: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        marginTop: '20px',
-    },
-    tableHeader: {
-        backgroundColor: '#34495e',
-        color: 'white',
-        textAlign: 'left',
-    },
-    th: {
-        padding: '12px',
-        border: '1px solid #bdc3c7',
-    },
-    td: {
-        padding: '12px',
-        border: '1px solid #bdc3c7',
-        backgroundColor: 'white',
-    },
-    noData: {
-        textAlign: 'center',
-        fontSize: '18px',
-        color: '#bdc3c7',
-    },
-    loading: {
-        textAlign: 'center',
-        marginTop: '20%',
-    },
-    error: {
-        color: 'red',
-        textAlign: 'center',
-        marginTop: '20%',
-    },
-};
+import Modal from 'react-modal';
+import Sidebar from '../partials/Sidebar';
+import { Steps, QRCode } from 'antd';
+Modal.setAppElement('#root');
 
 const DonHang = () => {
+    const userId = localStorage.getItem('account_id');
+    const [donhangList, setDonHangList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentOrderId, setCurrentOrderId] = useState('');
+
+    const [selectedReason, setSelectedReason] = useState('');
 
     const [donhang, setdonhang] = useState([]);
     const [token, settoken] = useState("");
@@ -186,8 +122,6 @@ const DonHang = () => {
 
     }
 
-
-
     const Stepforstatus = (status) => {
         console.log(status);
         if (status === "Đang chờ xử lý") {
@@ -254,6 +188,8 @@ const DonHang = () => {
 
                 <button data-bs-toggle="modal" data-bs-target="#exampleModal2"
                     onClick={() => {
+
+
                         if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt02") {
                             repay(donhangJson.online_payment_id)
                         } else if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt03") {
@@ -263,20 +199,21 @@ const DonHang = () => {
                         }
                     }
                     }
-                    style={{ ...styles.button, backgroundColor: '#34c9eb' }}
+                    className="btn btn-primary mt-2 w-100"
                 >
                     Thanh toán
                 </button>
                 <button
                     onClick={() => {
-                        handleCancelOrder(donhangJson.don_hangid)
-                        if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt02") {
-                            alert('refunded order')
-                            Show_order_details(donhangJson.online_payment_id)
-                        }
+                        // handleCancelOrder(donhangJson.don_hangid)
+                        // if (donhangJson.phuongthuctt.phuong_thucTTID == "ptt02") {
+                        //     alert('refunded order')
+                        //     Show_order_details(donhangJson.online_payment_id)
+                        // }
+                        openCancelModal(donhangJson.don_hangid)
                     }
                     }
-                    style={{ ...styles.button, backgroundColor: '#e74c3c' }}
+                    className="btn btn-danger mt-2 w-100"
                 >
                     Hủy Đơn
                 </button>
@@ -284,10 +221,11 @@ const DonHang = () => {
         } else if (status === "Đang chờ xử lý") {
             return <button
                 onClick={() => {
-                    handleCancelOrder(donhangJson.don_hangid)
+                    openCancelModal(donhangJson.don_hangid)
+                    
                 }
                 }
-                style={{ ...styles.button, backgroundColor: '#e74c3c' }}
+                className="btn btn-danger mt-2 w-100"
             >
                 Hủy Đơn
             </button>
@@ -295,10 +233,15 @@ const DonHang = () => {
 
     }
 
-    const userId = localStorage.getItem('account_id'); // Retrieve user ID from localStorage
-    const [donhangList, setDonHangList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const reasons = [
+        "Muốn thay đổi địa chỉ giao hàng",
+        "Muốn nhập/thay đổi mã Voucher",
+        "Muốn thay đổi sản phẩm trong đơn hàng (size, màu sắc, số lượng....)",
+        "Thủ tục thanh toán quá rắc rối",
+        "Tìm thấy giá rẻ hơn ở chỗ khác",
+        "Đổi ý, không muốn mua nữa",
+        "Khác",
+    ];
 
     useEffect(() => {
         localStorage.setItem("donhangidvnpay", null);
@@ -313,15 +256,11 @@ const DonHang = () => {
             try {
                 const response = await axios.get(`http://localhost:8080/api/donhang?userId=${userId}`);
                 const sortedData = response.data.sort((a, b) => {
-                    // Move 'Đã Hủy' and 'Đã Giao' orders to the bottom
                     if ((a.trang_thai === 'Đã Hủy' || a.trang_thai === 'Đã Giao') && !(b.trang_thai === 'Đã Hủy' || b.trang_thai === 'Đã Giao')) return 1;
                     if (!(a.trang_thai === 'Đã Hủy' || a.trang_thai === 'Đã Giao') && (b.trang_thai === 'Đã Hủy' || b.trang_thai === 'Đã Giao')) return -1;
-
-                    // For other orders, sort by date (newest first)
                     return new Date(b.ngay_tao) - new Date(a.ngay_tao);
                 });
                 setDonHangList(sortedData);
-                console.log('Order data:', sortedData);
             } catch (err) {
                 console.error(err);
                 setError('Error fetching data: ' + (err.response?.data?.message || err.message));
@@ -332,6 +271,32 @@ const DonHang = () => {
 
         fetchDonHang();
     }, [userId]);
+
+    const openCancelModal = (orderId) => {
+        setCurrentOrderId(orderId);
+        setIsModalOpen(true);
+    };
+
+    const handleCancelOrder = async () => {
+        if (!selectedReason) {
+            alert('Vui lòng chọn lý do hủy.');
+            return;
+        }
+        try {
+            await axios.put(`http://localhost:8080/api/donhang/cancel/${currentOrderId}?lyDo=${encodeURIComponent(selectedReason)}`);
+            setDonHangList(donhangList.map(donhang =>
+                donhang.don_hangid === currentOrderId ? { ...donhang, trang_thai: 'Đã Hủy', ly_do: selectedReason } : donhang
+            ));
+            alert('Đơn hàng đã được hủy.');
+        } catch (error) {
+            console.error('Error canceling order:', error);
+            alert('Không thể hủy đơn hàng.');
+        } finally {
+            setIsModalOpen(false);
+            setSelectedReason('');
+        }
+    };
+
     const getCurrentStep = (status) => {
         switch (status) {
             case 'Đang chờ xử lý':
@@ -343,146 +308,127 @@ const DonHang = () => {
             case 'Đã Giao':
                 return 3;
             case 'Đã Hủy':
-                return 4; // Step for canceled orders if you want it to appear in the steps
+                return 4;
             default:
                 return 0;
         }
     };
 
-    //     For orders that have just been received: "Đang chờ xử lý"
-    // For orders currently being delivered: "Đang Giao"
-    // For orders that have been delivered: "Đã Giao"
-    const handleCancelOrder = async (orderId) => {
-        try {
-            await axios.put(`http://localhost:8080/api/donhang/cancel/${orderId}`);
-            // Refresh the order list after cancellation
-            setDonHangList(donhangList.map(donhang =>
-                donhang.don_hangid === orderId ? { ...donhang, trang_thai: 'Đã Hủy' } : donhang
-            ));
-            alert('Order has been canceled.');
-        } catch (error) {
-            console.error('Error canceling order:', error);
-            alert('Failed to cancel the order.');
-        }
-    };
-    if (loading) return <div style={styles.loading}>Loading...</div>;
     if (error) return (
-        <div style={styles.error}>
+        <div className="text-center text-danger mt-5">
             <p>{error}</p>
-            <button onClick={() => window.location.reload()} style={styles.button}>Try Again</button>
+            <button className="btn btn-primary" onClick={() => window.location.reload()}>Thử lại</button>
         </div>
     );
 
     return (
-        <div style={styles.container}>
-            <aside style={styles.sidebar}>
-                <Link to="/" style={styles.link}>
-                    <h3>Quản Lý Cá Nhân</h3>
-                </Link>
-                <ul style={styles.menu}>
-                    {['Thông tin cá nhân', 'Lịch sử đặt hàng', 'Đổi mật khẩu', 'Feedback', 'Yêu Thích', 'Mã giảm giá',
-                        "Địa chỉ của bạn",
-                        "Ví đã liên kết",].map((item, index) => (
-                            <li key={index}>
-                                <Link to={`/${item.replace(/ /g, '-').toLowerCase()}?userId=${userId}`} style={styles.link}>
-                                    <button style={styles.button}>{item}</button>
-                                </Link>
-                            </li>
-                        ))}
-                </ul>
-            </aside>
+        <div className="d-flex vh-100">
+            <div className='col-2'>
+                <Sidebar userId={userId} />
+            </div>
 
-            <main style={styles.mainContent}>
-                <h1 style={{ fontSize: '28px', color: '#34495e' }}>Danh Sách Đơn Hàng</h1>
+            <main className="flex-grow-1 p-4 bg-light overflow-auto col-6">
+                <h1 className="fs-4 text-primary">Danh Sách Đơn Hàng</h1>
                 {donhangList.length === 0 ? (
-                    <p style={styles.noData}>Không có đơn hàng nào.</p>
+                    <p className="text-center text-muted">Không có đơn hàng nào.</p>
                 ) : (
-                    <table style={styles.table} aria-label="Danh sách đơn hàng">
-                        <thead>
-                            <tr style={styles.tableHeader}>
-                                <th style={styles.th}>ID</th>
-                                <th style={styles.th}>Ngày Tạo</th>
-                                <th style={styles.th}>Người Dùng</th>
-                                <th style={styles.th}>Số Điện Thoại</th>
-
-                                <th style={styles.th}>Phí Ship</th>
-                                <th style={styles.th}>Tổng Tiền</th>
-                                <th style={styles.th}>Trạng Thái</th>
-                                <th style={styles.th}>Đánh Giá</th>
+                    <table className="table table-bordered mt-4">
+                        <thead className="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Ngày Tạo</th>
+                                <th>Người Dùng</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Địa Chỉ</th>
+                                <th>Voucher</th>
+                                <th>Phí Ship</th>
+                                <th>Tổng Tiền</th>
+                                <th>Trạng Thái</th>
+                                <th>Đánh Giá</th>
                             </tr>
                         </thead>
                         <tbody>
                             {donhangList.map((donhang) => (
                                 <tr key={donhang.don_hangid}>
-                                    <td style={styles.td}>{donhang.don_hangid}</td>
-                                    <td style={styles.td}>{new Date(donhang.ngay_tao).toLocaleDateString()}</td>
-                                    <td style={styles.td}>{donhang.users ? donhang.users.hovaten : 'N/A'}</td>
-                                    <td style={styles.td}>{donhang.so_dien_thoai}</td>
-
-                                    <td style={styles.td}>{donhang.phi_ship.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                    <td style={styles.td}>{donhang.tong_tien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                    <td style={styles.td}>
-                                        {Stepforstatus(donhang.trang_thai)}
-                                        {/* {donhang.trang_thai === 'Đang chờ xử lý'?Stepforstatus(donhang.trang_thai):Stepforstatus(donhang.trang_thai)} */}
-
-
+                                    <td>{donhang.don_hangid}</td>
+                                    <td>{new Date(donhang.ngay_tao).toLocaleDateString()}</td>
+                                    <td>{donhang.users?.hovaten || 'Tên không tồn tại'}</td>
+                                    <td>{donhang.so_dien_thoai}</td>
+                                    <td>{donhang.dia_chi?.dia_chi ? donhang.dia_chi?.dia_chi : 'Địa chỉ không tồn tại'}</td>
+                                    <td>{donhang.voucher?.so_tien_giam?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'Không áp dụng'}</td>
+                                    <td>{donhang.phi_ship.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                    <td>{donhang.tong_tien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                    <td>
                                         {/* {donhang.trang_thai === 'Đã Hủy' ? (
-                                            <Steps
-                                                direction="vertical"
-                                                current={1} // Set to 1 to mark "Đã Hủy" as the current step
-                                                items={[
-                                                    { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận và chuẩn bị.' },
-                                                    { title: 'Đã Hủy', description: 'Đơn hàng đã bị hủy bởi người dùng.' },
-                                                ]}
-                                            />
-                                        ) : Stepforstatus(donhang.trang_thai)
-                                        } */}
-                                        {/* {donhang.trang_thai === 'Đang xử lý' && (
-                                            <button
-                                                onClick={() => {
-                                                    handleCancelOrder(donhang.don_hangid)
-                                                    if (donhang.don_hangid.includes("-")) {
-                                                        alert('refunded order')
-                                                        Show_order_details(donhang.don_hangid)
-                                                    }
-                                                }
-
-                                                }
-                                                style={{ ...styles.button, backgroundColor: '#e74c3c' }}
-                                            >
-                                                Hủy Đơn
-                                            </button>
-                                        )}
-                                        {donhang.trang_thai === 'Chờ Thanh Toán' && (
-                                            <button data-bs-toggle="modal" data-bs-target="#exampleModal2"
-                                                onClick={() => {
-                                                    repay(donhang.online_payment_id)
-
-                                                }
-
-                                                }
-                                                style={{ ...styles.button, backgroundColor: '#34c9eb' }}
-                                            >
-                                                Thanh toán
-                                            </button>
-                                        )} */}
+                      <Steps
+                        direction="vertical"
+                        current={1}
+                        items={[
+                          { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận.' },
+                          { title: 'Đã Hủy', description: `Lý do: ${donhang.ly_do || "Không có lý do."}` },
+                        ]}
+                      />
+                    ) : (
+                      <Steps
+                        direction="vertical"
+                        current={getCurrentStep(donhang.trang_thai)}
+                        items={[
+                          { title: 'Đang chờ xử lý', description: 'Đơn hàng đã được xác nhận.' },
+                          { title: 'Đang Chuẩn Bị', description: 'Đơn hàng đang chuẩn bị.' },
+                          { title: 'Đang Giao', description: 'Đơn hàng đang giao.' },
+                          { title: 'Đã Giao', description: 'Đơn hàng đã giao.' },
+                        ]}
+                      />
+                    )}
+                    {donhang.trang_thai === 'Đang chờ xử lý' && (
+                      <button
+                        onClick={() => openCancelModal(donhang.don_hangid)}
+                        className="btn btn-danger mt-2"
+                      >
+                        Hủy Đơn
+                      </button>
+                    )} */}
+                                        {Stepforstatus(donhang.trang_thai)}
                                         {buttons(donhang.trang_thai, JSON.stringify(donhang))}
                                     </td>
-
-                                    <td style={styles.td}>
-                                        <Link to={`/orderdetail/${donhang.don_hangid}`} style={styles.link}>
-                                            <button style={styles.button}>Xem Chi Tiết</button>
+                                    <td className='align-middle'>
+                                        <Link to={`/OrderDetail/${donhang.don_hangid}`} className="text-decoration-none">
+                                            <button className="btn btn-primary align-middle">Xem Chi Tiết</button>
                                         </Link>
                                     </td>
                                 </tr>
-                            )
-                            )}
+                            ))}
                         </tbody>
-
                     </table>
                 )}
             </main>
 
+            <Modal
+                isOpen={isModalOpen}
+                onRequestClose={() => setIsModalOpen(false)}
+                style={{
+                    overlay: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+                    content: { width: '400px', margin: '0', borderRadius: '10px', padding: '20px', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'absolute' },
+                }}
+            >
+                <h2>Chọn Lý Do Hủy Đơn</h2>
+                <div>
+                    {reasons.map((reason, index) => (
+                        <div key={index} className="form-check">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                value={reason}
+                                checked={selectedReason === reason}
+                                onChange={(e) => setSelectedReason(e.target.value)}
+                            />
+                            <label className="form-check-label">{reason}</label>
+                        </div>
+                    ))}
+                </div>
+                <button onClick={handleCancelOrder} className="btn btn-success mt-3 me-2">Xác Nhận</button>
+                <button onClick={() => setIsModalOpen(false)} className="btn btn-danger mt-3">Hủy</button>
+            </Modal>
             <div>
                 <div className="modal fade" id="exampleModal2" tabIndex={-1} >
                     <div className="modal-dialog modal-dialog-centered" >
@@ -521,6 +467,7 @@ const DonHang = () => {
                 </div>
             </div>
         </div>
+        
     );
 };
 
