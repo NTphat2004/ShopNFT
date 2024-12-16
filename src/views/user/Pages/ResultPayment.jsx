@@ -110,7 +110,7 @@ const ResultPayment = () => {
     }, [iserror])
 
     return (
-        <>
+     
             <div className='container' >
                 <div className='' style={{
                     'display': 'flex',
@@ -133,7 +133,7 @@ const ResultPayment = () => {
                                     <button className="history_button" type="button"><Link style={{ textDecoration: 'none' }} to={`/`} >
                                         Trang chủ
                                     </Link></button>
-                                    <button className="track_button" type="button"> <Link style={{ textDecoration: 'none' }} to={`/lịch-sử-đặt-hàng`} >
+                                    <button className="track_button" type="button"> <Link style={{ textDecoration: 'none' }} to={`/order-history`} >
                                         Theo dõi đơn hàng
                                     </Link></button>
                                 </div>
@@ -142,7 +142,7 @@ const ResultPayment = () => {
                     </div>
                 </div>
             </div>
-        </>
+  
     )
 }
 
