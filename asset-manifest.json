@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ShopNFT/static/css/main.4e687644.css",
-    "main.js": "/ShopNFT/static/js/main.0929987c.js",
+    "main.js": "/ShopNFT/static/js/main.9ca09d4a.js",
     "static/js/453.d855a71b.chunk.js": "/ShopNFT/static/js/453.d855a71b.chunk.js",
     "static/media/fa-solid-900.ttf": "/ShopNFT/static/media/fa-solid-900.07ed6d5fa32c1d54af0f.ttf",
     "static/media/fa-brands-400.ttf": "/ShopNFT/static/media/fa-brands-400.0ff70dcbf135d859ebf3.ttf",
@@ -13,11 +13,11 @@
     "static/media/fa-v4compatibility.woff2": "/ShopNFT/static/media/fa-v4compatibility.6cfec8414be20e2c3426.woff2",
     "index.html": "/ShopNFT/index.html",
     "main.4e687644.css.map": "/ShopNFT/static/css/main.4e687644.css.map",
-    "main.0929987c.js.map": "/ShopNFT/static/js/main.0929987c.js.map",
+    "main.9ca09d4a.js.map": "/ShopNFT/static/js/main.9ca09d4a.js.map",
     "453.d855a71b.chunk.js.map": "/ShopNFT/static/js/453.d855a71b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.4e687644.css",
-    "static/js/main.0929987c.js"
+    "static/js/main.9ca09d4a.js"
   ]
 }
