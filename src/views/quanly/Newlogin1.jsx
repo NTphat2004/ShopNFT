@@ -11,11 +11,13 @@ import "../../styles/main.css";
 import bgImage from "../../assets/images/bg-01.jpg";
 import { useEffect, useState } from "react";
 import $ from "jquery";
-import { useNavigate } from "react-router-dom";
+import { notification } from "antd";
+import { Navigate, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 //import { Navigate } from "react-router";
 
 const Newlogin1 = () => {
-  const [accountID, setAccountID] = useState("");
+  const [accountID, setAccountID] = useState(null);
   const [password, setPassword] = useState("");
   const [hinhanh, setHinhanh] = useState("");
   const navigate = useNavigate();
@@ -58,12 +60,17 @@ const Newlogin1 = () => {
   // useEffect(() => {
   //   testDeploy();
   // }, []);
-
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("Account ID:", accountID);
-    console.log("Password:", password);
-
+    if (accountID === "" || password === "") {
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description: `Vui lòng nhập đầy đủ họ và tên !`,
+        duration: 1, // thời gian hiển thị
+        onMouseEnter: () => notification.destroy(),
+      });
+      return;
+    }
     fetch("http://localhost:8080/api/login", {
       method: "POST",
       headers: {
@@ -77,7 +84,13 @@ const Newlogin1 = () => {
       .then((response) => {
         if (!response.ok) {
           return response.json().then((errorData) => {
-            throw new Error(errorData.message || "Đăng nhập thất bại."); // Lấy thông báo lỗi từ server
+            //throw new Error(errorData.message || "Đăng nhập thất bại.");
+            notification.error({
+              message: "Đăng nhập thất bại",
+              description: errorData.message || "Đăng nhập thất bại.",
+              duration: 1, // thời gian hiển thị
+              onMouseEnter: () => notification.destroy(),
+            }); // Lấy thông báo lỗi từ server
           });
         }
         return response.json();
@@ -89,7 +102,17 @@ const Newlogin1 = () => {
           // Lưu token vào localStorage hoặc sessionStorage
           localStorage.setItem("jwtToken", data.token);
           localStorage.setItem("data", JSON.stringify(data));
+          const decode = jwtDecode(data.token);
+          console.log("Decode nè:", decode);
+          console.log("hihi: ", decode.sub);
+          console.log("Roles nè trời: ", decode.roles);
           navigate("/dashboard");
+          notification.success({
+            message: "Đăng nhập thành công",
+            description: `Chào mừng ${data.hovaten}!`,
+            duration: 1, // thời gian hiển thị
+            onMouseEnter: () => notification.destroy(),
+          });
           console.log("Token saved:", data.token);
         }
       })
@@ -153,7 +176,7 @@ const Newlogin1 = () => {
             </div>
 
             <div className="flex-sb-m w-full p-t-3 p-b-32">
-              <div className="contact100-form-checkbox">
+              {/* <div className="contact100-form-checkbox">
                 <input
                   className="input-checkbox100"
                   id="ckb1"
@@ -169,7 +192,7 @@ const Newlogin1 = () => {
                 <a href="#" className="txt1">
                   Forgot Password?
                 </a>
-              </div>
+              </div> */}
             </div>
 
             <div className="container-login100-form-btn">
@@ -178,12 +201,12 @@ const Newlogin1 = () => {
               </button>
             </div>
 
-            <div className="text-center p-t-46 p-b-20">
+            {/* <div className="text-center p-t-46 p-b-20">
               <span className="txt2">or sign up using</span>
-            </div>
+            </div> */}
 
             <div className="login100-form-social flex-c-m">
-              <a
+              {/* <a
                 href="#"
                 className="login100-form-social-item flex-c-m bg1 m-r-5"
               >
@@ -195,7 +218,7 @@ const Newlogin1 = () => {
                 className="login100-form-social-item flex-c-m bg2 m-r-5"
               >
                 <i className="fa fa-twitter" aria-hidden="true"></i>
-              </a>
+              </a> */}
             </div>
           </form>
 

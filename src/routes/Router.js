@@ -5,8 +5,7 @@ import Newlogin1 from "../views/quanly/Newlogin1";
 import Thongtincanhan from "../views/quanly/Thongtincanhan";
 import Voucher from "../views/quanly/QuanlyVoucher";
 import Sanpham from "../views/quanly/QuanlySP";
-import UserForm from "../views/quanly/Usermanagement";
-import Thuonghieu from "../views/quanly/ThuongHieu";
+import Thuonghieu from "../views/quanly/Thuonghieu";
 import Naptien from "../views/quanly/Naptien";
 import QuanLyDonHang from "../views/quanly/QuanLyDonHang";
 import NhapHang from "../views/quanly/QuanLyNhapHang";
@@ -15,6 +14,17 @@ import DanhGia from "../views/quanly/QuanLyDanhGia";
 import QuanLyShipper from "../views/quanly/QuanLyShipper";
 import UploadFile from "../views/quanly/UploadFile";
 import CrudCategory from "../views/quanly/CrudCategory";
+import Baidang from "../views/quanly/Baidang";
+import Settings from "../views/quanly/Settings";
+import CRUDAnh from "../views/quanly/CRUDAnh";
+import UserManagement from "../views/quanly/UserManagement";
+import BannerManager from "../views/quanly/BannerManager";
+import SupplierManagement from "../views/quanly/SupplierManagement";
+import CrudPOPUP from "../views/quanly/CrudPOPUP";
+import Respone from "../views/quanly/Respone";
+import { patch } from "@mui/material";
+import { X } from "@mui/icons-material";
+import Xetduyetsanpham from "../views/quanly/Xetduyetsanpham";
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import("../layouts/full/FullLayout")));
@@ -45,7 +55,16 @@ const Router = [
     children: [
       { path: "/", element: <Navigate to="/dashboard" /> },
       { path: "upload", element: <UploadFile /> },
+      { path: "popup", element: <CrudPOPUP /> },
+      { path: "response", element: <Respone /> },
+      { path: "xetduyetsanpham", element: <Xetduyetsanpham /> },
+      { path: "crudhinhAnh", element: <CRUDAnh /> },
+      { path: "banner", element: <BannerManager /> },
+      { path: "nhacungcap", element: <SupplierManagement /> },
       { path: "danhmuc", element: <CrudCategory /> },
+      { path: "settings", element: <Settings /> },
+      { path: "thuonghieu", element: <Thuonghieu /> },
+      { path: "baidang", element: <Baidang /> },
       { path: "DuAnTotNghiep", element: <Dashboard /> },
       { path: "dashboard", element: <Thongtincanhan /> },
       { path: "shipper", element: <QuanLyShipper /> },
@@ -56,8 +75,7 @@ const Router = [
       { path: "danhgia", element: <DanhGia /> },
       { path: "sanpham", element: <Sanpham /> },
       { path: "donhang", element: <QuanLyDonHang /> },
-      { path: "nguoidung", element: <UserForm /> },
-      { path: "thuonghieu", element: <Thuonghieu /> },
+      { path: "nguoidung", element: <UserManagement /> },
       { path: "sample-page", element: <SamplePage /> },
       { path: "icons", element: <Icons /> },
       { path: "ui/typography", element: <TypographyPage /> },

@@ -16,6 +16,7 @@ import "../../styles/trangthaidonhang.css";
 import DonHang from "./components/DonHang";
 import DoanhThuDateToDate from "./components/DoanhThuDateToDate";
 import BestSeller from "./components/BestSeller";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const token = localStorage.getItem("jwtToken");
@@ -50,12 +51,12 @@ const Dashboard = () => {
                 <LoiNhuan />
               </Grid>
             </Grid>
-          </Grid> 
+          </Grid>
 
           {/* Hàng riêng cho SalesOverview */}
           <Grid item xs={12} lg={12} className="hang3">
             <SalesOverview />
-          </Grid> 
+          </Grid>
 
           <Grid item xs={12} lg={12} className="hang4">
             <DoanhThuDateToDate />
@@ -64,11 +65,11 @@ const Dashboard = () => {
           {/* Hàng riêng cho TrangThaiDonHang */}
           <Grid item xs={12} lg={12} className="hang4">
             <TrangThaiDonHang />
-          </Grid> 
+          </Grid>
 
           <Grid item xs={12} lg={12} className="hang4">
             <BestSeller />
-          </Grid> 
+          </Grid>
         </Grid>
       </Box>
     </PageContainer>

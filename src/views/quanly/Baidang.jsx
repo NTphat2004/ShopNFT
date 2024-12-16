@@ -1,5 +1,5 @@
 import { Tabs, Select, Table, Upload, Image, Button } from "antd"; // Thêm Table từ antd
-import "../../styles/thuonghieu.css";
+import "../../styles/baidang.css";
 import {
   ExportOutlined,
   EditOutlined,
@@ -8,15 +8,25 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { useState, useEffect, useRef } from "react";
-import { data, get } from "jquery";
+import { data } from "jquery";
 import * as XLSX from "xlsx";
-import axios from "axios";
-
 //import "../../assets/images"
+import axios from "axios";
+import { Editor } from "@tinymce/tinymce-react";
+import { Input } from "antd";
+const { TextArea } = Input;
 
 const onChange = (key) => {
   console.log(key);
 };
+
+// const getCurrentDate = () => {
+//   const today = new Date();
+//   const year = today.getFullYear();
+//   const month = String(today.getMonth() + 1).padStart(2, "0");
+//   const day = String(today.getDate()).padStart(2, "0");
+//   return `${year}-${month}-${day}`;
+// };
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -26,15 +36,14 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
-const Thuonghieu = () => {
-  const [hanhdong, sethanhdong] = useState([]);
+const Baidang = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [initialHoatDong, setInitialHoatDong] = useState(null); // Giá trị ban đầu của hoat_dong
   const [isDisabled, setIsDisabled] = useState(false); // Mặc định disable tất cả
-  const [thuonghieuData, setThuonghieuData] = useState([]);
+  const [hanhdong, sethanhdong] = useState([]);
+  const [baidangData, setBaidangData] = useState([]);
   const [hoatDong, setHoatDong] = useState("Hoạt động");
-  const [selectedThuongHieu, setSelectedThuongHieu] = useState({
-    thuong_hieuID: "",
+  const [selectedBaiDang, setSelectedBaiDang] = useState({
     hoat_dong: "On",
     hanh_dong: "Thêm",
   });
@@ -43,8 +52,8 @@ const Thuonghieu = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState([]);
   const [searchStatus, setSearchStatus] = useState("");
-  const [newThuongHieuID, setNewThuongHieuID] = useState("");
-
+  const [newBaiDangID, setNewBaiDangID] = useState("");
+  const [content, setContent] = useState("");
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -55,27 +64,31 @@ const Thuonghieu = () => {
 
   const handleChangeImage = ({ fileList: newFileList }) => {
     setFileList(newFileList);
-    setSelectedThuongHieu((prev) => ({
+    setSelectedBaiDang((prev) => ({
       ...prev,
       hinh_anh: newFileList.map((file) =>
         file.response ? file.response.url : file.url
       ), // Lưu URL hình ảnh
     }));
   };
+  const handleEditorChange = (newContent) => {
+    console.log(newContent);
+    setContent(newContent);
+  };
 
-  const getNewThuongHieuID = async () => {
+  const getNewBaiDangID = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/thuonghieu/getNewThuongHieuID"
+        "http://localhost:8080/baidang/getNewBaiDangID"
       );
-      setNewThuongHieuID(response.data);
-      console.log("Thương Hiệu ID:", response.data);
-      setSelectedThuongHieu((prev) => ({
+      setNewBaiDangID(response.data);
+      console.log("Bài Đăng ID:", response.data);
+      setSelectedBaiDang((prev) => ({
         ...prev,
-        thuong_hieuID: response.data,
+        bai_dangID: response.data,
       }));
     } catch (error) {
-      console.error("Lỗi khi lấy thuong_hieuID:", error);
+      console.error("Lỗi khi lấy bai_dangID:", error);
     }
   };
 
@@ -97,30 +110,31 @@ const Thuonghieu = () => {
       </div>
     </button>
   );
-  const handleEdit = async (thuonghieu) => {
+  const handleEdit = async (baidang) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/edit/thuonghieu/${thuonghieu.thuong_hieuID}`
+        `http://localhost:8080/edit/baidang/${baidang.bai_dangID}`
       );
       if (response.ok) {
         const data = await response.json();
-        setSelectedThuongHieu({
+        setSelectedBaiDang({
           ...data,
           accountID: data.users ? data.users.accountID : null,
         });
+        setContent(data.noi_dung);
+        console.log("noi dung: ", data);
         //console.log(data);
         setActiveKey("1");
-
         setInitialHoatDong(data.hoat_dong); // Lưu giá trị ban đầu của hoat_dong
-        setIsDisabled(data.hoat_dong === "On"); // Disable nếu hoat_dong là "On"
+        setIsDisabled(data.hoat_dong === "On" ? true : false); // Disable nếu hoat_dong là "On"
       }
     } catch (error) {
-      console.error("Lỗi khi lấy thông tin thương hiệu:", error);
+      console.error("Lỗi khi lấy thông tin bài đăng:", error);
     }
     // Chuyển đổi 'hinh_anh' thành mảng nếu cần
-    const images = Array.isArray(thuonghieu.hinh_anh)
-      ? thuonghieu.hinh_anh
-      : [thuonghieu.hinh_anh];
+    const images = Array.isArray(baidang.hinh_anh)
+      ? baidang.hinh_anh
+      : [baidang.hinh_anh];
 
     // Tạo fileList từ danh sách hình ảnh
     const initialFileList = images.map((image) => ({
@@ -135,26 +149,28 @@ const Thuonghieu = () => {
     setFileList(initialFileList);
     setIsEditMode(true);
 
-    console.log(thuonghieu);
+    console.log(baidang);
   };
 
   const handleChange = (value) => {
     console.log("Selected option:", value); // Log để kiểm tra
-    setSelectedThuongHieu((prev) => ({
+    setSelectedBaiDang((prev) => ({
       ...prev,
       hoat_dong: value, // Cập nhật trạng thái hoat_dong
     }));
   };
 
-  const fetchThuongHieuData = async () => {
+  const fetchBaiDangData = async () => {
     try {
-      const response = await fetch("http://localhost:8080/loadThuongHieu");
+      const response = await fetch("http://localhost:8080/loadBaiDang");
       const data = await response.json();
       console.log("Dữ liệu là: ", data);
       const formattedData = data.map((item) => ({
-        key: item.thuong_hieuID,
-        thuong_hieuID: item.thuong_hieuID,
-        ten_thuong_hieu: item.ten_thuong_hieu,
+        key: item.bai_dangID,
+        bai_dangID: item.bai_dangID,
+        tieu_de_phu: item.tieu_de_phu,
+        tieu_de_chinh: item.tieu_de_chinh,
+        noi_dung: item.noi_dung,
         ngay_tao: item.ngay_tao,
         hoat_dong: item.hoat_dong,
         trang_thai_xoa: item.trang_thai_xoa,
@@ -162,57 +178,59 @@ const Thuonghieu = () => {
         hanh_dong: item.hanh_dong,
         accountID: item.users.accountID,
       }));
-      setThuonghieuData(formattedData);
+      setBaidangData(formattedData);
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu thương hiệu:", error);
+      console.error("Lỗi khi lấy dữ liệu bài đăng:", error);
     }
-    getNewThuongHieuID();
+    getNewBaiDangID();
   };
 
   const fetchHanhDongData = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/thuonghieu/gethanhdong"
-      );
+      const response = await fetch("http://localhost:8080/baidang/gethanhdong");
       const data = await response.json();
-      console.log("Dữ liệu là: ", data);
+      console.log("Dữ liệu là:", data);
       const formattedData = data.map((item) => ({
-        key: item.thuonghieu.thuong_hieuID,
-        thuong_hieuID: item.thuonghieu.thuong_hieuID,
-        ten_thuong_hieu: item.thuonghieu.ten_thuong_hieu,
-        ngay_tao: item.thuonghieu.ngay_tao,
-        hoat_dong: item.thuonghieu.hoat_dong,
-        trang_thai_xoa: item.thuonghieu.trang_thai_xoa,
-        hinh_anh: item.thuonghieu.hinh_anh,
+        key: item.baidang.bai_dangID,
+        bai_dangID: item.baidang.bai_dangID,
+        tieu_de_phu: item.baidang.tieu_de_phu,
+        tieu_de_chinh: item.baidang.tieu_de_chinh,
+        noi_dung: item.baidang.noi_dung,
+        ngay_tao: item.baidang.ngay_tao,
+        hoat_dong: item.baidang.hoat_dong,
+        trang_thai_xoa: item.baidang.trang_thai_xoa,
+        hinh_anh: item.baidang.hinh_anh,
         hanh_dong: item.ten_HanhDong,
-        ngay_hanh_dong: item.ngay_HanhDong, // Thêm trường này
-        accountID: item.thuonghieu.users.accountID,
+        ngay_hanh_dong: item.ngay_HanhDong,
+        accountID: item.baidang.users.accountID,
       }));
       sethanhdong(formattedData);
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu thương hiệu:", error);
+      console.error("Lỗi khi lấy dữ liệu bài đăng:", error);
     }
   };
 
   useEffect(() => {
-    fetchThuongHieuData();
     fetchHanhDongData();
+    fetchBaiDangData();
     const accountID = JSON.parse(localStorage.getItem("accountID"));
     if (accountID) {
-      setSelectedThuongHieu((prev) => ({
+      setSelectedBaiDang((prev) => ({
         ...prev,
         accountID,
       }));
     }
   }, []);
 
-  let thuonghieu = {};
-  const thuonghieuChung = () => {
-    thuonghieu = {
-      thuong_hieuID: document.getElementById("thuong_hieuID").value,
-      ten_thuong_hieu: document.getElementById("ten_thuong_hieu").value,
+  let baidang = {};
+  const baidangChung = () => {
+    baidang = {
+      bai_dangID: document.getElementById("bai_dangID").value,
+      tieu_de_phu: document.getElementById("tieu_de_phu").value,
+      tieu_de_chinh: document.getElementById("tieu_de_chinh").value,
+      noi_dung: content != null ? content : "",
       ngay_tao: document.getElementById("ngay_tao").value,
-      hoat_dong: selectedThuongHieu.hoat_dong,
+      hoat_dong: selectedBaiDang.hoat_dong,
       accountID: document.getElementById("accountID").value,
     };
   };
@@ -221,20 +239,11 @@ const Thuonghieu = () => {
     e.preventDefault();
 
     // Kiểm tra các trường bắt buộc
-    if (document.getElementById("ten_thuong_hieu").value === "") {
-      alert("Vui lòng nhập tên thương hiệu");
+    if (document.getElementById("tieu_de_chinh").value === "") {
+      alert("Vui lòng nhập tiêu đề chính");
       return;
-    }
-    // Kiểm tra nếu chỉ toàn số
-    else if (/^\d+$/.test(document.getElementById("ten_thuong_hieu").value)) {
-      alert("Tên thương hiệu không được là chuỗi toàn số");
-      return;
-    }
-    // Cho phép chữ và số
-    else if (
-      !/^[a-zA-Z0-9\s]+$/.test(document.getElementById("ten_thuong_hieu").value)
-    ) {
-      alert("Tên thương hiệu không được chứa kí tự đặc biệt");
+    } else if (document.getElementById("tieu_de_phu").value === "") {
+      alert("Vui lòng nhập tiêu đề phụ");
       return;
     } else if (document.getElementById("accountID").value === "") {
       alert("Vui lòng nhập tài khoản ID");
@@ -242,47 +251,45 @@ const Thuonghieu = () => {
     } else if (document.getElementById("ngay_tao").value === "") {
       alert("Vui lòng chọn ngày tạo");
       return;
+    } else if (content.length == 0) {
+      alert("Vui lòng nhập nội dung");
+      return;
     } else if (fileList.length === 0) {
       alert("Vui lòng chọn hình ảnh");
       return;
     }
-
-    // Gọi hàm thuonghieuChung để cập nhật dữ liệu thương hiệu
-    thuonghieuChung();
+    baidangChung();
 
     const formData = new FormData();
-    for (const key in thuonghieu) {
-      formData.append(key, thuonghieu[key]);
+    for (const key in baidang) {
+      formData.append(key, baidang[key]);
     }
 
-    // Thêm các tệp hình ảnh vào formData
+    formData.append("noi_dung", content);
+
+    // Sử dụng ref để lấy file
     fileList.forEach((file) => {
       formData.append("hinh_anh", file.originFileObj); // Sử dụng originFileObj để lấy file thực tế
     });
-
     try {
-      const response = await fetch("http://localhost:8080/thuonghieu/add", {
+      const response = await fetch("http://localhost:8080/baidang/add", {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Thương hiệu đã được thêm thành công:", data);
-        alert("Thêm thương hiệu thành công!");
-        fetchThuongHieuData();
+        console.log("Bài đăng đã được thêm thành công:", data);
+        alert("Thêm bài đăng thành công!");
+        fetchBaiDangData();
         fetchHanhDongData();
         clear();
         console.log("URL ảnh:", data.imageUrl);
-        console.log(selectedThuongHieu);
+        console.log(selectedBaiDang);
       } else {
-        const errorData = await response.text();
-        alert(errorData);
-        console.error(
-          "Lỗi khi thêm thương hiệu:",
-          response.statusText,
-          errorData
-        );
+        const errorData = await response.json();
+        console.error("Lỗi khi thêm bài đăng:", response.statusText, errorData);
+        alert("Thêm bài đăng thất bại!");
       }
     } catch (error) {
       console.error("Lỗi:", error);
@@ -290,20 +297,12 @@ const Thuonghieu = () => {
   };
 
   const handleUpdate = async () => {
-    if (document.getElementById("ten_thuong_hieu").value === "") {
-      alert("Vui lòng nhập tên thương hiệu");
+    // Kiểm tra các trường bắt buộc
+    if (document.getElementById("tieu_de_chinh").value === "") {
+      alert("Vui lòng nhập tiêu đề chính");
       return;
-    }
-    // Kiểm tra nếu chỉ toàn số
-    else if (/^\d+$/.test(document.getElementById("ten_thuong_hieu").value)) {
-      alert("Tên thương hiệu không được là chuỗi toàn số");
-      return;
-    }
-    // Cho phép chữ và số
-    else if (
-      !/^[a-zA-Z0-9\s]+$/.test(document.getElementById("ten_thuong_hieu").value)
-    ) {
-      alert("Tên thương hiệu chỉ được chứa chữ cái, số và khoảng trắng");
+    } else if (document.getElementById("tieu_de_phu").value === "") {
+      alert("Vui lòng nhập tiêu đề phụ");
       return;
     } else if (document.getElementById("accountID").value === "") {
       alert("Vui lòng nhập tài khoản ID");
@@ -311,14 +310,18 @@ const Thuonghieu = () => {
     } else if (document.getElementById("ngay_tao").value === "") {
       alert("Vui lòng chọn ngày tạo");
       return;
+    } else if (content.length == 0) {
+      alert("Vui lòng nhập nội dung");
+      return;
     } else if (fileList.length === 0) {
       alert("Vui lòng chọn hình ảnh");
       return;
     }
-    thuonghieuChung();
+    baidangChung();
+
     const formData = new FormData();
-    for (const key in thuonghieu) {
-      formData.append(key, thuonghieu[key]);
+    for (const key in baidang) {
+      formData.append(key, baidang[key]);
     }
 
     // Nếu có hình ảnh mới, thêm vào formData
@@ -327,7 +330,7 @@ const Thuonghieu = () => {
     });
     try {
       const response = await fetch(
-        `http://localhost:8080/thuonghieu/update/${thuonghieu.thuong_hieuID}`,
+        `http://localhost:8080/baidang/update/${baidang.bai_dangID}`,
         {
           method: "PUT",
           body: formData,
@@ -336,27 +339,24 @@ const Thuonghieu = () => {
 
       if (response.ok) {
         // Kiểm tra nếu trạng thái hoat_dong được thay đổi từ "On" sang "Off"
-        if (
-          initialHoatDong === "On" &&
-          selectedThuongHieu.hoat_dong === "Off"
-        ) {
+        if (initialHoatDong === "On" && selectedBaiDang.hoat_dong === "Off") {
           setIsDisabled(false); // Tắt disable khi chuyển sang "Off"
         }
         const data = await response.json();
-        console.log("Thương hiệu đã được cập nhật thành công:", data);
-        alert("Cập nhật thương hiệu thành công!");
-        fetchThuongHieuData(); // Tải lại dữ liệu
+        console.log("Bài đăng đã được cập nhật thành công:", data);
+        alert("Cập nhật bài đăng thành công!");
+        fetchBaiDangData(); // Tải lại dữ liệu
         fetchHanhDongData();
         clear();
         setIsEditMode(false);
       } else {
-        const errorData = await response.text();
+        const errorData = await response.json();
         console.error(
-          "Lỗi khi cập nhật thương hiệu:",
+          "Lỗi khi cập nhật bài đăng:",
           response.statusText,
           errorData
         );
-        alert(errorData);
+        alert("Cập nhật bài đăng thất bại!");
       }
     } catch (error) {
       console.error("Lỗi:", error);
@@ -364,11 +364,13 @@ const Thuonghieu = () => {
   };
 
   const clear = () => {
-    getNewThuongHieuID();
-    document.getElementById("ten_thuong_hieu").value = "";
+    getNewBaiDangID();
+    document.getElementById("tieu_de_phu").value = "";
+    document.getElementById("tieu_de_chinh").value = "";
+    setContent("");
     document.getElementById("ngay_tao").value = "";
 
-    setSelectedThuongHieu({
+    setSelectedBaiDang({
       hoat_dong: "On",
       trang_thai_xoa: "Chưa xoá",
       accountID: JSON.parse(localStorage.getItem("accountID")),
@@ -378,83 +380,83 @@ const Thuonghieu = () => {
   };
   const handelClear = () => {
     clear();
-    setIsEditMode(false); // Bật lại nút "Thêm"
+    setIsEditMode(false);
     setIsDisabled(false);
   };
 
-  const handleReload = async (thuong_hieuID) => {
+  const handleReload = async (bai_dangID) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/thuonghieu/reloadFromGarbage/${thuong_hieuID}`,
+        `http://localhost:8080/baidang/reloadFromGarbage/${bai_dangID}`,
         {
           method: "PUT",
         }
       );
 
       if (response.ok) {
-        alert("Phục hồi thương hiệu thành công!");
-        fetchThuongHieuData(); // Tải lại dữ liệu thương hiệu
+        alert("Phục hồi bài đăng thành công!");
+        fetchBaiDangData(); // Tải lại dữ liệu thương hiệu
         fetchHanhDongData();
       } else {
-        alert("Lỗi khi phục hồi thương hiệu.");
+        alert("Lỗi khi phục hồi bài đăng");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
     }
   };
 
-  const handleDeleteThuongHieuToGarbage = async (thuong_hieuID) => {
+  const handleDeleteBaiDangToGarbage = async (bai_dangID) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/thuonghieu/deleteToGarbage/${thuong_hieuID}`,
+        `http://localhost:8080/baidang/deleteToGarbage/${bai_dangID}`,
         {
           method: "PUT",
         }
       );
 
       if (response.ok) {
-        alert("Thương hiệu đã được xóa thành công!");
-        fetchThuongHieuData(); // Tải lại dữ liệu thương hiệu
+        alert("Bài đăng đã được xóa thành công!");
+        fetchBaiDangData(); // Tải lại dữ liệu thương hiệu
         fetchHanhDongData();
       } else {
-        alert("Lỗi khi xóa thương hiệu.");
+        alert("Lỗi khi xóa bài đăng");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
     }
   };
 
-  const handleDeleteThuongHieuToGarbageInput = (thuong_hieuID) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa thương hiệu này?")) {
+  const handleDeleteBaiDangToGarbageInput = (bai_dangID) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài đăng này?")) {
       // Gọi API xóa voucher
-      deleteThuongHieuToGarbageInput(thuong_hieuID);
+      deleteBaiDangToGarbageInput(bai_dangID);
     }
   };
 
-  const handleDeleteThuongHieuToGarbageTable = (thuong_hieuID) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa thương hiệu này?")) {
+  const handleDeleteBaiDangToGarbageTable = (bai_dangID) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài đăng này?")) {
       // Gọi API xóa voucher
-      handleDeleteThuongHieuToGarbage(thuong_hieuID);
+      handleDeleteBaiDangToGarbage(bai_dangID);
     }
   };
 
-  const deleteThuongHieuToGarbageInput = async () => {
-    thuonghieuChung();
+  const deleteBaiDangToGarbageInput = async () => {
+    baidangChung();
     try {
       const response = await fetch(
-        `http://localhost:8080/thuonghieu/deleteToGarbage/${thuonghieu.thuong_hieuID}`,
+        `http://localhost:8080/baidang/deleteToGarbage/${baidang.bai_dangID}`,
         {
           method: "PUT",
         }
       );
 
       if (response.ok) {
-        alert("Thương hiệu đã được xóa thành công!");
-        fetchThuongHieuData(); // Tải lại dữ liệu thương hiệu
+        alert("Bài đăng đã được xóa thành công!");
+        fetchBaiDangData(); // Tải lại dữ liệu thương hiệu
         fetchHanhDongData();
         clear();
       } else {
-        alert("Lỗi khi xóa thương hiệu.");
+        alert("Lỗi khi xóa bài đăng");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
@@ -464,14 +466,47 @@ const Thuonghieu = () => {
   // Cấu hình cột cho bảng
   const columns = [
     {
-      title: "Mã thương hiệu",
-      dataIndex: "thuong_hieuID",
-      key: "thuong_hieuID",
+      title: "Mã bài đăng",
+      dataIndex: "bai_dangID",
+      key: "bai_dangID",
     },
     {
-      title: "Tên thương hiệu",
-      dataIndex: "ten_thuong_hieu",
-      key: "ten_thuong_hieu",
+      title: "Tiêu đề phụ",
+      dataIndex: "tieu_de_phu",
+      key: "tieu_de_phu",
+    },
+    {
+      title: "Tiêu đề chính",
+      dataIndex: "tieu_de_chinh",
+      key: "tieu_de_chinh",
+    },
+    {
+      title: "Nội dung",
+      dataIndex: "noi_dung",
+      key: "noi_dung",
+      render: (text) => {
+        // Loại bỏ tất cả các thẻ HTML bằng regex
+        const plainText = text.replace(/<\/?[^>]+(>|$)/g, "");
+
+        // Giải mã các ký tự HTML (HTML entities) thành ký tự thuần
+        const decodedText =
+          new DOMParser().parseFromString(plainText, "text/html").body
+            .textContent || "";
+
+        return (
+          <div
+            style={{
+              maxWidth: 200,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            title={decodedText} // Hiển thị toàn bộ văn bản khi hover
+          >
+            {decodedText}
+          </div>
+        );
+      },
     },
     {
       title: "Ngày tạo",
@@ -494,7 +529,8 @@ const Thuonghieu = () => {
       key: "hinh_anh",
       render: (text) => (
         <img
-          src={`http://localhost:8080/uploads/${text}`}
+          //src={`http://localhost:8080/uploads/${text}`}
+          src={text}
           alt="Thương hiệu"
           style={{ width: 50, height: 50 }}
         />
@@ -517,9 +553,7 @@ const Thuonghieu = () => {
           />
           <DeleteOutlined
             style={{ cursor: "pointer", color: "red" }}
-            onClick={() =>
-              handleDeleteThuongHieuToGarbageTable(record.thuong_hieuID)
-            }
+            onClick={() => handleDeleteBaiDangToGarbageTable(record.bai_dangID)}
           />
         </div>
       ),
@@ -529,14 +563,47 @@ const Thuonghieu = () => {
   // Cấu hình cột cho bảng đã xóa
   const columns2 = [
     {
-      title: "Mã thương hiệu",
-      dataIndex: "thuong_hieuID",
-      key: "thuong_hieuID",
+      title: "Mã bài đăng",
+      dataIndex: "bai_dangID",
+      key: "bai_dangID",
     },
     {
-      title: "Tên thương hiệu",
-      dataIndex: "ten_thuong_hieu",
-      key: "ten_thuong_hieu",
+      title: "Tiêu đề phụ",
+      dataIndex: "tieu_de_phu",
+      key: "tieu_de_phu",
+    },
+    {
+      title: "Tiêu đề chính",
+      dataIndex: "tieu_de_chinh",
+      key: "tieu_de_chinh",
+    },
+    {
+      title: "Nội dung",
+      dataIndex: "noi_dung",
+      key: "noi_dung",
+      render: (text) => {
+        // Loại bỏ tất cả các thẻ HTML bằng regex
+        const plainText = text.replace(/<\/?[^>]+(>|$)/g, "");
+
+        // Giải mã các ký tự HTML (HTML entities) thành ký tự thuần
+        const decodedText =
+          new DOMParser().parseFromString(plainText, "text/html").body
+            .textContent || "";
+
+        return (
+          <div
+            style={{
+              maxWidth: 200,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            title={decodedText} // Hiển thị toàn bộ văn bản khi hover
+          >
+            {decodedText}
+          </div>
+        );
+      },
     },
     {
       title: "Ngày tạo",
@@ -578,23 +645,56 @@ const Thuonghieu = () => {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <ReloadOutlined
             style={{ cursor: "pointer", color: "#1890ff" }}
-            onClick={() => handleReload(record.thuong_hieuID)}
+            onClick={() => handleReload(record.bai_dangID)}
           />
         </div>
       ),
     },
   ];
-
+  // nhatj ki
   const columns3 = [
     {
-      title: "Mã thương hiệu",
-      dataIndex: "thuong_hieuID",
-      key: "thuong_hieuID",
+      title: "Mã bài đăng",
+      dataIndex: "bai_dangID",
+      key: "bai_dangID",
     },
     {
-      title: "Tên thương hiệu",
-      dataIndex: "ten_thuong_hieu",
-      key: "ten_thuong_hieu",
+      title: "Tiêu đề phụ",
+      dataIndex: "tieu_de_phu",
+      key: "tieu_de_phu",
+    },
+    {
+      title: "Tiêu đề chính",
+      dataIndex: "tieu_de_chinh",
+      key: "tieu_de_chinh",
+    },
+    {
+      title: "Nội dung",
+      dataIndex: "noi_dung",
+      key: "noi_dung",
+      render: (text) => {
+        // Loại bỏ tất cả các thẻ HTML bằng regex
+        const plainText = text.replace(/<\/?[^>]+(>|$)/g, "");
+
+        // Giải mã các ký tự HTML (HTML entities) thành ký tự thuần
+        const decodedText =
+          new DOMParser().parseFromString(plainText, "text/html").body
+            .textContent || "";
+
+        return (
+          <div
+            style={{
+              maxWidth: 100,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            title={decodedText} // Hiển thị toàn bộ văn bản khi hover
+          >
+            {decodedText}
+          </div>
+        );
+      },
     },
     {
       title: "Ngày tạo",
@@ -617,7 +717,8 @@ const Thuonghieu = () => {
       key: "hinh_anh",
       render: (text) => (
         <img
-          src={`http://localhost:8080/uploads/${text}`}
+          //src={`http://localhost:8080/uploads/${text}`}
+          src={text}
           alt="Thương hiệu"
           style={{ width: 50, height: 50 }}
         />
@@ -640,43 +741,41 @@ const Thuonghieu = () => {
     },
   ];
 
-  const filteredThuongHieuData = thuonghieuData.filter((thuonghieu) => {
+  const filteredBaiDangData = baidangData.filter((baidang) => {
     return (
-      thuonghieu.trang_thai_xoa === null &&
-      (!searchStatus || thuonghieu.hoat_dong === searchStatus)
+      baidang.trang_thai_xoa === null &&
+      (!searchStatus || baidang.hoat_dong === searchStatus)
     );
   });
 
-  console.log("Danh sách thương hiệu", filteredThuongHieuData);
+  console.log("Danh sách bài đăng", filteredBaiDangData);
 
-  const filteredThuongHieuDataGarbage = thuonghieuData.filter((thuonghieu) => {
-    console.log(`trang_thai_xoa: ${thuonghieu.trang_thai_xoa}`);
-    return thuonghieu.trang_thai_xoa === "Xóa";
+  const filteredBaiDangDataGarbage = baidangData.filter((baidang) => {
+    console.log(`trang_thai_xoa: ${baidang.trang_thai_xoa}`);
+    return baidang.trang_thai_xoa === "Xóa";
   });
-  console.log("Thùng rác", filteredThuongHieuDataGarbage);
+  console.log("Thùng rác", filteredBaiDangDataGarbage);
 
-  const filteredNhatKyThuongHieuData = thuonghieuData;
+  const filteredNhatKyBaiDangData = baidangData;
 
   // Xuất file Excel
   const exportToExcel = () => {
     const filteredData = searchStatus
-      ? thuonghieuData.filter(
-          (thuonghieu) => thuonghieu.hoat_dong === searchStatus
-        )
-      : thuonghieuData;
+      ? baidangData.filter((baidang) => baidang.hoat_dong === searchStatus)
+      : baidangData;
 
     // Chuyển đổi dữ liệu thành bảng
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ThuongHieu");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BaiDang");
 
     // Xuất file Excel
-    XLSX.writeFile(workbook, "ThuongHieuData.xlsx");
+    XLSX.writeFile(workbook, "BaiDangData.xlsx");
   };
   return (
     <Tabs
       className="mx-auto"
-      style={{ width: "1100px", margin: "auto" }}
+      style={{ width: "1190px", margin: "auto" }}
       //onChange={onChange}
       activeKey={activeKey} // Điều khiển tab hiện tại
       onChange={(key) => setActiveKey(key)}
@@ -690,37 +789,57 @@ const Thuonghieu = () => {
               <h1>Thông tin chung</h1>
               <div className="input-container">
                 <div className="form-group">
-                  <label htmlFor="productName">Mã thương hiệu</label>
+                  <label htmlFor="productCode">Bài Đăng ID</label>
                   <input
                     type="text"
+                    id="bai_dangID"
                     disabled
-                    id="thuong_hieuID"
                     className="form-control"
-                    value={selectedThuongHieu?.thuong_hieuID || ""}
+                    value={selectedBaiDang?.bai_dangID || ""}
                     onChange={(e) =>
-                      setSelectedThuongHieu({
-                        ...selectedThuongHieu,
-                        thuong_hieuID: e.target.value,
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
+                        bai_dangID: e.target.value,
                       })
                     }
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="productName">Tên Thương Hiệu</label>
+                  <label htmlFor="productName">Tiêu Đề Chính</label>
                   <input
                     type="text"
-                    id="ten_thuong_hieu"
-                    className="form-control"
+                    id="tieu_de_chinh"
                     disabled={isDisabled} // Disable nếu hoat_dong là "On"
-                    value={selectedThuongHieu?.ten_thuong_hieu || ""}
+                    className="form-control"
+                    value={selectedBaiDang?.tieu_de_chinh || ""}
                     onChange={(e) =>
-                      setSelectedThuongHieu({
-                        ...selectedThuongHieu,
-                        ten_thuong_hieu: e.target.value,
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
+                        tieu_de_chinh: e.target.value,
                       })
                     }
                   />
                 </div>
+              </div>
+
+              <div className="input-container">
+                <div className="form-group">
+                  <label htmlFor="productName">Tiêu Đề Phụ</label>
+                  <input
+                    type="text"
+                    id="tieu_de_phu"
+                    disabled={isDisabled} // Disable nếu hoat_dong là "On"
+                    className="form-control"
+                    value={selectedBaiDang?.tieu_de_phu || ""}
+                    onChange={(e) =>
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
+                        tieu_de_phu: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
                 <div className="form-group">
                   <label htmlFor="productName">Account ID</label>
                   <input
@@ -728,10 +847,10 @@ const Thuonghieu = () => {
                     id="accountID"
                     disabled
                     className="form-control"
-                    value={selectedThuongHieu?.accountID || ""}
+                    value={selectedBaiDang?.accountID || ""}
                     onChange={(e) =>
-                      setSelectedThuongHieu({
-                        ...selectedThuongHieu,
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
                         accountID: e.target.value,
                       })
                     }
@@ -745,12 +864,12 @@ const Thuonghieu = () => {
                   <input
                     type="date"
                     id="ngay_tao"
+                    disabled={isDisabled} // Disable nếu hoat_dong là "On"
                     className="form-control"
-                    disabled={isDisabled}
-                    value={selectedThuongHieu?.ngay_tao || ""}
+                    value={selectedBaiDang?.ngay_tao || ""}
                     onChange={(e) =>
-                      setSelectedThuongHieu({
-                        ...selectedThuongHieu,
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
                         ngay_tao: e.target.value,
                       })
                     }
@@ -760,10 +879,10 @@ const Thuonghieu = () => {
                 <div className="form-group">
                   <label htmlFor="warehouseStatus">Hoạt động</label>
                   <Select
-                    value={selectedThuongHieu.hoat_dong || "Hoạt động"}
+                    value={selectedBaiDang.hoat_dong || "Hoạt động"}
                     onChange={(value) =>
-                      setSelectedThuongHieu({
-                        ...selectedThuongHieu,
+                      setSelectedBaiDang({
+                        ...selectedBaiDang,
                         hoat_dong: value,
                       })
                     }
@@ -782,12 +901,41 @@ const Thuonghieu = () => {
                   />
                 </div>
               </div>
+              <div className="inputtext mt-2">
+                <div className="h4">Nội dung </div>
+                <Editor
+                  apiKey="cdl7m07e6o2g3q2jko7q8ompxq0yenyd414zt85qbpdonj4i" // Sử dụng API key của bạn
+                  init={{
+                    height: 300,
+                    width: "100%",
+
+                    menubar: false,
+                    plugins: [
+                      "advlist autolink lists link image charmap print preview anchor",
+                      // Bỏ bớt các plugin không cần thiết để kiểm tra
+                      "insertdatetime media table paste help",
+                    ],
+                    toolbar:
+                      "undo redo | formatselect | bold italic forecolor backcolor | " +
+                      "alignleft aligncenter alignright alignjustify | " +
+                      "bullist numlist outdent indent | removeformat | help",
+                    content_style:
+                      "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                  }}
+                  name=""
+                  className="mt-5"
+                  disabled={isDisabled}
+                  // Disable nếu hoat_dong là "On"
+                  value={content}
+                  onEditorChange={handleEditorChange}
+                />
+              </div>
               <Upload
-                disabled={isDisabled}
                 action="http://localhost:8080/images/"
                 listType="picture-card"
                 fileList={fileList}
-                value={selectedThuongHieu?.hinh_anh || ""}
+                disabled={isDisabled} // Disable nếu hoat_dong là "On"
+                value={selectedBaiDang?.hinh_anh || ""}
                 onPreview={handlePreview}
                 onChange={handleChangeImage}
               >
@@ -813,9 +961,7 @@ const Thuonghieu = () => {
                   <button
                     className="button"
                     onClick={() =>
-                      handleDeleteThuongHieuToGarbageInput(
-                        thuonghieu.thuong_hieuID
-                      )
+                      handleDeleteBaiDangToGarbageInput(baidang.bai_dangID)
                     }
                   >
                     Xóa
@@ -831,11 +977,11 @@ const Thuonghieu = () => {
           ),
         },
         {
-          label: `Danh sách thương hiệu`,
+          label: `Danh sách bài đăng`,
           key: "2",
           children: (
             <div className="tab-content">
-              <h1>Danh sách thương hiệu</h1>
+              <h1>Danh sách bài đăng</h1>
               <button
                 style={{
                   marginBottom: "20px",
@@ -865,7 +1011,7 @@ const Thuonghieu = () => {
                 ]}
               />
               <Table
-                dataSource={filteredThuongHieuData}
+                dataSource={filteredBaiDangData}
                 columns={columns}
                 pagination={false}
               />
@@ -879,7 +1025,7 @@ const Thuonghieu = () => {
             <div className="tab-content">
               <h1>Danh Sách Đã Xóa</h1>
               <Table
-                dataSource={filteredThuongHieuDataGarbage}
+                dataSource={filteredBaiDangDataGarbage}
                 columns={columns2}
                 pagination={false}
               />
@@ -904,4 +1050,4 @@ const Thuonghieu = () => {
   );
 };
 
-export default Thuonghieu;
+export default Baidang;

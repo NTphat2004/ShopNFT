@@ -12,9 +12,44 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import { tab } from "@testing-library/user-event/dist/tab";
-
+import Swal from "sweetalert2";
 const CrudCategory = () => {
+  const alertCurrent = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Sai thông tin đầu vào",
+      text: "Tên danh mục đã tồn tại!",
+    });
+  };
+  const alertSuccess = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Thêm thành công",
+    });
+  };
+
+  const alertSuccessupdate = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Cập nhật thành công",
+    });
+  };
+
+  const alertSuccessdelete = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Xóa thành công",
+    });
+  };
+
+  const alertSuccessback = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Khôi phục thành công",
+    });
+  };
+
+  const [fileImage, SetfileImage] = useState(null);
   const changeImage = (event) => {
     const value = event.currentTarget.files[0];
     const parent = document.querySelector("[gay]");
@@ -34,9 +69,11 @@ const CrudCategory = () => {
       parent.appendChild(parent2);
     });
   };
-  const iduser = localStorage.getItem("account_id");
+  const iduserNe = JSON.parse(localStorage.getItem("data"));
+  const iduser = iduserNe.accountID;
+  console.log("ID user nè: ", iduser);
   const [previewImage, setPreviewImage] = useState(null);
-
+  const [active, activeSet] = useState(false);
   const formik = useFormik({
     initialValues: {
       id: "",
@@ -45,7 +82,8 @@ const CrudCategory = () => {
       createdDate: "",
       status: "",
       image: "",
-      active: "Working",
+      active: "On",
+      imageold: "",
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Hãy Nhập Tên Danh Mục"),
@@ -55,6 +93,16 @@ const CrudCategory = () => {
     }),
     onSubmit: async (values) => {
       if (update == "") {
+        const response = await axios({
+          url: `http://localhost:8080/DanhMuc/findTrung?name=${values.name}`,
+          method: "GET",
+        });
+        if (response.data != "") {
+          console.log("lỗi");
+          // alert("Ten danh muc da ton tai");
+          alertCurrent();
+          return;
+        }
         console.log("data", values);
         const formData = new FormData();
         formData.append("name", values.name);
@@ -63,6 +111,7 @@ const CrudCategory = () => {
         formData.append("status", values.active);
         formData.append("image", values.image);
         formData.append("iduser", iduser);
+        formData.append("imgFile", fileImage);
         await axios({
           url: `http://localhost:8080/DanhMuc/ADD_DanhMuc`,
           method: "POST",
@@ -71,31 +120,53 @@ const CrudCategory = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        toast.success("Thêm danh mục thành công!");
+        alertSuccess();
         const tab1 = document.querySelector("#table-tab");
 
         tab1.click();
       } else {
         console.log("cập nhật");
-
         console.log("data", values);
-        const formData = new FormData();
-        formData.append("id", values.id);
-        formData.append("name", values.name);
+        if (values.imageold == values.image) {
+          console.log("cập nhật no img");
+          const formData = new FormData();
+          formData.append("id", values.id);
+          formData.append("name", values.name);
 
-        formData.append("createdDate", values.createdDate);
-        formData.append("status", values.active);
-        formData.append("image", values.image);
-        formData.append("iduser", iduser);
-        await axios({
-          url: `http://localhost:8080/DanhMuc/UPDATE_DanhMuc`,
-          method: "PUT",
-          data: formData,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        toast.success("Cập nhật danh mục thành công!");
+          formData.append("createdDate", values.createdDate);
+          formData.append("status", values.active);
+          formData.append("image", values.image);
+          formData.append("iduser", iduser);
+
+          await axios({
+            url: `http://localhost:8080/DanhMuc/UPDATE_DanhMucNOImage`,
+            method: "PUT",
+            data: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+        } else {
+          const formData = new FormData();
+          formData.append("id", values.id);
+          formData.append("name", values.name);
+
+          formData.append("createdDate", values.createdDate);
+          formData.append("status", values.active);
+          formData.append("image", values.image);
+          formData.append("iduser", iduser);
+          formData.append("imgFile", fileImage);
+          await axios({
+            url: `http://localhost:8080/DanhMuc/UPDATE_DanhMuc`,
+            method: "PUT",
+            data: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+        }
+        alertSuccessupdate();
+
         const tab1 = document.querySelector("#table-tab");
 
         tab1.click();
@@ -239,10 +310,11 @@ const CrudCategory = () => {
                     status: record.status,
                     image: record.imageUrl,
                     active: record.active,
+                    imageold: record.imageUrl,
                   });
-
+                  activeSet(record.active == "On" ? true : false);
                   const tab2 = document.querySelector("#form-tab");
-
+                  setupdate("update");
                   tab2.click();
                   console.log("Tab:  ", tab2);
                 }}
@@ -254,7 +326,7 @@ const CrudCategory = () => {
                       url: `http://localhost:8080/DanhMuc/DeleteDanhMuc/${record.categoryId}`,
                       method: "DELETE",
                     });
-                    toast.success("Xóa danh mục thành công!");
+                    alertSuccessdelete();
                     fetchData();
                   }
                 }}
@@ -272,25 +344,11 @@ const CrudCategory = () => {
                       url: `http://localhost:8080/DanhMuc/BackDeleteDanhMuc/${record.categoryId}`,
                       method: "DELETE",
                     });
-                    toast.success("Khôi phục danh mục thành công!");
+                    alertSuccessback();
                     fetchDataDeleted();
                   }
                 }}
                 style={{ fontSize: "24px", color: "#08c" }}
-              />
-
-              <DeleteOutlined
-                onClick={async () => {
-                  if (window.confirm("Bạn có muốn xóa danh mục này không")) {
-                    await axios({
-                      url: `http://localhost:8080/DanhMuc/DeleteDanhMuc/${record.categoryId}`,
-                      method: "DELETE",
-                    });
-                    toast.success("Xóa danh mục thành công!");
-                    fetchData();
-                  }
-                }}
-                style={{ fontSize: "24px", color: "red", marginLeft: "10px" }}
               />
             </>
           )}
@@ -344,8 +402,7 @@ const CrudCategory = () => {
       title: "Hoạt động",
       dataIndex: "active", // chỉ là tên trường dữ liệu
       key: "active",
-      render: (text) =>
-        text === "Working" ? "Đang hoạt động" : "Không hoạt động",
+      render: (text) => (text === "On" ? "Đang hoạt động" : "Không hoạt động"),
     },
 
     {
@@ -365,10 +422,6 @@ const CrudCategory = () => {
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
   };
 
   return (
@@ -473,7 +526,7 @@ const CrudCategory = () => {
                     if (value == "Tìm kiếm theo trạng thái hoạt động") {
                       return;
                     }
-                    if (value == "Working") {
+                    if (value == "On") {
                       const res = await axios({
                         url: "http://localhost:8080/DanhMuc/findALLWorking",
                         method: "GET",
@@ -492,7 +545,7 @@ const CrudCategory = () => {
                       }));
                       setDataSource(formattedData);
                     }
-                    if (value == "NotWorking") {
+                    if (value == "Off") {
                       const res = await axios({
                         url: "http://localhost:8080/DanhMuc/findALLNotWorking",
                         method: "GET",
@@ -516,8 +569,8 @@ const CrudCategory = () => {
                   aria-label="Small select example"
                 >
                   <option selected>Tìm kiếm theo trạng thái hoạt động</option>
-                  <option value={"Working"}>Đang hoạt động</option>
-                  <option value={"NotWorking"}>Không hoạt động</option>
+                  <option value={"On"}>Đang hoạt động</option>
+                  <option value={"Off"}>Không hoạt động</option>
                 </select>
               </div>
               <div className="col-md-4 d-flex">
@@ -529,11 +582,7 @@ const CrudCategory = () => {
 
               <div className="col-md-4"></div>
             </div>
-            <Table
-              rowSelection={rowSelection}
-              columns={columns}
-              dataSource={dataSource}
-            />
+            <Table columns={columns} dataSource={dataSource} />
           </div>
 
           {/* Deleted content */}
@@ -544,11 +593,7 @@ const CrudCategory = () => {
             aria-labelledby="deleted-tab"
           >
             <h3>QUẢN LÍ DANH MỤC - ĐÃ XÓA</h3>
-            <Table
-              rowSelection={rowSelection}
-              columns={columns}
-              dataSource={dataSource}
-            />
+            <Table columns={columns} dataSource={dataSource} />
           </div>
 
           {/* Action content */}
@@ -559,11 +604,7 @@ const CrudCategory = () => {
             aria-labelledby="action-tab"
           >
             <h3>Hành Động Đã Xử Lí</h3>
-            <Table
-              rowSelection={rowSelection}
-              columns={columnHanhdongs}
-              dataSource={datahanhdong}
-            />
+            <Table columns={columnHanhdongs} dataSource={datahanhdong} />
           </div>
           <div
             className="tab-pane fade"
@@ -580,6 +621,7 @@ const CrudCategory = () => {
                     id="floatingPassword"
                     placeholder="Password"
                     name="name"
+                    disabled={active}
                     value={formik.values.name}
                     onChange={formik.handleChange}
                   />
@@ -636,6 +678,7 @@ const CrudCategory = () => {
                             "image",
                             event.currentTarget.files[0].name
                           );
+                          SetfileImage(event.currentTarget.files[0]);
                         }}
                         className=" mt-3"
                       />
@@ -675,6 +718,7 @@ const CrudCategory = () => {
                     id="floatingCreatedDate"
                     placeholder="Ngày tạo"
                     name="createdDate"
+                    disabled={active}
                     value={formik.values.createdDate}
                     onChange={formik.handleChange}
                   />
@@ -697,8 +741,8 @@ const CrudCategory = () => {
                     type="radio"
                     name="active"
                     id="option1"
-                    value="Working"
-                    checked={formik.values.active == "Working"}
+                    value="On"
+                    checked={formik.values.active == "On"}
                     onChange={formik.handleChange}
                   />
                   <label
@@ -714,8 +758,8 @@ const CrudCategory = () => {
                     type="radio"
                     name="active"
                     id="option2"
-                    value="NOtWorking"
-                    checked={formik.values.active == "NOtWorking"}
+                    value="Off"
+                    checked={formik.values.active == "Off"}
                     onChange={formik.handleChange}
                   />
                   <label
@@ -728,29 +772,36 @@ const CrudCategory = () => {
               </div>
 
               <div className="col-md-12 text-center mt-3">
-                <button
-                  type="submit"
-                  onClick={() => {
-                    setupdate("");
-                  }}
-                  className="btn btn-outline-primary fw-bold ms-2 mt-2"
-                  style={{ minWidth: 120 }}
-                >
-                  Thêm Danh Mục
-                </button>
+                {update == "" ? (
+                  <button
+                    type="submit"
+                    onClick={() => {
+                      setupdate("");
+                    }}
+                    className="btn btn-outline-primary fw-bold ms-2 mt-2"
+                    style={{ minWidth: 120 }}
+                  >
+                    Thêm Danh Mục
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    onClick={() => {
+                      setupdate("cập nhật");
+                    }}
+                    className="btn btn-outline-warning fw-bold ms-2 mt-2"
+                    style={{ minWidth: 120 }}
+                  >
+                    Cập nhật Danh Mục
+                  </button>
+                )}
 
                 <button
-                  type="submit"
                   onClick={() => {
-                    setupdate("cập nhật");
+                    formik.resetForm();
+                    setupdate("");
+                    activeSet(false);
                   }}
-                  className="btn btn-outline-warning fw-bold ms-2 mt-2"
-                  style={{ minWidth: 120 }}
-                >
-                  Cập nhật Danh Mục
-                </button>
-                <button
-                  onClick={() => formik.resetForm()}
                   type="button"
                   className="btn btn-outline-success fw-bold ms-2 mt-2"
                   style={{ minWidth: 120 }}

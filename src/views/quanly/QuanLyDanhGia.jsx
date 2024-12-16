@@ -428,7 +428,7 @@ const DanhGia = () => {
                 <Table
                   dataSource={filerDanhGiaChuaPhanHoi}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -442,7 +442,7 @@ const DanhGia = () => {
                 <Table
                   dataSource={filerDanhGiaDaPhanHoi}
                   columns={columnsDaPhanHoi}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -456,7 +456,7 @@ const DanhGia = () => {
                 <Table
                   dataSource={listNhatKyNe}
                   columns={columnsNhatKy}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),

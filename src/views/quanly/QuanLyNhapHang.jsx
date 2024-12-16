@@ -45,6 +45,7 @@ const NhapHang = () => {
     gia_goc: parseFloat(0),
     tien_nhap_hang: parseFloat(0),
     mo_ta: "",
+    han_su_dung: "",
   });
   const [listNhatKy, setListNhatKy] = useState([]);
   let khoNewData = {};
@@ -62,6 +63,7 @@ const NhapHang = () => {
       gia_goc: parseFloat(document.getElementById("gia_goc").value),
       so_luong: parseInt(document.getElementById("so_luong").value) || 0,
       ngay_tao: getCurrentDate(),
+      han_su_dung: document.getElementById("han_su_dung").value,
       tien_nhap_hang: parseFloat(
         document.getElementById("tien_nhap_hang").value
       ),
@@ -505,16 +507,12 @@ const NhapHang = () => {
     },
   ];
   const filterCanNhapHang = khoData.filter((item) => {
-    return (
-      item.trang_thai_kho === "Cần nhập hàng" &&
-      item.trang_thai_xoa === null &&
-      item.nhap_hang === "Cần nhập hàng"
-    );
+    return item.trang_thai_xoa === null && item.nhap_hang === "Cần nhập hàng";
   });
 
   const filterHangMoiNhapAndChuaDuyet = khoData.filter((item) => {
     return (
-      item.nhap_hang === "Mới nhập hàng" &&
+      item.nhap_hang === "Chờ phê duyệt" &&
       item.phe_duyet === "Chưa phê duyệt" &&
       item.trang_thai_xoa === null
     );
@@ -522,8 +520,9 @@ const NhapHang = () => {
 
   const filterMoiDuyetVaoKho = khoData.filter((item) => {
     return (
-      item.trang_thai_kho === "Mới vào kho" &&
+      item.trang_thai_kho === "Đã vào kho" &&
       item.phe_duyet === "Đã phê duyệt" &&
+      item.nhap_hang === "Đã nhập hàng" &&
       item.trang_thai_xoa === null
     );
   });
@@ -600,6 +599,20 @@ const NhapHang = () => {
                     />
                   </div>
                   <div className="form-group">
+                    <label htmlFor="productQuantity">Hạn sử dụng</label>
+                    <input
+                      type="date"
+                      id="han_su_dung"
+                      name="han_su_dung"
+                      className="form-control"
+                      value={selectedKho.han_su_dung || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="input-container">
+                  <div className="form-group">
                     <label htmlFor="productQuantity">Mô tả</label>
                     <input
                       type="text"
@@ -610,9 +623,6 @@ const NhapHang = () => {
                       onChange={handleChange}
                     />
                   </div>
-                </div>
-
-                <div className="input-container">
                   <div className="form-group">
                     <label htmlFor="createDate">Chiều cao</label>
                     <input
@@ -683,34 +693,6 @@ const NhapHang = () => {
                       onChange={handleChange}
                     />
                   </div>
-                  {/* <div className="form-group">
-                  <label htmlFor="productQuantity">Danh mục</label>
-                  <Select
-                    value={selectedTenLoaiDanhMuc.ten_loaiDM}
-                    // value={optionsDanhMuc.find(
-                    //   (option) =>
-                    //     option.value === selectedTenLoaiDanhMuc.ten_loaiDM
-                    // )}
-                    options={optionsDanhMuc}
-                    onChange={(option) => {
-                      const newValue = option;
-                      setSelectedTenLoaiDanhMuc({
-                        ...selectedTenLoaiDanhMuc,
-                        ten_loaiDM: newValue,
-                      });
-                      console.log("New value là: ", newValue);
-                      console.log("Dữ liệu option: ", optionsDanhMuc);
-                    }}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        width: "100%",
-                        borderRadius: "8px",
-                        height: "40px",
-                      }),
-                    }}
-                  />
-                </div> */}
                   <div className="form-group">
                     <label htmlFor="productQuantity">Danh mục</label>
                     <Select
@@ -730,30 +712,6 @@ const NhapHang = () => {
                       }}
                     />
                   </div>
-                  {/* <div className="form-group">
-                  <label htmlFor="productQuantity">Thương hiệu</label>
-                  <Select
-                    value={selectedTenThuongHieu.ten_thuong_hieu}
-                    options={optionsThuongHieu}
-                    onChange={(option) => {
-                      const newValue = option;
-                      setSelectedTenThuongHieu({
-                        ...selectedTenThuongHieu,
-                        ten_thuong_hieu: newValue,
-                      });
-                      console.log("New value là: ", newValue);
-                      console.log("Dữ liệu option: ", optionsThuongHieu);
-                    }}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        width: "100%",
-                        borderRadius: "8px",
-                        height: "40px",
-                      }),
-                    }}
-                  />
-                </div> */}
                   <div className="form-group">
                     <label htmlFor="productQuantity">Thương hiệu</label>
                     <Select
@@ -773,33 +731,6 @@ const NhapHang = () => {
                       }}
                     />
                   </div>
-                  {/* <div className="form-group">
-                  <label htmlFor="productQuantity">Nhà cung cấp</label>
-                  <Select
-                    value={selectedNhaCungCap.ten_nha_cung_cap}
-                    options={optionsNhaCungCap}
-                    onChange={(option) => {
-                      const newValue = option;
-                      setSelectedNhaCungCap({
-                        ...selectedNhaCungCap,
-                        ten_nha_cung_cap: newValue,
-                      });
-                      console.log("New value nhà cung cấp là: ", newValue);
-                      console.log(
-                        "Dữ liệu option nhà cung cấp là: ",
-                        optionsNhaCungCap
-                      );
-                    }}
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        width: "100%",
-                        borderRadius: "8px",
-                        height: "40px",
-                      }),
-                    }}
-                  />
-                </div> */}
                   <div className="form-group">
                     <label htmlFor="nhaCungCap">Nhà cung cấp</label>
                     <Select
@@ -895,7 +826,7 @@ const NhapHang = () => {
                   rowKey="san_phamId"
                   dataSource={filterBiTuChoi}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -940,7 +871,7 @@ const NhapHang = () => {
                   rowKey="san_phamId"
                   dataSource={listNhatKy}
                   columns={columnsNhatKy}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),

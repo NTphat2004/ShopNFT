@@ -685,7 +685,7 @@ const QuanLyDonHang = () => {
                 <Table
                   dataSource={filterDangChoThanhToan}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -730,7 +730,7 @@ const QuanLyDonHang = () => {
                     "Đang chờ xử lý"
                   )}
                   columns={columnsDaXacNhan}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -763,7 +763,7 @@ const QuanLyDonHang = () => {
                     "Đã xác nhận"
                   )}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -796,7 +796,7 @@ const QuanLyDonHang = () => {
                     "Đang giao"
                   )}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -829,7 +829,7 @@ const QuanLyDonHang = () => {
                     "Đã giao"
                   )}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -862,7 +862,7 @@ const QuanLyDonHang = () => {
                     "Đã hủy"
                   )}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),
@@ -895,7 +895,7 @@ const QuanLyDonHang = () => {
                     "Đã hoàn tiền"
                   )}
                   columns={columns}
-                  pagination={false}
+                  pagination={true}
                 />
               </div>
             ),

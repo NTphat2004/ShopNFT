@@ -1,0 +1,36 @@
+.thong-tin-ca-nhan-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+.thong-tin-ca-nhan-card {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.ant-upload.ant-upload-select-picture-card {
+  border-radius: 10px;
+  background: #f5f5f5;
+}
+
+.ant-btn-primary {
+  width: 100%;
+  background-color: #007bff;
+  border: none;
+  height: 40px;
+  font-size: 16px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.ant-btn-primary:hover {
+  background-color: #0056b3;
+}
